@@ -7,7 +7,7 @@ from qiskit.circuit import Parameter
 matplotlib.use('TkAgg')  # more general backend, works for PyCharm
 
 # Only one qubit possible sor far for simplification purposes
-class QuantumModel:
+class BasicQFourier1:
     def __init__(self, num_qubits, num_layer, parameter):
         self.num_q = num_qubits
         self.L = num_layer
@@ -45,9 +45,9 @@ class QuantumModel:
             probability_0 = abs(statevector.data[0]) ** 2
         return 2 * probability_0 - 1  # Map to [-1, 1]
 
-    def predict_interval(self, simulator, shots, interval, space, plot=True):
-        x_values = np.linspace(interval[0], interval[1], space)
-        f_x_values = np.zeros(space)
+    def predict_interval(self, simulator, shots, interval, points, plot=True):
+        x_values = np.linspace(interval[0], interval[1], points, endpoint=True)  # Set False to avoid duplicate samples at start-end of period
+        f_x_values = np.zeros(points)
         for i, x in enumerate(x_values):
             qc = self.define_circuit(x)
             f_x = self.compute_expectations(qc, simulator, shots)
