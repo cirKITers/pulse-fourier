@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 
 from gate_coefficients import fourier_coefficients, fourier_series
 from basic_q_fourier import BasicQFourier1
-from helpers import random_parameter
+from utils.helpers import random_parameter
 
 # Hyper
 QuantumModel = BasicQFourier1
@@ -14,6 +14,12 @@ shots = 32768
 
 interval = [0, 1]
 points = 200
+
+# Current TASKS:
+# Kedro
+# Correlation params and coefficients numerically
+# -> Linear transformation?
+# Pulse - level simple QFM
 
 # Analysis
 num_samples = 100
