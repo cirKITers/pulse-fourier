@@ -1,6 +1,7 @@
 import numpy as np
 from qiskit.quantum_info import Operator, Statevector
 import jax.numpy as jnp
+from qiskit_dynamics.signals import Convolution
 
 SIGMA_X = Operator(np.array([[0, 1], [1, 0]], dtype=complex))
 SIGMA_Y = Operator(np.array([[0, -1j], [1j, 0]], dtype=complex))
@@ -43,3 +44,6 @@ def random_parameter(repetitions, layer, qubits):
 # def random_weights():
 #     return 2 * np.pi * np.random.random(size=(2, n_ansatz_layers, n_qubits))
 
+# from Tutorial, what is it for?
+def gaussian_conv(t, _dt, sigma):
+    return Convolution(2. * _dt / np.sqrt(2. * np.pi * sigma ** 2) * np.exp(-t ** 2 / (2 * sigma ** 2)))

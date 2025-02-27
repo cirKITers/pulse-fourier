@@ -35,9 +35,9 @@ def plot_bloch_sphere(states):
     ax.scatter([bloch_x[-1]], [bloch_y[-1]], [bloch_z[-1]], color='r', label='Final (|Ψ>)')
 
     # axes
-    ax.set_xlabel('X (<σx>)')
-    ax.set_ylabel('Y (<σy>)')
-    ax.set_zlabel('Z (<σz>)')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
     ax.set_title('Bloch Sphere Trajectory')
     ax.legend()
 
