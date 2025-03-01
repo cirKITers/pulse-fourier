@@ -1,13 +1,28 @@
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib
+import matplotlib.pyplot as plt
+# from matplotlib import pyplot as plt
 from src.utils.helpers import *
+matplotlib.use('TkAgg')
 
+# this type does not work: <class 'qiskit_aer.backends.compatibility.Statevector'>
+# this type the function .expectation value works: <class 'qiskit.quantum_info.states.statevector.Statevector'>
 def plot_bloch_sphere(states):
     bloch_x = []
     bloch_y = []
     bloch_z = []
 
     for state in states:
+
+        # check correct type
+        if not isinstance(state, Statevector):
+            raise TypeError(f"Invalid state type: {type(state)}. Expected: {Statevector}.")
+
+        # check if normalized
+        norm = np.sum(np.abs(state.data) ** 2)
+        if not np.isclose(norm, 1.0):
+            raise ValueError(f"Invalid quantum state: Norm = {norm}. Expected: 1.")
+
         # Bloch coordinates: <sigma_x>, <sigma_y>, <sigma_z>
         bloch_x.append(np.real(state.expectation_value(SIGMA_X)))
         bloch_y.append(np.real(state.expectation_value(SIGMA_Y)))
@@ -31,8 +46,8 @@ def plot_bloch_sphere(states):
     ax.plot_wireframe(x, y, z, color='gray', alpha=0.2)
 
     ax.plot(bloch_x, bloch_y, bloch_z, 'b-', label='Pulse trajectory')
-    ax.scatter([bloch_x[0]], [bloch_y[0]], [bloch_z[0]], color='g', label='Initial (|0>)')
-    ax.scatter([bloch_x[-1]], [bloch_y[-1]], [bloch_z[-1]], color='r', label='Final (|Ψ>)')
+    ax.scatter([bloch_x[0]], [bloch_y[0]], [bloch_z[0]], color='g', label=f'Initial State ({states[0].data})')
+    ax.scatter([bloch_x[-1]], [bloch_y[-1]], [bloch_z[-1]], color='r', label=f'Final State ({states[-1].data})')
 
     # axes
     ax.set_xlabel('X')

@@ -1,9 +1,12 @@
 import numpy as np
 import matplotlib
-import matplotlib.pyplot as plt
 from qiskit import QuantumCircuit
 import qiskit_aer
 from qiskit.circuit import Parameter
+
+from src.utils.visualize import fx
+from src.utils.helpers import *
+
 matplotlib.use('TkAgg')  # more general backend, works for PyCharm
 
 # Only one qubit possible sor far for simplification purposes
@@ -42,7 +45,7 @@ class BasicQFourier1:
         else:   # if simulator == 'statevector_simulator':
             result = backend.run(qc).result()
             statevector = result.get_statevector()
-            probability_0 = abs(statevector.data[0]) ** 2
+            probability_0 = prob(statevector.data[0])
         return 2 * probability_0 - 1  # Map to [-1, 1]
 
     def predict_interval(self, simulator, shots, interval, points, plot=True):
@@ -54,15 +57,7 @@ class BasicQFourier1:
             f_x_values[i] = f_x
 
         if plot:
-            plt.figure(figsize=(8, 6))
-            plt.plot(x_values, f_x_values, label="Quantum Model Prediction", color='b')
-            plt.title("Quantum Model Prediction Function")
-            plt.xlabel("Input x")
-            plt.ylabel("Predicted f(x)")
-            plt.grid(True)
-            plt.legend()
-            plt.show()
-
+            fx.plot_fx(x_values, f_x_values, "Quantum Model Prediction Function")
         return x_values, f_x_values
 
     def predict_single(self, simulator, shots, x):

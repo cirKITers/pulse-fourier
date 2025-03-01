@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from gate_coefficients import fourier_coefficients_fft, fourier_series_tri, coefficient_distribution
-from gate_q_fourier import BasicQFourier1
+from gate_fourier_models import BasicQFourier1
 from utils.helpers import random_parameter
 
 # Current TASKS:

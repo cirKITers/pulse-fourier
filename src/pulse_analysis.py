@@ -1,41 +1,28 @@
-from src.basic_pulse import *
+import math
+import numpy as np
+
+from src.pulse_gates import *
 from utils.visualize import bloch_sphere
 
+current_state = GROUND_STATE
 samples = 1
-H = 3
-# sigma is 15
+sigma = 15
+drive_strength_samples = np.linspace(0, 0.02277960635661175, samples)
+sigma_samples = np.linspace(15, 15, samples)
+theta = jnp.pi/2
 
-if H == 1:
-    drive_strength = np.linspace(0.04277960635661175, 0.042781180930164746, samples)
-    sigma = np.linspace(15, 15, samples)
+# for sigma = 15
+RX = 0.04278068369641117
+H = 0.042780849440995694       # does not work when init state is superposition
+RZ = 0
+H2 = np.pi / (math.sqrt(2*np.pi) * sigma)
+# good estimate for H is np.pi / (math.sqrt(2*np.pi) * sigma)
 
-    for _ in range(samples):
-        ds, s, probs, ol, result = h_pulse(drive_strength[_], sigma[_], plot=False, bool_blochsphere=False)
-        print("|0>", probs[0], "---", "|1>", probs[1], "---", "overlap =", ol, ds, s, "final:", result[-1].data)
-        if ol > 0.999997:
-            print("found")
-            bloch_sphere.plot_bloch_sphere(result)
-
-elif H == 2:
-    drive_strength = np.linspace(0.04277960635661175, 0.042781180930164746, samples)
-    sigma = np.linspace(15, 15, samples)
-
-    for _ in range(samples):
-        ds, s, probs, ol, result = RX_pulse(drive_strength[_], sigma[_], theta=jnp.pi/2, plot=False, bool_blochsphere=False)
-        print("|0>", probs[0], "---", "|1>", probs[1], "---", "overlap =", ol, ds, s, "final:", result[-1].data)
-        if ol > 0.1:
-            print("found")
-            bloch_sphere.plot_bloch_sphere(result)
-
-else:
-    drive_strength = np.linspace(0.04277960635661175, 0.042781180930164746, samples)
-    sigma = np.linspace(15, 15, samples)
-
-    for _ in range(samples):
-        ds, s, probs, ol, result = RZ_pulse(drive_strength[_], sigma[_], theta=jnp.pi / 2, plot=False, bool_blochsphere=False)
-        print("|0>", probs[0], "---", "|1>", probs[1], "---", "overlap =", ol, ds, s, "final:", result[-1].data)
-        if ol > 0.1:
-            print("found")
-            bloch_sphere.plot_bloch_sphere(result)
-
+for _ in range(samples):
+    ds, s, probs, ol, result = RZ_pulse(theta, RX, sigma, current_state, plot_prob=False, plot_blochsphere=False)
+    print("|0>", probs[0], "---", "|1>", probs[1], "---", ds, s, "final:", result[-1].data)
+    bloch_sphere.plot_bloch_sphere(result)
+    if ol > 0.99995:
+        print("found")
+        # bloch_sphere.plot_bloch_sphere(result)
 
