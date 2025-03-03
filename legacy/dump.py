@@ -1,4 +1,16 @@
+#####################################
 
+ds, s, probs, ol, result = RX_pulse(RX, sigma, current_state, plot_prob=False, plot_blochsphere=False)
+    print("|0>", probs[0], "---", "|1>", probs[1], "---", ds, s, "final:", result[-1].data)
+
+ds, s, probs, ol, result = RZ_pulse(RZ, sigma, current_state, plot_prob=False, plot_blochsphere=False)
+    print("|0>", probs[0], "---", "|1>", probs[1], "---", ds, s, "final:", result[-1].data)
+
+
+
+#####################################
+drive_strength_samples = np.linspace(0, 0.02277960635661175, samples)
+sigma_samples = np.linspace(15, 15, samples)
 def h_pulse(drive_strength, sigma, plot, bool_blochsphere=False):
     expected_state = np.array([1, 1]) / np.sqrt(2)
     phase = np.pi / 2

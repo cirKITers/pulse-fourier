@@ -29,6 +29,20 @@ def RANDOM_STATE():
 
     return Statevector([alpha, beta])
 
+def swap_dims(trajectory):
+    result = [trajectory[0]]
+    for state in trajectory:
+        result.append(Statevector([state[1], state[0]]))
+    return result
+
+def swap_probs(probs):
+    return np.array([probs[1], probs[0]])
+
+
+def diff(v1, v2):
+    errors = (v1 - v2)
+    return np.mean(errors)
+
 
 def state_normalized(statevector):
     norm = np.sum(np.abs(statevector.data) ** 2)

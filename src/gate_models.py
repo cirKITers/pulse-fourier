@@ -6,26 +6,29 @@ from qiskit.quantum_info import Statevector
 from src.utils.helpers import prob
 from src.utils.visualize.bloch_sphere import *
 
-circuit = QuantumCircuit(1)
-simulator = 'statevector_simulator'
-backend = qiskit_aer.Aer.get_backend(simulator)
-
-theta = np.pi / 2
-init_state = GROUND_STATE
-
-def basic_model(qc):
-    qc.rz(theta, 0)
-    return qc
+def q_circuit(qubits):
+    circuit = QuantumCircuit(qubits)
+    simulator = 'statevector_simulator'
+    backend = qiskit_aer.Aer.get_backend(simulator)
+    return backend, circuit
 
 
-circuit.initialize(init_state, 0)
-result = backend.run(basic_model(circuit)).result()
-result_vector = Statevector(result.get_statevector())
-probability = prob(result_vector)
+# theta = np.pi / 2
+# init_state = EXCITED_STATE
 
-plot_bloch_sphere([init_state, result_vector])
-print("result_vector", result_vector.data)
-print("probability", probability)
+def run_basic_model(backend, circuit, init_state, theta, plot_bloch=False):
+    def basic_model(qc):
+        qc.h(0)
+        return qc
+
+    circuit.initialize(init_state, 0)
+    result = backend.run(basic_model(circuit)).result()
+    result_vector = Statevector(result.get_statevector())
+    probability = prob(result_vector)
+    if plot_bloch:
+        plot_bloch_sphere([init_state, result_vector])
+
+    return result_vector.data, probability
 
 # Check correctness
 # expected_vector = Statevector(init_state).evolve(RXGate(theta))
