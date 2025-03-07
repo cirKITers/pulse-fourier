@@ -7,10 +7,16 @@ matplotlib.use('TkAgg')
 
 # this type does not work: <class 'qiskit_aer.backends.compatibility.Statevector'>
 # this type the function .expectation value works: <class 'qiskit.quantum_info.states.statevector.Statevector'>
-def plot_bloch_sphere(states):
+def plot_bloch_sphere(states, laboratory_frame=False):
     bloch_x = []
     bloch_y = []
     bloch_z = []
+
+    # test with Hadamard
+    # if laboratory_frame:
+    #     trajectory_lab = []
+    #     for state in states:
+    #         trajectory_lab.append(Statevector(U_static @ state.data))
 
     for state in states:
 

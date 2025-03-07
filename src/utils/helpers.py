@@ -2,11 +2,37 @@ import numpy as np
 from qiskit.quantum_info import Operator, Statevector
 import jax.numpy as jnp
 from qiskit_dynamics.signals import Convolution
+from scipy.linalg import expm
 
 SIGMA_X = Operator(np.array([[0, 1], [1, 0]], dtype=complex))
 SIGMA_Y = Operator(np.array([[0, -1j], [1j, 0]], dtype=complex))
 SIGMA_Z = Operator(np.array([[1, 0], [0, -1]], dtype=complex))
 
+I = jnp.array([[1, 0], [0, 1]], dtype=complex)
+X = jnp.array([[0, 1], [1, 0]], dtype=complex)
+Z = jnp.array([[1, 0], [0, -1]], dtype=complex)
+
+CNOT_MATRIX = jnp.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 0, 1, 0]
+    ], dtype=complex)
+
+# Two-qubit operator helpers
+def kron(A, B):
+    return jnp.kron(A, B)
+
+
+I0 = kron(I, I)  # Identity on two-qubit space
+Z0 = kron(Z, I)  # Z on qubit 0
+Z1 = kron(I, Z)  # Z on qubit 1
+X0 = kron(X, I)  # X on qubit 0
+X1 = kron(I, X)  # X on qubit 1
+P1 = 0.5 * (I0 - Z0)
+
+
+# U_static = expm(-1j * H_static * t_max)
 GROUND_STATE = Statevector([1.0, 0.0])
 EXCITED_STATE = Statevector([0.0, 1.0])
 SUPERPOSITION_STATE = Statevector([1/np.sqrt(2), 1/np.sqrt(2)])
@@ -29,10 +55,20 @@ def RANDOM_STATE():
 
     return Statevector([alpha, beta])
 
-def swap_dims(trajectory):
+def random_theta():
+    return np.random.uniform(-2*np.pi, 2*np.pi)
+
+def swap_amplitudes(trajectory):
     result = [trajectory[0]]
-    for state in trajectory:
+    for state in trajectory[1:]:
         result.append(Statevector([state[1], state[0]]))
+    return result
+
+def quadrant_selective_conjugate_transpose(trajectory):
+    result = [trajectory[0]]
+    for state in trajectory[1:]:
+        new_amps = [complex(state.data[0].imag, -state.data[0].real), complex(-state.data[1].imag, state.data[1].real)]
+        result.append(Statevector(new_amps))
     return result
 
 def swap_probs(probs):

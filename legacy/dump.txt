@@ -1,3 +1,19 @@
+k = 5.524648297886591
+drivestrength_RZ = (theta/2 - 5.0/2 * 12 + 2 * np.pi * k) / 12
+print(drivestrength_RZ)
+
+def RZ_pulse(theta, drive_strength, sigma, current_state, plot_prob=False, plot_blochsphere=False):
+    omega = 5.0
+    duration = int(theta / (omega * 0.1))
+    if duration < 1:
+        duration = 1
+    phase = np.pi
+    expected_state = np.array([np.exp(-1j * theta / 2), 0])
+    return pulse(drive_strength=drive_strength, sigma=sigma, duration=duration, omega=omega, phase=phase, expected_state=expected_state,
+                 current_state=current_state,
+                 plot=plot_prob, bool_blochsphere=plot_blochsphere)
+
+
 #####################################
 
 ds, s, probs, ol, result = RX_pulse(RX, sigma, current_state, plot_prob=False, plot_blochsphere=False)

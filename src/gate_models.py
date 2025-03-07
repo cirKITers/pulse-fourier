@@ -18,7 +18,7 @@ def q_circuit(qubits):
 
 def run_basic_model(backend, circuit, init_state, theta, plot_bloch=False):
     def basic_model(qc):
-        qc.h(0)
+        qc.rz(theta, 0)
         return qc
 
     circuit.initialize(init_state, 0)
@@ -28,7 +28,7 @@ def run_basic_model(backend, circuit, init_state, theta, plot_bloch=False):
     if plot_bloch:
         plot_bloch_sphere([init_state, result_vector])
 
-    return result_vector.data, probability
+    return result_vector, probability
 
 # Check correctness
 # expected_vector = Statevector(init_state).evolve(RXGate(theta))
