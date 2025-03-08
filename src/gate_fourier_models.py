@@ -10,7 +10,7 @@ from src.utils.helpers import *
 matplotlib.use('TkAgg')  # more general backend, works for PyCharm
 
 # Only one qubit possible sor far for simplification purposes
-class BasicQFourier1:
+class GateONEQFourier:
     def __init__(self, num_qubits, num_layer, parameter):
         self.num_q = num_qubits
         self.L = num_layer

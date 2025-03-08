@@ -1,8 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from gate_coefficients import fourier_coefficients_fft, fourier_series_tri, coefficient_distribution
-from gate_fourier_models import BasicQFourier1
+from gate_coefficients import coefficient_distribution
+from gate_fourier_models import GateONEQFourier
 from utils.helpers import random_parameter
 
 # Current TASKS:
@@ -14,7 +14,7 @@ from utils.helpers import random_parameter
 
 
 # Hyper
-QuantumModel = BasicQFourier1   # max 5 coeffs needed
+QuantumModel = GateONEQFourier   # max 5 coeffs needed
 simulator = 'statevector_simulator'
 num_layer = 3
 num_qubits = 1

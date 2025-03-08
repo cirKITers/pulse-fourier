@@ -1,67 +1,34 @@
-import numpy as np
-import matplotlib
-from qiskit import QuantumCircuit
-import qiskit_aer
 from qiskit.circuit import Parameter
 
-import pulse_gates as p
+import pulse_gates as pls
 from utils.visualize import fx
+from constants import *
+from utils.helpers import *
 
-class ONEQBasicFourier:
-    def __init__(self, num_qubits, num_layer, parameter):
-        self.num_q = num_qubits
+class PulseONEQFourier:
+    def __init__(self, num_layer, parameter):
         self.L = num_layer
         self.params = parameter
-        self.param_label = [Parameter(f'theta_{i}') for i in range(self.L)]
 
     @staticmethod
-    def data_encoding(x):
+    def data_encoding(current_state, x):
         theta = 2 * np.pi * x
-        drive
-        p.RX_pulse(d)
+        _, _, _, next_state = pls.RX_pulse(theta, sigma, current_state)
+        return next_state[-1]
 
     @staticmethod
-    def trainable_block(qc, qubit, theta):
-        qc.rz(theta, qubit)
+    def trainable_block(current_state, theta):
+        _, _, _, next_state = pls.RZ_pulse(theta, sigma, current_state)
+        return next_state[-1]
 
-    def define_circuit(self, x):
-        qc = QuantumCircuit(self.num_q)
+    def predict_single(self, x):
+        current_state = GROUND_STATE
         for lay in range(self.L):
-            self.data_encoding(qc, 0, x)
-            self.trainable_block(qc, 0, self.param_label[lay])
-        for i, theta in enumerate(self.param_label):
-            qc = qc.assign_parameters({theta: self.params[i % len(self.params)]})
-        return qc
-
-    @staticmethod
-    def compute_expectations(qc, simulator, shots):
-        backend = qiskit_aer.Aer.get_backend(simulator)
-        if simulator == 'qasm_simulator':
-            qc.measure_all()
-            result = backend.run(qc, shots=shots).result()
-            counts = result.get_counts()
-            probability_0 = counts.get('0', 0) / shots   # Probability of measuring |0> state - expectation value
-        else:   # if simulator == 'statevector_simulator':
-            result = backend.run(qc).result()
-            statevector = result.get_statevector()
-            probability_0 = abs(statevector.data[0]) ** 2
+            next_state = self.data_encoding(current_state, x)
+            next_state = self.trainable_block(next_state, self.params[lay])
+            current_state = next_state
+        probability_0 = prob(current_state.data[0])
         return 2 * probability_0 - 1  # Map to [-1, 1]
 
-    def predict_interval(self, simulator, shots, interval, points, plot=True):
-        x_values = np.linspace(interval[0], interval[1], points, endpoint=True)  # Set False to avoid duplicate samples at start-end of period
-        f_x_values = np.zeros(points)
-        for i, x in enumerate(x_values):
-            qc = self.define_circuit(x)
-            f_x = self.compute_expectations(qc, simulator, shots)
-            f_x_values[i] = f_x
 
-        if plot:
-            fx.plot_fx(x_values, f_x_values, "Quantum Model Prediction Function")
-
-        return x_values, f_x_values
-
-    def predict_single(self, simulator, shots, x):
-        qc = self.define_circuit(x)
-        f_x = self.compute_expectations(qc, simulator, shots)
-        return f_x
 

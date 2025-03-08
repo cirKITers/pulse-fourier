@@ -18,7 +18,7 @@ def q_circuit(qubits):
 
 def run_basic_model(backend, circuit, init_state, theta, plot_bloch=False):
     def basic_model(qc):
-        qc.rx(theta, 0)
+        qc.h(0)
         return qc
 
     circuit.initialize(init_state, 0)

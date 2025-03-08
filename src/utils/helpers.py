@@ -58,6 +58,7 @@ def RANDOM_STATE():
 def random_theta():
     return np.random.uniform(-2*np.pi, 2*np.pi)
 
+# should later return real result not list
 def swap_amplitudes(trajectory):
     result = [trajectory[0]]
     for state in trajectory[1:]:
