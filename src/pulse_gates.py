@@ -45,6 +45,7 @@ from utils.helpers import static_hamiltonian, prob, overlap, Z
 from utils.visualize.bloch_sphere import plot_bloch_sphere
 from utils.visualize.probabilites import plot_probabilities
 
+# uses a constant envelope
 def RZ_pulse(theta, drive_strength, sigma, current_state, plot_prob=False, plot_blochsphere=False):
     """
     Implements an RZ gate (rotation around Z-axis) by angle theta on a single qubit.
@@ -122,15 +123,82 @@ def RZ_pulse(theta, drive_strength, sigma, current_state, plot_prob=False, plot_
 
     return drive_strength, sigma, final_probs, ol, result.y
 
-def RX_pulse(theta, drive_strength, sigma, current_state, plot_prob=False, plot_blochsphere=False):
+
+from scipy.integrate import quad
+
+# def calculate_envelope_integral(duration, _dt, sigma):
+#     """
+#     Calculate the integral of the gaussian envelope from 0 to duration*_dt.
+#     """
+#     t_span = np.linspace(0, duration * _dt, duration + 1)
+#     center = duration * _dt / 2
+#
+#     def gaussian_envelope(t):
+#         return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+#
+#     integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])
+#     return integral
+#
+# def estimate_rx_drive_strength(theta, sigma, k, duration=120, _dt=0.1):
+#     """
+#     Estimate drive_strength for RX gate based on rotation angle theta.
+#     """
+#
+#     integral = calculate_envelope_integral(duration, _dt, sigma)
+#     drive_strength = (theta + 2 * np.pi * k) / (2 * integral)
+#     return drive_strength
+
+
+from qiskit.circuit.library import RXGate
+
+# uses a time-dependent gaussian envelope
+def RX_pulse(theta, sigma, current_state, plot_prob=False, plot_blochsphere=False):
     omega = 5.0
     duration = 120
-    phase = 0
-    expected_state = np.array([np.cos(theta / 2), -1j * np.sin(theta / 2)])
-    return pulse(drive_strength=drive_strength, sigma=sigma, duration=duration, omega=omega, phase=phase, expected_state=expected_state,
-                 current_state=current_state,
-                 plot=plot_prob, bool_blochsphere=plot_blochsphere)
+    _dt = 0.1
+    t_span = np.linspace(0, duration * _dt, duration + 1)
+    t_max = t_span[-1]
+    center = duration * _dt / 2
 
+    # Define the gaussian envelope function
+    def envelope(t):
+        return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    # Calculate the integral of the envelope numerically
+    integral, _ = quad(envelope, t_span[0], t_span[-1])
+
+    # Calculate drive_strength
+    strength_scale = 0.3183109217857033
+    drive_strength = theta / integral
+    drive_strength = drive_strength * strength_scale
+
+    # Call the pulse function with placeholder expected_state
+    expected_state_placeholder = np.array([np.cos(theta / 2), -1j * np.sin(theta / 2)])
+    _, _, final_probs, _, result_y = pulse(drive_strength, sigma, duration, omega, 0, current_state, expected_state_placeholder, plot_prob, plot_blochsphere)
+
+    # Calculate the correct expected_state
+    rx_gate = RXGate(theta)
+    expected_state_correct = current_state.evolve(rx_gate)
+
+    # Transform the final state to the lab frame
+    H_static = static_hamiltonian(omega=omega)
+    U_static = expm(-1j * H_static * t_max)
+    final_state_rot = result_y[-1].data
+    final_state_lab = U_static @ final_state_rot
+    final_state_lab = Statevector(final_state_lab)
+
+    # Compute overlap
+    ol = overlap(expected_state_correct, final_state_lab)
+
+    # If plot_blochsphere, transform the entire trajectory
+    if plot_blochsphere:
+        trajectory_lab = []
+        for state in result_y:
+            state_lab = U_static @ state.data
+            trajectory_lab.append(Statevector(state_lab))
+        plot_bloch_sphere(trajectory_lab)
+
+    return drive_strength, sigma, final_probs, ol, result_y
 
 def pulse(drive_strength, sigma, duration, omega, phase, current_state, expected_state, plot, bool_blochsphere):
     final_probs = np.zeros(2)

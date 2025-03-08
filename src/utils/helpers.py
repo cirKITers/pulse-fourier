@@ -95,6 +95,8 @@ def static_hamiltonian(omega):
     return 2 * np.pi * omega * SIGMA_Z / 2
 
 def drive_hamiltonian(drive_strength):
+    if isinstance(drive_strength, np.ndarray):
+        drive_strength = drive_strength[0]
     return 2 * np.pi * drive_strength * SIGMA_X / 2
 
 def magnitude_spectrum(c_n):

@@ -1,3 +1,21 @@
+
+Working only for np.pi/2
+def RX_pulse(theta, drive_strength, sigma, current_state, plot_prob=False, plot_blochsphere=False):
+    omega = 5.0
+    duration = 120
+    phase = 0
+    expected_state = np.array([np.cos(theta / 2), -1j * np.sin(theta / 2)])
+    k = -0.179 #= -0.0908450021334925
+    drive_strength = estimate_rx_drive_strength(theta, sigma, k, duration)
+    # print("Drive strength: ", drive_strength)
+    return pulse(drive_strength=drive_strength, sigma=sigma, duration=duration, omega=omega, phase=phase, expected_state=expected_state,
+                 current_state=current_state,
+                 plot=plot_prob, bool_blochsphere=plot_blochsphere)
+
+
+
+
+
 k = 5.524648297886591
 drivestrength_RZ = (theta/2 - 5.0/2 * 12 + 2 * np.pi * k) / 12
 print(drivestrength_RZ)

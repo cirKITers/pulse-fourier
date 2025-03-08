@@ -5,11 +5,12 @@ from utils.helpers import *
 from gate_models import *
 from pulse_gates import *
 
+
 init_state = RANDOM_STATE()
 theta = random_theta()
-
-# -np.pi/2, 1
-# np.pi/2, -1
+print("Initial state: ", init_state)
+print("theta: ", theta)
+print("\n")
 
 # gate level
 backend, qc = q_circuit(1)
@@ -21,20 +22,23 @@ bloch_sphere.plot_bloch_sphere([init_state, gate_result])
 
 # pulse level
 sigma = 15
-RX = 0.04278068369641117
+RX = 0.042780631757944214
 H = 0.042780849440995694
 RZ = 0.4581489313344305
 # H2 = np.pi / (math.sqrt(2*np.pi) * sigma)
 
-samples = 1
-# ii = np.linspace(0.18, 5, samples)
 
-ds, s, pulse_probs, ol, pulse_result = RZ_pulse(theta, RZ, sigma, init_state, plot_prob=False, plot_blochsphere=False)
+samples = 10
+# ii = np.linspace(0.31831092178570325, 0.3183109217857033, samples)
+
+ds, s, pulse_probs, ol, pulse_result = RX_pulse(theta, sigma, init_state, plot_prob=False, plot_blochsphere=False)
+
+
+print("\n")
 print("Pulse level:")
 print("result_vector", pulse_result[-1].data)
 print("probability", pulse_probs)
 bloch_sphere.plot_bloch_sphere(pulse_result)
-
 
 # COMPARISON
 print("\n")
