@@ -110,8 +110,13 @@ def prob(statevector):
 def fourier_series(x, coeffs):
     return sum(c * np.cos(2 * np.pi * k * x) for k, c in enumerate(coeffs))
 
-
 def random_parameter(repetitions, layer, qubits):
+    """
+    Generates a random parameter array with values between -2*pi and 2*pi.
+    """
+    return np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(repetitions, layer, qubits))
+
+def random_parameter2(repetitions, layer, qubits):
     """
 
     :param repetitions: number of parameter dependent gates

@@ -1,21 +1,25 @@
-import numpy as np
+import json
 
+from data.save import *
 from pulse_fourier_models import PulseONEQFourier
 from utils.helpers import *
-from utils.visualize.fx import *
+from constants import *
 
 num_layer = 3
 parameter = random_parameter(1, num_layer, 1)
 qm = PulseONEQFourier(num_layer, parameter)
 
+points = 200
+x_ = np.linspace(0, 2, points)
 
-points = 100
-x = np.linspace(0, 1, points)
+fx = qm.predict_interval(x_)
 
-fx = []
-for t in range(points):
-    fx.append(qm.predict_single(x[t]))
+# SAVE DATA
+data_to_save = {
+    "model_name": qm.model_name+"("+str(parameter.shape).replace("(", "").replace(")", "").replace(" ", "")+")",
+    "x": x_.tolist(),  #
+    "fx": [val.tolist() if isinstance(val, np.ndarray) else val for val in fx],
+    "parameters": parameter.tolist(),
+}
 
-plot_fx(x, fx, "pulse fourier analysis")
-
-
+save(data_to_save, file_name_pulse)

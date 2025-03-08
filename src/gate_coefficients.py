@@ -8,7 +8,6 @@ from src.utils.helpers import random_parameter
 
 
 # task: Analysis how derivable from gate level
-
 def fourier_coefficients_fft(x, f_x, num_coeff=10, complex_valued_fx=False):
     f_x = f_x - np.mean(f_x)
     N = len(f_x)
@@ -19,14 +18,15 @@ def fourier_coefficients_fft(x, f_x, num_coeff=10, complex_valued_fx=False):
     c_n = fourier_transform(f_x) / N  # complex coefficients, divided by N for scaling
 
     # exponential form
-    c_n = c_n[:num_coeff]   # complex coefficients
+    c_n = c_n[:num_coeff]  # complex coefficients
 
     # trigonometric form
     a_n = 2 * np.real(c_n)  # describes cosinus part
-    b_n = -2 * np.imag(c_n)   # describes sinus part
+    b_n = -2 * np.imag(c_n)  # describes sinus part
     a_n[0] = a_n[0] / 2
 
     return a_n, b_n, c_n
+
 
 # much higher mse in exponential form
 def fourier_series_exp(x, f_x, c_n, plot=False):
@@ -52,10 +52,11 @@ def fourier_series_exp(x, f_x, c_n, plot=False):
 
     return f_fourier_series.real, mse
 
+
 # Better mse values in trigonometric form
 def fourier_series_tri(x, f_x, a_n, b_n, plot=False):
     T = (x[-1] - x[0])  # works only if x span is one period, general compute still necessary
-    num_coeff = len(a_n)    # num_coeff = 7     # len(f_x) // 2
+    num_coeff = len(a_n)  # num_coeff = 7     # len(f_x) // 2
     f_fourier_series = np.full_like(x, a_n[0] / 2)
     for n in range(1, num_coeff):  # Symmetrische Fourier-Koeffizienten
         f_fourier_series += a_n[n] * np.cos(2 * np.pi * n * x / T) \
@@ -82,7 +83,6 @@ def coefficient_distribution(num_samples, num_coeff, quantum_model, num_layer, n
     coeffs_all = np.zeros((num_samples, num_coeff), dtype=np.complex128)
 
     for _ in range(num_samples):
-
         params = random_parameter(1, num_layer, num_qubits)
 
         qm = quantum_model(num_qubits, num_layer, params)
@@ -120,6 +120,8 @@ def coefficient_distribution(num_samples, num_coeff, quantum_model, num_layer, n
 
     return coeffs_cos, coeffs_sin, coeffs_all
 
+
+# ----------------------------------------
 # Multiple ways to compute coefficients:
 def fourier_coefficients_lstsq(x, f_x, num_coeff=5):
     T = x[-1] - x[0]
@@ -139,6 +141,7 @@ def fourier_coefficients_lstsq(x, f_x, num_coeff=5):
         b_n[n] = coeffs[2 * n]
     c = None
     return a_n, b_n, c
+
 
 # For continuous functions
 def fourier_coefficients_integral(x, f_x, num_coeff=5):

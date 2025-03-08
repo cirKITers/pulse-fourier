@@ -9,12 +9,18 @@ from src.utils.helpers import *
 
 matplotlib.use('TkAgg')  # more general backend, works for PyCharm
 
+
 # Only one qubit possible sor far for simplification purposes
 class GateONEQFourier:
     def __init__(self, num_qubits, num_layer, parameter):
         self.num_q = num_qubits
         self.L = num_layer
-        self.params = parameter
+        if isinstance(parameter, np.ndarray):
+            self.params = parameter.flatten().tolist()
+        elif isinstance(parameter, list):
+            self.params = parameter
+        else:
+            self.params = [parameter]
         self.param_label = [Parameter(f'theta_{i}') for i in range(self.L)]
 
     @staticmethod
@@ -41,30 +47,24 @@ class GateONEQFourier:
             qc.measure_all()
             result = backend.run(qc, shots=shots).result()
             counts = result.get_counts()
-            probability_0 = counts.get('0', 0) / shots   # Probability of measuring |0> state - expectation value
-        else:   # if simulator == 'statevector_simulator':
+            probability_0 = counts.get('0', 0) / shots  # Probability of measuring |0> state - expectation value
+        else:  # if simulator == 'statevector_simulator':
             result = backend.run(qc).result()
             statevector = result.get_statevector()
             probability_0 = prob(statevector.data[0])
         return 2 * probability_0 - 1  # Map to [-1, 1]
 
-    def predict_interval(self, simulator, shots, interval, points, plot=True):
-        x_values = np.linspace(interval[0], interval[1], points, endpoint=True)  # Set False to avoid duplicate samples at start-end of period
-        f_x_values = np.zeros(points)
-        for i, x in enumerate(x_values):
-            qc = self.define_circuit(x)
-            f_x = self.compute_expectations(qc, simulator, shots)
-            f_x_values[i] = f_x
+    def predict_interval(self, simulator, shots, x, plot=False):
+        f_x = []
+        for i in range(len(x)):
+            qc = self.define_circuit(x[i])
+            f_x.append(self.compute_expectations(qc, simulator, shots))
 
         if plot:
-            fx.plot_fx(x_values, f_x_values, "Quantum Model Prediction Function")
-        return x_values, f_x_values
+            fx.plot_fx_advanced(x, f_x, "Gate level Fourier Model Prediction")
+        return f_x
 
     def predict_single(self, simulator, shots, x):
         qc = self.define_circuit(x)
         f_x = self.compute_expectations(qc, simulator, shots)
         return f_x
-
-
-
-
