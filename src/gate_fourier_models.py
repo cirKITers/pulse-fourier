@@ -12,6 +12,7 @@ matplotlib.use('TkAgg')  # more general backend, works for PyCharm
 
 # Only one qubit possible sor far for simplification purposes
 class GateONEQFourier:
+
     def __init__(self, num_qubits, num_layer, parameter):
         self.num_q = num_qubits
         self.L = num_layer
@@ -22,6 +23,7 @@ class GateONEQFourier:
         else:
             self.params = [parameter]
         self.param_label = [Parameter(f'theta_{i}') for i in range(self.L)]
+        self.model_name = "GateONEQFourier"
 
     @staticmethod
     def data_encoding(qc, qubit, x):

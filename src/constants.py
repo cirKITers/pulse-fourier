@@ -1,6 +1,6 @@
 sigma = 15
-file_name_pulse = "../data/pulse_fourier.jsonl"
-file_name_gate = "../data/gate_fourier.jsonl"
-
-
+pulse_file = "../data/pulse_fourier.jsonl"
+gate_file = "../data/gate_fourier.jsonl"
+correlation_dir = "../data/correlations"
+correlation_dir_detailed = "../data/correlations/detailed"
 

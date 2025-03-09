@@ -22,4 +22,4 @@ data_to_save = {
     "parameters": parameter.tolist(),
 }
 
-save(data_to_save, file_name_pulse)
+save_to(data_to_save, pulse_file)

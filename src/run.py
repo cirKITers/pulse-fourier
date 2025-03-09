@@ -6,7 +6,7 @@ from constants import *
 from src.utils.visualize.fx import *
 
 
-x, pulse_fx, parameter, parameter_shape = load_data_from_jsonl(file_name_pulse, 9)
+x, pulse_fx, parameter, parameter_shape = load_data_from_jsonl(pulse_file, 9)
 
 
 num_repetitions = parameter_shape[0]

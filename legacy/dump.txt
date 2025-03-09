@@ -1,3 +1,11 @@
+parameter_set = np.array(num_samples*[[[[+4329999.2948790318043715], [-50099999.487549821951812], [-900000.267787482006577]]]])
+
+qm = qm(num_qubits, num_layer, parameter_set[0])
+f_x = qm.predict_interval(simulator, shots, x, plot=False)
+
+plot_fx_advanced(x, f_x)
+
+
 ########################################
 ########################################
 OLD PULSE ANALYSIS

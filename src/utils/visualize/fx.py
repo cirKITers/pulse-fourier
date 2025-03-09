@@ -14,7 +14,7 @@ def plot_fx(x_data, y_data, title):
     plt.show()
 
 
-def plot_fx_advanced(x_data, y_data, title,
+def plot_fx_advanced(x_data, y_data, title="Plot",
                      xlabel="Input x", ylabel="Predicted f(x)",
                      uncertainty=None, statistical_analysis=False):
     """

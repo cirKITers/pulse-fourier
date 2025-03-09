@@ -4,8 +4,8 @@ from scipy.fft import fft, ifft, rfft
 from scipy.integrate import quad
 from sklearn.metrics import mean_squared_error
 
-from src.utils.helpers import random_parameter
-
+from data.save import *
+from src.constants import *
 
 # task: Analysis how derivable from gate level
 def fourier_coefficients_fft(x, f_x, num_coeff=10, complex_valued_fx=False):
@@ -77,46 +77,80 @@ def fourier_series_tri(x, f_x, a_n, b_n, plot=False):
     return f_fourier_series, mse
 
 
-def coefficient_distribution(num_samples, num_coeff, quantum_model, num_layer, num_qubits, simulator, shots, interval, points):
+def coefficient_distribution(num_samples, num_coeff, quantum_model, param_set, num_layer, num_qubits, simulator, shots, x, plot=False, save=True):
     coeffs_cos = np.zeros((num_samples, num_coeff))
     coeffs_sin = np.zeros((num_samples, num_coeff))
     coeffs_all = np.zeros((num_samples, num_coeff), dtype=np.complex128)
 
+    if save:
+        row_start = 0
+        try:
+            with open(gate_file, "r") as f:
+                for row_start, _ in enumerate(f):
+                    pass
+                row_start += 1  # last line + 1
+        except FileNotFoundError:
+            row_start = 0
+        row_start += 2
+        row_end = row_start + num_samples + 1
+
+        title = f"Coefficient distribution; number samples: {num_samples}; number coefficients: {num_coeff}; row_start: {row_start}; row_end: {row_end}"
+
+        new_set(title, gate_file)
+
     for _ in range(num_samples):
-        params = random_parameter(1, num_layer, num_qubits)
+        params = param_set[_]
 
         qm = quantum_model(num_qubits, num_layer, params)
 
-        x, f_x = qm.predict_interval(simulator, shots, interval, points, plot=False)
+        f_x = qm.predict_interval(simulator, shots, x, plot=False)
 
         f_x = f_x - np.mean(f_x)
 
         a, b, c = fourier_coefficients_fft(x, f_x, num_coeff=num_coeff)
 
         f_series, mse = fourier_series_tri(x, f_x, a, b, plot=False)
-        print(f"Fourier Approximation MSE: {mse:.6f}")
+        # print(f"Fourier Approximation MSE: {mse:.6f}")
 
         coeffs_cos[_, :] = a
         coeffs_sin[_, :] = b
         coeffs_all[_, :] = c
 
-    fig, ax = plt.subplots(1, num_coeff, figsize=(15, 4))
+        if save:
+            # SAVE DATA
+            data_to_save = {
+                "model_name": qm.model_name + "(" + str(param_set[_].shape).replace("(", "").replace(")", "").replace(" ", "") + ")",
+                "x": x.tolist(),  #
+                "fx": [val.tolist() if isinstance(val, np.ndarray) else val for val in f_x],
+                "parameter": param_set[_].tolist(),
+                "coeffs_cos": a.tolist(),
+                "coeffs_sin": b.tolist(),
+                "coeffs_all": [[val.real, val.imag] for val in c.tolist()]     # Complex numbers to pairs.
+            }
+            save_to(data_to_save, gate_file)
 
-    for idx, ax_ in enumerate(ax):
-        ax_.set_title(r"$c_{:02d}$".format(idx))
-        ax_.scatter(
-            coeffs_cos[:, idx],
-            coeffs_sin[:, idx],
-            s=20,
-            facecolor="white",
-            edgecolor="red",
-        )
-        ax_.set_aspect("equal")
-        ax_.set_ylim(-1, 1)
-        ax_.set_xlim(-1, 1)
+    if plot:
+        fig, ax = plt.subplots(1, num_coeff, figsize=(15, 4))
 
-    plt.tight_layout(pad=0.5)
-    plt.show()
+        for idx, ax_ in enumerate(ax):
+            ax_.set_title(r"$c_{:02d}$".format(idx))
+            ax_.scatter(
+                coeffs_cos[:, idx],
+                coeffs_sin[:, idx],
+                s=20,
+                facecolor="white",
+                edgecolor="red",
+            )
+            ax_.set_aspect("equal")
+            ax_.set_ylim(-1, 1)
+            ax_.set_xlim(-1, 1)
+
+        plt.tight_layout(pad=0.5)
+        plt.show()
+
+    if save:
+        print(f"Saved data to {gate_file}")
+        set_done(gate_file)
 
     return coeffs_cos, coeffs_sin, coeffs_all
 
