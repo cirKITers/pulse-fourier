@@ -38,7 +38,7 @@ num_coeff = 5
 
 data = load_rows_between(gate_file, 2, 76)
 
-plot_interactive_3d_heatmaps(np.array(data["parameter"]), np.array(data["coeffs_all"]))
+correlation(np.array(data["parameter"]), np.array(data["coeffs_all"]))
 
 
 
