@@ -60,11 +60,11 @@ def plot_fx_advanced(x_data, y_data, title="Plot",
     plt.show()
 
 
-def plot_2fx_advanced(x, fx1, fx2, label1="Function 1", label2="Function 2",
-                      title="Comparison of Functions",
-                      xlabel="Independent Variable", ylabel="Dependent Variable",
+def plot_2fx_advanced(x, fx1, fx2, label1="Expectations on Pulse level", label2="Expectations on Gate level",
+                      title="Comparison",
+                      xlabel="X Interval", ylabel="Quantum Fourier Expectation Value",
                       uncertainty1=None, uncertainty2=None,
-                      statistical_test=False):
+                      statistical_test=True):
 
     plt.figure(figsize=(12, 8))
     plt.plot(x, fx1, label=label1, color='blue', linewidth=2)

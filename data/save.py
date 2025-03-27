@@ -10,9 +10,10 @@ def save_to(data, file):
     with open(file, "a") as f:
         json.dump(data, f)
         f.write("\n")
-    # print("Saved in "+file)
+
 
 def set_done(file):
     with open(file, "a") as f:
         f.write("#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-")
         f.write("\n")
+    print("Saved in "+file)

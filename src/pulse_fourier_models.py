@@ -6,10 +6,13 @@ from constants import *
 from utils.helpers import *
 
 class PulseONEQFourier:
-    def __init__(self, num_layer, parameter):
+    model_name = "PulseONEQFourier"
+
+    def __init__(self, num_qubits, num_layer, parameter):
+        self.num_qubits = num_qubits
         self.L = num_layer
         self.params = parameter
-        self.model_name = "PulseONEQFourier"
+        # self.model_name = "PulseONEQFourier"
 
     @staticmethod
     def data_encoding(current_state, x):

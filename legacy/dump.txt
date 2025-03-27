@@ -1,3 +1,51 @@
+from the original GATEONEQFOURIER
+
+    # @staticmethod
+    # def compute_expectations(qc, simulator, shots):
+    #     backend = qiskit_aer.Aer.get_backend(simulator)
+    #     if simulator == 'qasm_simulator':
+    #         qc.measure_all()
+    #         result = backend.run(qc, shots=shots).result()
+    #         counts = result.get_counts()
+    #         probability_0 = counts.get('0', 0) / shots  # Probability of measuring |0> state - expectation value
+    #     else:  # if simulator == 'statevector_simulator':
+    #         result = backend.run(qc).result()
+    #         statevector = result.get_statevector()
+    #         probability_0 = prob(statevector.data[0])
+    #     return 2 * probability_0 - 1  # Map to [-1, 1]
+    #
+    # def predict_interval(self, simulator, shots, x, plot=False):
+    #     f_x = []
+    #     for i in range(len(x)):
+    #         qc = self.define_circuit(x[i])
+    #         f_x.append(self.compute_expectations(qc, simulator, shots).item())
+    #
+    #     if plot:
+    #         fx.plot_fx_advanced(x, f_x, "Gate level Fourier Model Prediction")
+    #     return f_x
+    #
+    # def predict_single(self, simulator, shots, x):
+    #     qc = self.define_circuit(x)
+    #     f_x = self.compute_expectations(qc, simulator, shots)
+    #     return f_x
+
+old param generator:
+def random_parameter2(repetitions, layer, qubits):
+    """
+
+    :param repetitions: number of parameter dependent gates
+    :param layer: number of layer
+    :param qubits: number of qubits
+    :return: set of random weights
+    """
+    np_arr = 2 * np.pi * np.random.random(size=(repetitions, layer, qubits))
+    return np_arr.flatten().tolist()
+
+# def random_weights():
+#     return 2 * np.pi * np.random.random(size=(2, n_ansatz_layers, n_qubits))
+
+
+
 parameter_set = np.array(num_samples*[[[[+4329999.2948790318043715], [-50099999.487549821951812], [-900000.267787482006577]]]])
 
 qm = qm(num_qubits, num_layer, parameter_set[0])

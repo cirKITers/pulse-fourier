@@ -14,8 +14,12 @@ jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
 
-# Expected state always for when |0> initially
-# Duration always assuming _dt=0.1, Number of time steps (samples)
+# new
+# CNOT gate
+# Cluster for validation
+
+# old
+# Duration always assuming _dt=0.1, Number of time steps (samples) -> contstants.py
 
 # drive_strength  r
 
@@ -105,7 +109,7 @@ def RZ_pulse(theta, sigma, current_state, plot_prob=False, plot_blochsphere=Fals
         for state in result.y:
             trajectory_lab.append(Statevector(U_static @ state.data))
 
-        plot_bloch_sphere(trajectory_lab)
+        plot_bloch_sphere(trajectory_lab, False)
 
     return drive_strength, final_probs, ol, result.y
 
@@ -216,20 +220,27 @@ def CNOT_Pulse(drive_strength, sigma, current_state, plot_prob=False, plot_bloch
 
     # Expected state for CNOT (for |00> -> |00>, |10> -> |11>, etc.)
     # Depends on input, so we'll compute overlap with ideal CNOT matrix applied to initial state
-    cnot_matrix = jnp.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 0, 1],
-        [0, 0, 1, 0]
-    ], dtype=complex)
-    expected_state = cnot_matrix @ current_state
+    # cnot_matrix = Operator(np.array([
+    #     [1, 0, 0, 0],
+    #     [0, 1, 0, 0],
+    #     [0, 0, 0, 1],
+    #     [0, 0, 1, 0]])
+    # )
+    # expected_state = cnot_matrix @ current_state
 
     # Two-qubit static Hamiltonian
-    H_static_2q = 0.5 * omega * (Z0 + Z1)
+    # H_static_2q = 0.5 * omega * (Z0 + Z1)
+    P1a = np.array([[0, 0], [0, 1]])
+
+    H_static_2q = 0.5 * omega * (Z0 + Z1).astype(np.complex128)
 
     # Drive Hamiltonians
-    H_drive_control = X0  # Drive for H pulses on control qubit
-    H_drive_target = kron(P1, X)  # Conditional drive: |1><1| ⊗ X on target
+    H_drive_control = np.kron(X, np.eye(2)).astype(np.complex128)  # Drive for H pulses on control qubit (4x4)
+    H_drive_target = np.kron(P1a, X).astype(np.complex128)  # Conditional drive: |1><1| ⊗ X on target
+
+    print(H_static_2q.shape, "H_static_2q shape")
+    print(H_drive_control.shape, "h_drive_control shape")
+    print(H_drive_target.shape, "h_drive_target shape")
 
     ham_solver = Solver(
         static_hamiltonian=H_static_2q,
@@ -273,7 +284,7 @@ def CNOT_Pulse(drive_strength, sigma, current_state, plot_prob=False, plot_bloch
     # Compute probabilities and overlap
     state_probs = prob(result.y)  # Assumes prob is updated for 4D states (|00>, |01>, |10>, |11>)
     final_state = result.y[-1]
-    ol = overlap(expected_state, final_state)
+    # ol = overlap(expected_state, final_state)
 
     final_probs = np.zeros(4)  # Two-qubit probabilities
     final_probs[0] = state_probs[-1, 0]  # |00>
@@ -286,4 +297,4 @@ def CNOT_Pulse(drive_strength, sigma, current_state, plot_prob=False, plot_bloch
     if plot_blochsphere:
         plot_bloch_sphere(result.y)  # Note: May need adjustment for two-qubit visualization
 
-    return drive_strength, sigma, final_probs, ol, result.y
+    return drive_strength, sigma, final_probs, result.y

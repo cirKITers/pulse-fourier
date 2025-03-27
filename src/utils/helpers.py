@@ -33,13 +33,44 @@ P1 = 0.5 * (I0 - Z0)
 
 
 # U_static = expm(-1j * H_static * t_max)
+
+# ONE QUBIT STATES
 GROUND_STATE = Statevector([1.0, 0.0])
 EXCITED_STATE = Statevector([0.0, 1.0])
 SUPERPOSITION_STATE = Statevector([1/np.sqrt(2), 1/np.sqrt(2)])
 PHASE_SHIFTED_STATE = Statevector([1/np.sqrt(2), 1j/np.sqrt(2)])
 RANDOM_STATE_A = Statevector([0.8, 0.6])
 
-def RANDOM_STATE():
+# TWO QUBIT STATES: |ψ⟩ = α|00⟩ + β|01⟩ + γ|10⟩ + δ|11⟩ s.t. |α|² + |β|² + |γ|² + |δ|² = 1
+GROUND_GROUND = Statevector([1.0, 0.0, 0.0, 0.0])
+GROUND_EXCITED = Statevector([0.0, 1.0, 0.0, 0.0])
+BELL_STATE = Statevector([1/np.sqrt(2), 0.0, 0.0, 1/np.sqrt(2)])
+SUPERPOSITION_PRODUCT = Statevector([0.5, 0.5, 0.5, 0.5])
+
+def RANDOM_STATE(num_q=1):
+    """
+    Generates a random pure quantum statevector for a given number of qubits.
+
+    Args:
+        num_q (int): The number of qubits for the statevector.
+
+    Returns:
+        Statevector: A random pure quantum statevector.
+    """
+    if num_q <= 0:
+        raise ValueError("Number of qubits must be at least 1.")
+
+    num_amplitudes = 2**num_q
+    amplitudes = np.random.randn(num_amplitudes) + 1j * np.random.randn(num_amplitudes)
+    norm = np.sqrt(np.sum(np.abs(amplitudes)**2))
+
+    if norm == 0:
+        raise ValueError("Generated amplitudes have a norm of zero. This is unlikely but possible with random generation.")
+
+    normalized_amplitudes = amplitudes / norm
+    return Statevector(normalized_amplitudes)
+
+def RANDOM_STATE_old():
     alpha_real = np.random.uniform(-1, 1)
     alpha_imag = np.random.uniform(-1, 1)
     beta_real = np.random.uniform(-1, 1)
@@ -110,31 +141,25 @@ def prob(statevector):
 def fourier_series(x, coeffs):
     return sum(c * np.cos(2 * np.pi * k * x) for k, c in enumerate(coeffs))
 
-def random_parameter_set(repetitions, layer, qubits, set_number):
+
+def fixed_parameter_set(num_layer, num_qubits, num_gates, num_samples, fixed_param):
     parameter_set = []
-    for times in range(set_number):
-        parameter_set.append(random_parameter(repetitions, layer, qubits))
+    for _ in range(num_samples):
+        parameter_set.append(fixed_parameter(num_layer, num_qubits, num_gates, fixed_param))
     return parameter_set
 
-def random_parameter(repetitions, layer, qubits):
-    """
-    Generates a random parameter array with values between -2*pi and 2*pi.
-    """
-    return np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(repetitions, layer, qubits))
+def fixed_parameter(num_layer, num_qubits, num_gates, fixed_param):
+    return np.full((num_layer, num_qubits, num_gates), fixed_param)
 
-def random_parameter2(repetitions, layer, qubits):
-    """
+def random_parameter_set(num_layer, num_qubits, num_gates, num_samples):
+    parameter_set = []
+    for times in range(num_samples):
+        parameter_set.append(random_parameter(num_layer, num_qubits, num_gates))
+    return parameter_set
 
-    :param repetitions: number of parameter dependent gates
-    :param layer: number of layer
-    :param qubits: number of qubits
-    :return: set of random weights
-    """
-    np_arr = 2 * np.pi * np.random.random(size=(repetitions, layer, qubits))
-    return np_arr.flatten().tolist()
+def random_parameter(num_layer, num_qubits, num_gates):
+    return np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(num_layer, num_qubits, num_gates))
 
-# def random_weights():
-#     return 2 * np.pi * np.random.random(size=(2, n_ansatz_layers, n_qubits))
 
 # from Tutorial, what is it for?
 def gaussian_conv(t, _dt, sigma):

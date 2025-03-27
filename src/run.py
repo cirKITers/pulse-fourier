@@ -1,26 +1,38 @@
+import numpy as np
+
 from gate_fourier_models import GateONEQFourier
 from pulse_fourier_models import PulseONEQFourier
 from utils.helpers import *
 from data.load import *
-from constants import *
 from src.utils.visualize.fx import *
+from coefficients import *
 
-
-x, pulse_fx, parameter, parameter_shape = load_data_from_jsonl(pulse_file, 9)
-
-
-num_repetitions = parameter_shape[0]
-num_layer = parameter_shape[1]
-num_qubits = parameter_shape[2]
 
 simulator = 'statevector_simulator'
+num_repetitions = 1
+num_layer = 4
+num_qubits = 1
+num_coeffs = 5
+
+samples = 2
 shots = 32768
+points = 70
 
-gate_qm = GateONEQFourier(num_qubits, num_layer, parameter)
+x = np.linspace(0, 1, points)
 
-gate_f_x = gate_qm.predict_interval(simulator, shots, x, plot=False)
+parameter = random_parameter_set(num_repetitions, num_layer, num_qubits, samples)
 
-plot_2fx_advanced(x, pulse_fx, gate_f_x, "Pulse Fourier", "Gate Fourier", "Comparison", "X", "Y", None, None, True)
+gate_fx_set = []
+pulse_fx_set = []
 
+for _ in range(samples):
+    gate_qm = GateONEQFourier(num_qubits, num_layer, np.array(parameter[_]))
+    pulse_qm = PulseONEQFourier(num_qubits, num_layer, np.array(parameter[_]))
 
+    gate_fx_set.append(gate_qm.predict_interval(simulator, shots, x, False))
+    pulse_fx_set.append(pulse_qm.predict_interval(x, plot=False))
+    plot_2fx_advanced(x, pulse_fx_set[_], gate_fx_set[_])
+
+    _, _, pulse_coeffs = coefficient_distribution_fft(samples, num_coeffs, x, pulse_fx_set[_], pulse_qm.model_name, parameter[_], pulse_file, plot=False)
+    _, _, gate_coeffs = coefficient_distribution_fft(samples, num_coeffs, x, gate_fx_set[_], gate_qm.model_name, parameter[_], gate_file, plot=False)
 

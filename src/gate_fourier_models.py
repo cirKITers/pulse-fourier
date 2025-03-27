@@ -10,8 +10,96 @@ from src.utils.helpers import *
 matplotlib.use('TkAgg')  # more general backend, works for PyCharm
 
 
+# with correct convention for parameter assigning
+class QiskitFourier1:
+    model_name = "QiskitFourier1"
+    num_layer = 4
+    num_qubits = 1
+    num_gates = 3
+
+    # parameter always in the same format! (num_layers, num_qubits, num_gates)
+    def __init__(self, parameter):
+        self.num_layers = parameter.shape[0]
+        self.num_qubits = parameter.shape[1]
+        self.num_gates = parameter.shape[2]
+
+        if isinstance(parameter, np.ndarray):
+            self.params = parameter.flatten().tolist()
+        else:
+            raise ValueError("Parameter for init QiskitFourier1 is not a nparray.")
+
+        self.param_label = []
+        for lay in range(self.num_layers):
+            for qub in range(self.num_qubits):
+                for gate in range(self.num_gates):
+                    self.param_label.append(Parameter(f'theta_layer_{lay}_qubit_{qub}_gate_{gate}'))
+
+        # sanity check
+        self.total_params_expected = len(self.params)
+        if len(self.params) != self.total_params_expected:
+            raise ValueError(f"The number of parameters provided ({len(self.params)}) does not match the expected number ({self.total_params_expected}).")
+
+    def define_circuit(self, x):
+        qc = QuantumCircuit(self.num_qubits)
+        param_index = 0
+        for lay in range(self.num_layers):
+            for qub in range(self.num_qubits):
+                # Encoding
+                qc.rx(self.param_label[param_index] * x, qub)
+                param_index += 1
+                # Trainable Block
+                qc.rz(self.param_label[param_index], qub)
+                param_index += 1
+                qc.ry(self.param_label[param_index], qub)
+                param_index += 1
+
+        param_binds = dict(zip(self.param_label, self.params))
+        qc = qc.assign_parameters(param_binds)
+        # print(qc.draw())
+        return qc
+
+    @staticmethod
+    def data_encoding(qc, qubit, theta, x):
+        qc.rx(theta * x, qubit)
+
+    @staticmethod
+    def trainable_block(qc, qubit, theta):
+        qc.rz(theta, qubit)
+        qc.ry(theta, qubit)
+
+
+def predict_interval(qm, simulator, shots, x, plot=False):
+    f_x = []
+    for i in range(len(x)):
+        qc = qm.define_circuit(x[i])
+        f_x.append(compute_expectations(qc, simulator, shots).item())
+
+    if plot:
+        fx.plot_fx_advanced(x, f_x, "Gate level Fourier Model Prediction")
+    return f_x
+
+def predict_single(qm, simulator, shots, x):
+    qc = qm.define_circuit(x)
+    f_x = compute_expectations(qc, simulator, shots)
+    return f_x
+
+def compute_expectations(qc, simulator, shots):
+    backend = qiskit_aer.Aer.get_backend(simulator)
+    if simulator == 'qasm_simulator':
+        qc.measure_all()
+        result = backend.run(qc, shots=shots).result()
+        counts = result.get_counts()
+        probability_0 = counts.get('0', 0) / shots  # Probability of measuring |0> state - expectation value
+    else:  # if simulator == 'statevector_simulator':
+        result = backend.run(qc).result()
+        statevector = result.get_statevector()
+        probability_0 = prob(statevector.data[0])
+    return 2 * probability_0 - 1  # Map to [-1, 1]
+
+
 # Only one qubit possible sor far for simplification purposes
 class GateONEQFourier:
+    model_name = "GateONEQFourier"
 
     def __init__(self, num_qubits, num_layer, parameter):
         self.num_q = num_qubits
@@ -23,7 +111,6 @@ class GateONEQFourier:
         else:
             self.params = [parameter]
         self.param_label = [Parameter(f'theta_{i}') for i in range(self.L)]
-        self.model_name = "GateONEQFourier"
 
     @staticmethod
     def data_encoding(qc, qubit, x):
@@ -32,41 +119,20 @@ class GateONEQFourier:
     @staticmethod
     def trainable_block(qc, qubit, theta):
         qc.rz(theta, qubit)
+        qc.ry(theta, qubit)
 
     def define_circuit(self, x):
         qc = QuantumCircuit(self.num_q)
+        print("param_label", self.param_label)
+        print("params", self.params)
         for lay in range(self.L):
-            self.data_encoding(qc, 0, x)
-            self.trainable_block(qc, 0, self.param_label[lay])
+            for q_i in range(self.num_q):
+                self.data_encoding(qc, q_i, x)
+                # print("_")
+                # print("lay", lay, "qubit", q_i, "params", self.params[lay], "param_label", self.param_label[lay])
+                self.trainable_block(qc, q_i, self.param_label[lay])
         for i, theta in enumerate(self.param_label):
             qc = qc.assign_parameters({theta: self.params[i % len(self.params)]})
+        print(qc.draw())
         return qc
 
-    @staticmethod
-    def compute_expectations(qc, simulator, shots):
-        backend = qiskit_aer.Aer.get_backend(simulator)
-        if simulator == 'qasm_simulator':
-            qc.measure_all()
-            result = backend.run(qc, shots=shots).result()
-            counts = result.get_counts()
-            probability_0 = counts.get('0', 0) / shots  # Probability of measuring |0> state - expectation value
-        else:  # if simulator == 'statevector_simulator':
-            result = backend.run(qc).result()
-            statevector = result.get_statevector()
-            probability_0 = prob(statevector.data[0])
-        return 2 * probability_0 - 1  # Map to [-1, 1]
-
-    def predict_interval(self, simulator, shots, x, plot=False):
-        f_x = []
-        for i in range(len(x)):
-            qc = self.define_circuit(x[i])
-            f_x.append(self.compute_expectations(qc, simulator, shots))
-
-        if plot:
-            fx.plot_fx_advanced(x, f_x, "Gate level Fourier Model Prediction")
-        return f_x
-
-    def predict_single(self, simulator, shots, x):
-        qc = self.define_circuit(x)
-        f_x = self.compute_expectations(qc, simulator, shots)
-        return f_x
