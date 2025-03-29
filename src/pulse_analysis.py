@@ -2,7 +2,7 @@ import json
 
 from data.save import *
 from pulse_fourier_models import PulseONEQFourier
-from src.pulse_gates import *
+from src.oneQ_pulse_gates import *
 from utils.helpers import *
 from constants import *
 

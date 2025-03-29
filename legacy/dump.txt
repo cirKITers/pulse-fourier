@@ -1,3 +1,54 @@
+def X_fidelity(u):
+    return jnp.abs(jnp.sum(SIGMA_X * u))**2 / 4.
+
+
+# TWO QUBIT STATES: |ψ⟩ = α|00⟩ + β|01⟩ + γ|10⟩ + δ|11⟩ s.t. |α|² + |β|² + |γ|² + |δ|² = 1
+GROUND_GROUND = Statevector([1.0, 0.0, 0.0, 0.0])
+GROUND_EXCITED = Statevector([0.0, 1.0, 0.0, 0.0])
+BELL_STATE = Statevector([1/np.sqrt(2), 0.0, 0.0, 1/np.sqrt(2)])
+SUPERPOSITION_PRODUCT = Statevector([0.5, 0.5, 0.5, 0.5])
+
+def RANDOM_STATE(num_q=1):
+    """
+    Generates a random pure quantum statevector for a given number of qubits.
+
+    Args:
+        num_q (int): The number of qubits for the statevector.
+
+    Returns:
+        Statevector: A random pure quantum statevector.
+    """
+    if num_q <= 0:
+        raise ValueError("Number of qubits must be at least 1.")
+
+    num_amplitudes = 2**num_q
+    amplitudes = np.random.randn(num_amplitudes) + 1j * np.random.randn(num_amplitudes)
+    norm = np.sqrt(np.sum(np.abs(amplitudes)**2))
+
+    if norm == 0:
+        raise ValueError("Generated amplitudes have a norm of zero. This is unlikely but possible with random generation.")
+
+    normalized_amplitudes = amplitudes / norm
+    return Statevector(normalized_amplitudes)
+
+def RANDOM_STATE_old():
+    alpha_real = np.random.uniform(-1, 1)
+    alpha_imag = np.random.uniform(-1, 1)
+    beta_real = np.random.uniform(-1, 1)
+    beta_imag = np.random.uniform(-1, 1)
+
+    alpha = alpha_real + 1j * alpha_imag
+    beta = beta_real + 1j * beta_imag
+
+    norm = np.sqrt(np.abs(alpha) ** 2 + np.abs(beta) ** 2)
+
+    alpha /= norm
+    beta /= norm
+
+    return Statevector([alpha, beta])
+
+
+
 from the original GATEONEQFOURIER
 
     # @staticmethod

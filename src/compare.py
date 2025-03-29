@@ -3,7 +3,7 @@ import numpy as np
 from src.utils.visualize import bloch_sphere
 from utils.helpers import *
 from gate_models import *
-from pulse_gates import *
+from oneQ_pulse_gates import *
 
 
 init_state = RANDOM_STATE()
