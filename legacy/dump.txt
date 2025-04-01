@@ -1,3 +1,166 @@
+
+def Hadamard_pulse(current_state, target_qubit):
+    """
+    Implements a Hadamard gate on a specific qubit at the pulse level using an RX(pi/2) pulse.
+
+    Args:
+        current_state (Statevector): Initial quantum state.
+        target_qubit (int): Index of the qubit to apply the Hadamard gate to.
+
+    Returns:
+        tuple: (None, None, evolved_state) to match RX_pulseMULT and CNOT_pulse output format.
+    """
+    num_qubits = int(np.log2(current_state.dim))  # Number of qubits from state dimension
+
+    # Time span for evolution
+    t_span = np.linspace(0, duration * dt_, duration + 1)
+
+    drive_strength = 0.042780849440995694
+
+    # Static Hamiltonian: Only the target qubit's frequency term (others could be added if needed)
+    H_static_single = static_hamiltonian(omega)
+    H_static_multi = operator_on_qubit(H_static_single, target_qubit, num_qubits)
+
+    # Drive Hamiltonian: Applied only to the target qubit
+    H_drive_single = drive_hamiltonian(drive_strength)
+    H_drive_target = operator_on_qubit(H_drive_single, target_qubit, num_qubits)
+
+    # Define the solver
+    ham_solver = Solver(
+        static_hamiltonian=H_static_multi,
+        hamiltonian_operators=[H_drive_target],
+        rotating_frame=H_static_multi
+    )
+
+    # Gaussian envelope for the pulse
+    def gaussian_envelope(t):
+        center = duration * dt_ / 2
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    # Signal with carrier frequency set to the target qubit's frequency
+    gaussian_signal = Signal(
+        envelope=gaussian_envelope,
+        carrier_freq=omega,  # Drive at the qubit's frequency
+        phase=0.0  # No phase shift needed for basic RX-based Hadamard
+    )
+
+    # Solve the time evolution
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=[gaussian_signal]
+    )
+    # traj = swap_amplitudes(result.y)
+
+    return None, None, result.y
+
+#####
+print(quantify_entanglement(BELL_STATE))
+
+
+entanglement_results_ghz = quantify_entanglement(GHZ_STATE)
+print(entanglement_results_ghz)
+
+
+entanglement_results_non = quantify_entanglement(GROUND_STATE(2))
+print(entanglement_results_non)
+
+
+
+###
+old CNOT, no target and control parameter, only for two qubit systems:
+
+def CNOT_Pulse(drive_strength, sigma, current_state, plot_prob=False, plot_blochsphere=False):
+    """
+    Implements a CNOT gate with qubit 0 as control and qubit 1 as target.
+    Sequence: H on control, conditional pi pulse on target, H on control.
+    """
+    omega = 5.0
+    duration_H = 120  # Duration for each H pulse
+    duration_pi = 120  # Duration for conditional pi pulse
+    total_duration = 2 * duration_H + duration_pi
+    t_span = np.linspace(0, total_duration * dt_, total_duration + 1)
+
+    # Expected state for CNOT (for |00> -> |00>, |10> -> |11>, etc.)
+    # Depends on input, so we'll compute overlap with ideal CNOT matrix applied to initial state
+    # cnot_matrix = Operator(np.array([
+    #     [1, 0, 0, 0],
+    #     [0, 1, 0, 0],
+    #     [0, 0, 0, 1],
+    #     [0, 0, 1, 0]])
+    # )
+    # expected_state = cnot_matrix @ current_state
+
+    # Two-qubit static Hamiltonian
+    # H_static_2q = 0.5 * omega * (Z0 + Z1)
+    P1a = np.array([[0, 0], [0, 1]])
+
+    H_static_2q = 0.5 * omega * (Z0 + Z1).astype(np.complex128)
+
+    # Drive Hamiltonians
+    H_drive_control = np.kron(X, np.eye(2)).astype(np.complex128)  # Drive for H pulses on control qubit (4x4)
+    H_drive_target = np.kron(P1a, X).astype(np.complex128)  # Conditional drive: |1><1| ⊗ X on target
+
+    print(H_static_2q.shape, "H_static_2q shape")
+    print(H_drive_control.shape, "h_drive_control shape")
+    print(H_drive_target.shape, "h_drive_target shape")
+
+    ham_solver = Solver(
+        static_hamiltonian=H_static_2q,
+        hamiltonian_operators=[H_drive_control, H_drive_target],
+        rotating_frame=H_static_2q
+    )
+
+    def gaussian_H1(t):  # First H pulse, centered at duration_H/2
+        center = duration_H * dt_ / 2
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2)) * (t <= duration_H * dt_)
+
+    def gaussian_pi(t):  # Conditional pi pulse, centered at duration_H + duration_pi/2
+        center = (duration_H + duration_pi / 2) * dt_
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2)) * \
+            (t > duration_H * dt_) * (t <= (duration_H + duration_pi) * dt_)
+
+    def gaussian_H2(t):  # Second H pulse, centered at duration_H + duration_pi + duration_H/2
+        center = (duration_H + duration_pi + duration_H / 2) * dt_
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2)) * (t > (duration_H + duration_pi) * dt_)
+
+    # Combine signals for control qubit
+    def control_signal(t):
+        return gaussian_H1(t) + gaussian_H2(t)
+
+    signals = [
+        Signal(envelope=control_signal, carrier_freq=omega, phase=np.pi / 2),  # Control qubit H pulses
+        Signal(envelope=gaussian_pi, carrier_freq=omega, phase=0)  # Target qubit conditional pi pulse
+    ]
+
+    # Solve dynamics
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=signals
+    )
+
+    # Compute probabilities and overlap
+    state_probs = prob(result.y)  # Assumes prob is updated for 4D states (|00>, |01>, |10>, |11>)
+    final_state = result.y[-1]
+    # ol = overlap(expected_state, final_state)
+
+    final_probs = np.zeros(4)  # Two-qubit probabilities
+    final_probs[0] = state_probs[-1, 0]  # |00>
+    final_probs[1] = state_probs[-1, 1]  # |01>
+    final_probs[2] = state_probs[-1, 2]  # |10>
+    final_probs[3] = state_probs[-1, 3]  # |11>
+
+    if plot_prob:
+        plot_probabilities(t_span, state_probs)
+    if plot_blochsphere:
+        bloch_sphere_trajectory(result.y)  # Note: May need adjustment for two-qubit visualization
+
+    return drive_strength, sigma, final_probs, result.y
+
+
 def X_fidelity(u):
     return jnp.abs(jnp.sum(SIGMA_X * u))**2 / 4.
 

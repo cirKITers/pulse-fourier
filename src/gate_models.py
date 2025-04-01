@@ -26,7 +26,7 @@ def run_basic_model(backend, circuit, init_state, theta, plot_bloch=False):
     result_vector = Statevector(result.get_statevector())
     probability = prob(result_vector)
     if plot_bloch:
-        plot_bloch_sphere([init_state, result_vector])
+        bloch_sphere_trajectory([init_state, result_vector])
 
     return result_vector, probability
 

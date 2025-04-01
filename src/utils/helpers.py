@@ -1,10 +1,73 @@
 import numpy as np
-from qiskit.quantum_info import Operator, Statevector
+from qiskit.quantum_info import Operator, Statevector, partial_trace
 import jax.numpy as jnp
 from qiskit_dynamics.signals import Convolution
 
 
 # GENERAL HELPFUL
+def density_matrix(statevector):
+    """
+    Computes the density matrix of a given statevector.
+
+    Args:
+        statevector (numpy.ndarray): The statevector as a numpy array.
+
+    Returns:
+        numpy.ndarray: The density matrix.
+    """
+    statevector = np.array(statevector).reshape(-1, 1)  # Ensure it's a column vector
+    density_matrx = np.dot(statevector, statevector.conj().T)
+    return density_matrx
+
+def bool_pure_state(statevector):
+    dm = density_matrix(statevector)
+    trace_squared = np.trace(np.dot(dm, dm))
+    return np.isclose(trace_squared, 1.0)
+
+
+def round_statevector(statevector, tolerance=1e-3):
+    """
+    Rounds the real and imaginary parts of a Statevector's elements.
+
+    Args:
+        statevector (Statevector): The input Statevector.
+        tolerance (float): Values with absolute magnitude less than this are rounded to 0.
+
+    Returns:
+        Statevector: The rounded Statevector.
+    """
+    rounded_data = []
+    for complex_val in statevector.data:
+        real_part = complex_val.real
+        imag_part = complex_val.imag
+
+        if abs(real_part) < tolerance:
+            real_part = 0.0
+        if abs(imag_part) < tolerance:
+            imag_part = 0.0
+
+        rounded_data.append(complex(real_part, imag_part))
+
+    return Statevector(rounded_data)
+
+# F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2
+def fidelity(target_state, actual_state):
+    """
+    Calculates the fidelity between two quantum statevectors.  Best measure for how "close" two quantum states are
+
+    Args:
+        target_state (numpy.ndarray): The expected statevector.
+        actual_state (numpy.ndarray): The resulting statevector.
+
+    Returns:
+        float: The fidelity between the two statevectors. 0 no fidelity, 1 same vector
+    """
+    if len(target_state) != len(actual_state):
+        raise ValueError("Statevectors must have the same dimension.")
+
+    inner_product = np.dot(np.conjugate(target_state), actual_state)
+    return np.abs(inner_product)**2
+
 def kron(A, B):
     return jnp.kron(A, B)
 

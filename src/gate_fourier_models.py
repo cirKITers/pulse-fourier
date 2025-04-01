@@ -6,6 +6,8 @@ from qiskit.circuit import Parameter
 
 from src.utils.visualize import fx
 from src.utils.helpers import *
+from src.utils.visualize.bloch_sphere import *
+
 # https://quantum.ibm.com/composer/files/new
 
 # math behind it: https://dojo.qulacs.org/en/latest/notebooks/1.3_multiqubit_representation_and_operations.html
@@ -117,8 +119,8 @@ class BasicFourier1:
 
 class TestCircuit:
     model_name = "TestCircuit"
-    num_layer = 2
-    num_qubits = 5
+    num_layer = 1
+    num_qubits = 2
     num_gates = 1
 
     # parameter always in the same format! (num_layers, num_qubits, num_gates)
@@ -144,7 +146,7 @@ class TestCircuit:
         #     raise ValueError(f"Error 1: The number of parameters provided ({len(self.params)}) does not match the expected number ({total_params_expected}).")
 
         # sanity check 2
-        total_params_expected = BasicFourier1.num_layer * BasicFourier1.num_qubits * BasicFourier1.num_gates
+        # total_params_expected = BasicFourier1.num_layer * BasicFourier1.num_qubits * BasicFourier1.num_gates
         # if len(self.params) != total_params_expected:
         #     raise ValueError(f"Error 2: The number of parameters provided ({len(self.params)}) does not match the expected number ({total_params_expected}).")
 
@@ -152,11 +154,15 @@ class TestCircuit:
         qc = QuantumCircuit(self.num_qubits)
         for lay in range(self.num_layers):
             for qub in range(1):
-                qc.rx(np.pi/2, 0)
+                # qc.h(0)
+                # qc.h(1)
+                qc.rx(np.pi / 2, 0)
                 qc.rx(np.pi / 2, 1)
-                qc.rx(np.pi / 2, 2)
-                qc.rx(np.pi / 2, 3)
-                qc.rx(np.pi / 2, 4)
+                qc.cx(0, 1)
+                # qc.rx(np.pi / 2, 1)
+        #         qc.rx(np.pi / 2, 2)
+        #         qc.rx(np.pi / 2, 3)
+        #         qc.rx(np.pi / 2, 4)
         param_binds = dict(zip(self.param_label, self.params))
         # qc = qc.assign_parameters(param_binds)
         return qc
@@ -166,19 +172,20 @@ def predict_interval(qm, simulator, shots, x, plot=False):
     f_x = []
     for i in range(len(x)):
         qc = qm.define_circuit(x[i])
-        f_x.append(compute_expectations(qc, simulator, shots).item())
-
+        mapped_probability0, resulting_statevector = compute_expectations(qc, simulator, shots)
+        f_x.append(mapped_probability0.item())
     if plot:
         fx.plot_fx_advanced(x, f_x, "Gate level Fourier Model Prediction")
     return f_x
 
 def predict_single(qm, simulator, shots, x):
     qc = qm.define_circuit(x)
-    f_x = compute_expectations(qc, simulator, shots)
-    return f_x
+    f_x, resulting_statevector = compute_expectations(qc, simulator, shots)
+    return f_x, resulting_statevector
 
 def compute_expectations(qc, simulator, shots):
     backend = qiskit_aer.Aer.get_backend(simulator)
+    statevector = None
     if simulator == 'qasm_simulator':
         qc.measure_all()
         result = backend.run(qc, shots=shots).result()
@@ -188,9 +195,9 @@ def compute_expectations(qc, simulator, shots):
         print(qc.draw())
         result = backend.run(qc).result()
         statevector = result.get_statevector()
-        print(statevector)
+        # bloch_sphere_multiqubit_trajectory([Statevector(statevector.data)])
         probability_0 = prob(statevector.data[0])
-    return 2 * probability_0 - 1  # Map to [-1, 1]
+    return 2 * probability_0 - 1, statevector  # Map to [-1, 1]
 
 
 # Only one qubit possible sor far for simplification purposes

@@ -7,7 +7,7 @@ from scipy.linalg import expm  # For matrix exponentiation
 
 from src.utils.definitions import *
 from utils.helpers import *
-from utils.visualize.bloch_sphere import plot_bloch_sphere
+from utils.visualize.bloch_sphere import bloch_sphere_trajectory
 from utils.visualize.probabilites import plot_probabilities
 from constants import *
 
@@ -97,7 +97,7 @@ def RZ_pulse(theta, sigma, current_state, plot_prob=False, plot_blochsphere=Fals
         for state in result.y:
             trajectory_lab.append(Statevector(U_static @ state.data))
 
-        plot_bloch_sphere(trajectory_lab, False)
+        bloch_sphere_trajectory(trajectory_lab, False)
 
     return drive_strength, final_probs, ol, result.y
 
@@ -141,7 +141,7 @@ def RX_pulse(theta, sigma, current_state, plot_prob=False, plot_blochsphere=Fals
         for state in result_y:
             state_lab = U_static @ state.data
             trajectory_lab.append(Statevector(state_lab))
-        plot_bloch_sphere(trajectory_lab)
+        bloch_sphere_trajectory(trajectory_lab)
 
     return drive_strength, final_probs, overlap(expected_state_correct, final_state_lab), result_y
 
@@ -186,96 +186,8 @@ def pulse(drive_strength, sigma, duration, omega, phase, current_state, plot_pro
     if plot_probs:
         plot_probabilities(t_span, state_probs)
     if plot_blochsphere:
-        plot_bloch_sphere(result.y)
+        bloch_sphere_trajectory(result.y)
 
     return final_probs, result.y
 
 
-def CNOT_Pulse(drive_strength, sigma, current_state, plot_prob=False, plot_blochsphere=False):
-    """
-    Implements a CNOT gate with qubit 0 as control and qubit 1 as target.
-    Sequence: H on control, conditional pi pulse on target, H on control.
-    """
-    omega = 5.0
-    duration_H = 120  # Duration for each H pulse
-    duration_pi = 120  # Duration for conditional pi pulse
-    total_duration = 2 * duration_H + duration_pi
-    t_span = np.linspace(0, total_duration * dt_, total_duration + 1)
-
-    # Expected state for CNOT (for |00> -> |00>, |10> -> |11>, etc.)
-    # Depends on input, so we'll compute overlap with ideal CNOT matrix applied to initial state
-    # cnot_matrix = Operator(np.array([
-    #     [1, 0, 0, 0],
-    #     [0, 1, 0, 0],
-    #     [0, 0, 0, 1],
-    #     [0, 0, 1, 0]])
-    # )
-    # expected_state = cnot_matrix @ current_state
-
-    # Two-qubit static Hamiltonian
-    # H_static_2q = 0.5 * omega * (Z0 + Z1)
-    P1a = np.array([[0, 0], [0, 1]])
-
-    H_static_2q = 0.5 * omega * (Z0 + Z1).astype(np.complex128)
-
-    # Drive Hamiltonians
-    H_drive_control = np.kron(X, np.eye(2)).astype(np.complex128)  # Drive for H pulses on control qubit (4x4)
-    H_drive_target = np.kron(P1a, X).astype(np.complex128)  # Conditional drive: |1><1| ⊗ X on target
-
-    print(H_static_2q.shape, "H_static_2q shape")
-    print(H_drive_control.shape, "h_drive_control shape")
-    print(H_drive_target.shape, "h_drive_target shape")
-
-    ham_solver = Solver(
-        static_hamiltonian=H_static_2q,
-        hamiltonian_operators=[H_drive_control, H_drive_target],
-        rotating_frame=H_static_2q
-    )
-
-    def gaussian_H1(t):  # First H pulse, centered at duration_H/2
-        center = duration_H * dt_ / 2
-        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2)) * (t <= duration_H * dt_)
-
-    def gaussian_pi(t):  # Conditional pi pulse, centered at duration_H + duration_pi/2
-        center = (duration_H + duration_pi / 2) * dt_
-        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2)) * \
-            (t > duration_H * dt_) * (t <= (duration_H + duration_pi) * dt_)
-
-    def gaussian_H2(t):  # Second H pulse, centered at duration_H + duration_pi + duration_H/2
-        center = (duration_H + duration_pi + duration_H / 2) * dt_
-        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2)) * (t > (duration_H + duration_pi) * dt_)
-
-    # Combine signals for control qubit
-    def control_signal(t):
-        return gaussian_H1(t) + gaussian_H2(t)
-
-    signals = [
-        Signal(envelope=control_signal, carrier_freq=omega, phase=np.pi / 2),  # Control qubit H pulses
-        Signal(envelope=gaussian_pi, carrier_freq=omega, phase=0)  # Target qubit conditional pi pulse
-    ]
-
-    # Solve dynamics
-    result = ham_solver.solve(
-        t_span=t_span,
-        y0=current_state,
-        method='jax_odeint',
-        signals=signals
-    )
-
-    # Compute probabilities and overlap
-    state_probs = prob(result.y)  # Assumes prob is updated for 4D states (|00>, |01>, |10>, |11>)
-    final_state = result.y[-1]
-    # ol = overlap(expected_state, final_state)
-
-    final_probs = np.zeros(4)  # Two-qubit probabilities
-    final_probs[0] = state_probs[-1, 0]  # |00>
-    final_probs[1] = state_probs[-1, 1]  # |01>
-    final_probs[2] = state_probs[-1, 2]  # |10>
-    final_probs[3] = state_probs[-1, 3]  # |11>
-
-    if plot_prob:
-        plot_probabilities(t_span, state_probs)
-    if plot_blochsphere:
-        plot_bloch_sphere(result.y)  # Note: May need adjustment for two-qubit visualization
-
-    return drive_strength, sigma, final_probs, result.y

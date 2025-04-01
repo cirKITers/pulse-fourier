@@ -2,11 +2,13 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from qiskit.quantum_info import Statevector, Pauli
+
+from src.utils.definitions import *
 # from matplotlib import pyplot as plt
 from src.utils.helpers import *
 matplotlib.use('TkAgg')
 
-def plot_multiqubit_bloch_sphere(states, qubits_to_plot=None, laboratory_frame=False):
+def bloch_sphere_multiqubit_trajectory(states, qubits_to_plot=None, laboratory_frame=False):
     """
     Plots the Bloch sphere trajectories for specified qubits in a multi-qubit system.
 
@@ -75,7 +77,7 @@ def plot_multiqubit_bloch_sphere(states, qubits_to_plot=None, laboratory_frame=F
 
 # this type does not work: <class 'qiskit_aer.backends.compatibility.Statevector'>
 # this type the function .expectation value works: <class 'qiskit.quantum_info.states.statevector.Statevector'>
-def plot_bloch_sphere(states, laboratory_frame=False):
+def bloch_sphere_trajectory(states, laboratory_frame=False):
     bloch_x = []
     bloch_y = []
     bloch_z = []
