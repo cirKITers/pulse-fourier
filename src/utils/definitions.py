@@ -56,7 +56,7 @@ def operator_on_qubit(operator, qubit_index, num_qubits):
         result = np.kron(result, op)
     return Operator(result)
 
-
+# TODO sources
 def sum_operator(operator, num_qubits):
     """Creates a sum of the operator applied to each qubit individually."""
     total = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))

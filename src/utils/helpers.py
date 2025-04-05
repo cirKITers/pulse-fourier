@@ -7,11 +7,19 @@ from qiskit_dynamics.signals import Convolution
 
 # GENERAL
 
-# prints statevector in one line for better visibility
 def prints(statevector):
-    state_repr = repr(statevector).replace('\n', '').replace('  ', ' ')
-    print(state_repr)
+    """Prints the values of a Qiskit Statevector in one line, without brackets or string quotes."""
+    def format_complex(z):
+        return f"{z.real:.8f}{'+' if z.imag >= 0 else '-'}{abs(z.imag):.8f}j"
 
+    if isinstance(statevector, Statevector):
+        formatted_array = [format_complex(x) for x in statevector.data]
+        print("["+', '.join(formatted_array)+"]")
+    elif isinstance(statevector, list) or isinstance(statevector, np.ndarray):
+        formatted_array = [format_complex(x) for x in np.array(statevector)]
+        print("["+', '.join(formatted_array)+"]")
+    else:
+        print("Input is not a Qiskit Statevector, list, or numpy array.")
 
 def density_matrix(statevector):
     """

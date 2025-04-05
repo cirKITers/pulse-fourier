@@ -49,6 +49,8 @@ n_initial_points = 12
 initial_points = []
 initial_values = []
 
+print("Computing initial values...")
+
 for _ in range(n_initial_points):
     initial_params = [
         np.random.uniform(0.02, 1),
@@ -103,7 +105,11 @@ for seed in range(num_restarts):
             _, _, CNOTEcho_state = CNOT_pulseEcho(initial_statevector, 0, 1, [5.0, 4.9], g=best_params[0], drive_strength=best_params[1],
                                                   cnot_duration=best_params[2], cnot_phase=best_params[3], cnot_sigma=best_params[4])
             sim = statevector_similarity(CNOTEcho_state, expected_statevector.data)
-            print(f"Expected: {expected_statevector.data}, CNOTEcho: {CNOTEcho_state}, Similarity: {sim}")
+            print("Expected:")
+            prints(expected_statevector)
+            print("CNOTEcho:")
+            prints(CNOTEcho_state)
+            print(f"Similarity: {sim}")
         print("-" * 20)
         print("\n")
 

@@ -6,8 +6,6 @@ from qiskit.circuit.library import RXGate, HGate, RZGate
 from scipy.linalg import expm
 
 from src.utils.definitions import *
-# from scipy.linalg import expm  # For matrix exponentiation
-
 from src.utils.helpers import *
 from utils.visualize.bloch_sphere import *
 from utils.visualize.probabilites import plot_probabilities
@@ -22,41 +20,52 @@ jax.config.update('jax_platform_name', 'cpu')
 
 # Decoherence accounting (?)
 
+# TODO: At the end: build pulse machine as class with stored current_state, num_qubits etc; bundle calculation in init
+
 # TODO omega_list = [5.0, 4.9, 4.85, 4.95, ...] for n qubit systems
 
-# TODO conjugate transpose for RZ
-# TODO plot probabilities, plot entanglement
-def RZ_pulseMULT(theta, current_state, plot_prob=False, plot_blochsphere=False):
+# TODO plot probabilities, plot entanglement, plot blochsphere in lab frame
+
+# TODO clean pulse parameter and isolate as far as possible in k, to minimize pulse parameters
+
+
+def RZ_pulseSPEC(theta, current_state, target_qubits, plot_prob=False, plot_blochsphere=False):
     """
     Implements an RZ gate (rotation around Z-axis) by angle theta on all qubits in current_state.
     Uses a constant drive Hamiltonian with Z operator, with final state transformed to lab frame.
     """
     num_qubits = int(np.log2(current_state.dim))
+
+    if target_qubits == 'all':
+        target_qubits = list(range(num_qubits))
+    elif isinstance(target_qubits, int):
+        target_qubits = [target_qubits]
+    invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
+    assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
     # expected_state = current_state.evolve(RZGate(theta).control(num_qubits))
 
     t_span = np.linspace(0, duration * dt_, duration + 1)
     t_max = t_span[-1]
-
-    # RX:
-    # center = duration * dt_ / 2
-    # def envelope(t):
-    #     return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
-    # integral, _ = quad(envelope, t_span[0], t_span[-1])
-    # # Calculate drive_strength
-    # strength_scale = 0.3183109217857033
-    # drive_strength = theta / integral
-    # drive_strength = drive_strength * strength_scale
 
     # RZ:
     k = 5.524648297886591
     drive_strength = (theta / 2 - 5.0 / 2 * 12 + 2 * np.pi * k) / 12
     # RZdrive_strength = theta / (2 * t_max)
 
-    H_static_single = static_hamiltonian(omega=omega)
-    H_drive_Z_single = Z
+    drive_strength = - drive_strength
 
+    # static
+    H_static_single = static_hamiltonian(omega=omega)
     H_static_multi = sum_operator(H_static_single, num_qubits)
-    H_drive_Z_multi = sum_operator(H_drive_Z_single, num_qubits)
+
+    # drive
+    H_drive_Z_single = SIGMA_Z
+    if not target_qubits:
+        H_drive_Z_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    else:
+        H_drive_Z_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+        for k in target_qubits:
+            H_drive_Z_multi += operator_on_qubit(H_drive_Z_single, k, num_qubits)
 
     ham_solver = Solver(
         static_hamiltonian=H_static_multi,
@@ -79,9 +88,6 @@ def RZ_pulseMULT(theta, current_state, plot_prob=False, plot_blochsphere=False):
         method='jax_odeint',
         signals=[signal]
     )
-
-    # TODO very wrong approach to correct:
-    # result.y = quadrant_selective_conjugate_transpose(result.y, num_qubits)
 
     # Transform final state from rotating frame to lab frame
     U_static = expm(-1j * H_static_multi * t_max)
@@ -112,6 +118,82 @@ def RZ_pulseMULT(theta, current_state, plot_prob=False, plot_blochsphere=False):
     return None, None, result.y
 
 
+def RZ_pulseMULT(theta, current_state, plot_prob=False, plot_blochsphere=False):
+    """
+    Implements an RZ gate (rotation around Z-axis) by angle theta on all qubits in current_state.
+    Uses a constant drive Hamiltonian with Z operator, with final state transformed to lab frame.
+    """
+    num_qubits = int(np.log2(current_state.dim))
+    # expected_state = current_state.evolve(RZGate(theta).control(num_qubits))
+
+    t_span = np.linspace(0, duration * dt_, duration + 1)
+    t_max = t_span[-1]
+
+    # RZ:
+    k = 5.524648297886591
+    drive_strength = (theta / 2 - 5.0 / 2 * 12 + 2 * np.pi * k) / 12
+    # RZdrive_strength = theta / (2 * t_max)
+
+    drive_strength = - drive_strength
+
+    H_static_single = static_hamiltonian(omega=omega)
+    H_drive_Z_single = SIGMA_Z
+
+    H_static_multi = sum_operator(H_static_single, num_qubits)
+    H_drive_Z_multi = sum_operator(H_drive_Z_single, num_qubits)
+
+    ham_solver = Solver(
+        static_hamiltonian=H_static_multi,
+        hamiltonian_operators=[H_drive_Z_multi],
+        rotating_frame=H_static_multi
+    )
+
+    def constant_envelope(t):
+        return drive_strength
+
+    signal = Signal(
+        envelope=constant_envelope,
+        carrier_freq=0.0,  # No oscillation for Z drive
+        phase=0.0
+    )
+
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=[signal]
+    )
+
+    # Transform final state from rotating frame to lab frame
+    U_static = expm(-1j * H_static_multi * t_max)
+    # final_state_rot = result.y[-1].data
+    # final_state_lab = U_static @ final_state_rot
+    # final_state_lab = Statevector(final_state_lab)
+
+    # Compute probabilities (frame-invariant)
+    # state_probs = prob(result.y)
+    # final_probs = prob(result.y[-1])
+
+    # Compute overlap in lab frame
+    # ol = overlap(expected_state, final_state_lab)
+
+    # Optionally transform all states for plotting (lab frame)
+    # if plot_prob:
+    #     plot_probabilities
+    # print(f"initial state: {current_state}")
+    # print(f"result.y[-1]: {result.y[-1]}")
+    # print(f"U_static shape: {U_static.shape}")
+    if plot_blochsphere:
+        trajectory_lab = []
+        for state in result.y:
+            # print(f"state.data shape: {state.data.shape}")
+            trajectory_lab.append(Statevector(U_static @ state.data))
+        bloch_sphere_multiqubit_trajectory(trajectory_lab, list(range(num_qubits)), False)
+
+    return None, None, result.y
+
+
+# TODO compute ds beforehand
 def RX_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plot_blochsphere=False):
     """
     Implements an RX gate (rotation around X-axis) by angle theta on specified qubits in current_state.
