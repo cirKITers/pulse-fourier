@@ -1,10 +1,18 @@
 import numpy as np
-from qiskit.quantum_info import Operator, Statevector, partial_trace
+from matplotlib import pyplot as plt
+from qiskit.quantum_info import Operator, Statevector, partial_trace, DensityMatrix
 import jax.numpy as jnp
 from qiskit_dynamics.signals import Convolution
 
 
-# GENERAL HELPFUL
+# GENERAL
+
+# prints statevector in one line for better visibility
+def prints(statevector):
+    state_repr = repr(statevector).replace('\n', '').replace('  ', ' ')
+    print(state_repr)
+
+
 def density_matrix(statevector):
     """
     Computes the density matrix of a given statevector.
@@ -23,6 +31,9 @@ def bool_pure_state(statevector):
     dm = density_matrix(statevector)
     trace_squared = np.trace(np.dot(dm, dm))
     return np.isclose(trace_squared, 1.0)
+
+def bool_valid_state(statevector):
+    return statevector.is_valid()
 
 
 def round_statevector(statevector, tolerance=1e-3):
@@ -50,7 +61,71 @@ def round_statevector(statevector, tolerance=1e-3):
 
     return Statevector(rounded_data)
 
-# F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2
+def statevector_similarity(target_state, actual_state, tolerance=1e-6, scaling="linear"):
+    """
+    Calculates the component-wise similarity between two quantum statevectors,
+    sensitive to individual complex component values.
+    quadratic: allow small deviations
+    exponential: highly sensitive ti minor deviations
+
+    Args:
+        target_state (numpy.ndarray): The target statevector.
+        actual_state (numpy.ndarray): The actual statevector.
+        tolerance (float): The maximum allowed difference for a component to be considered "similar".
+        scaling (str): The scaling function to use ("quadratic" or "exponential").
+
+    Returns:
+        float: A similarity score between 0 and 1.
+    """
+    if len(target_state) != len(actual_state):
+        raise ValueError("Statevectors must have the same dimension.")
+
+    num_components = len(target_state)
+    similarity_sum = 0.0
+
+    for i in range(num_components):
+        real_diff = abs(target_state[i].real - actual_state[i].real)
+        imag_diff = abs(target_state[i].imag - actual_state[i].imag)
+        component_diff = real_diff + imag_diff
+
+        if component_diff <= tolerance:
+            similarity_sum += 1.0
+        else:
+            if scaling == "linear":
+                similarity_sum += max(0.0, 1.0 - component_diff)
+            elif scaling == "quadratic":
+                similarity_sum += max(0.0, 1.0 - component_diff**2)
+            elif scaling == "exponential":
+                similarity_sum += np.exp(-component_diff)
+            else:
+                raise ValueError("Invalid scaling function. Choose 'quadratic' or 'exponential'.")
+
+    return similarity_sum / num_components
+
+def bool_statevector_closeness(state1, state2, atol=1e-2, rtol=1e-2):
+    """
+    Compares two quantum states (Statevector or DensityMatrix) with a custom tolerance.
+
+    Args:
+        state1: The first quantum state.
+        state2: The second quantum state.
+        atol: Absolute tolerance.
+        rtol: Relative tolerance.
+
+    Returns:
+        True if the states are close, False otherwise.
+    """
+    if state1.dim != state2.dim:
+        return False  # Different dimensions
+
+    if isinstance(state1, Statevector):
+        return np.allclose(state1.data, state2.data, atol=atol, rtol=rtol)
+    elif isinstance(state1, DensityMatrix):
+        return np.allclose(state1.data, state2.data, atol=atol, rtol=rtol)
+    else:
+        raise ValueError("Input states must be Statevector or DensityMatrix.")
+
+# F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2, insensitive to global phase differences
 def fidelity(target_state, actual_state):
     """
     Calculates the fidelity between two quantum statevectors.  Best measure for how "close" two quantum states are
@@ -98,6 +173,9 @@ def fourier_series(x, coeffs):
 
 def random_theta():
     return np.random.uniform(-2*np.pi, 2*np.pi)
+
+def random_theta_positive():
+    return np.random.uniform(0, 2 * np.pi)
 
 def fixed_parameter_set(num_layer, num_qubits, num_gates, num_samples, fixed_param):
     parameter_set = []

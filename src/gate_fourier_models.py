@@ -163,10 +163,29 @@ class TestCircuit:
         #         qc.rx(np.pi / 2, 2)
         #         qc.rx(np.pi / 2, 3)
         #         qc.rx(np.pi / 2, 4)
-        param_binds = dict(zip(self.param_label, self.params))
+        # param_binds = dict(zip(self.param_label, self.params))
         # qc = qc.assign_parameters(param_binds)
         return qc
 
+# for quick and easy modifications
+class QuickCircuit:
+    def __init__(self, num_qubits):
+        self.num_qubits = num_qubits
+
+    def run_quick_circuit(self, initial_state):
+        qc = QuantumCircuit(self.num_qubits)
+
+        if initial_state is not None:
+            qc.initialize(initial_state, range(self.num_qubits))  # Initialize with the custom state
+
+        # qc.rx(np.pi / 2, 0)
+        # qc.rx(np.pi / 2, 1)
+        qc.cx(1, 0)
+        simulator = 'statevector_simulator'
+        backend = qiskit_aer.Aer.get_backend(simulator)
+        result = backend.run(qc).result()
+        statevector = result.get_statevector()
+        return statevector
 
 def predict_interval(qm, simulator, shots, x, plot=False):
     f_x = []

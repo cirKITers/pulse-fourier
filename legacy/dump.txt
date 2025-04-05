@@ -1,4 +1,530 @@
 
+MEMORY ERROR n_calls = 1000, 4 pairs
+C:\pythonProject\fourier-pulse-qc\.venv\Scripts\python.exe C:\pythonProject\fourier-pulse-qc\src\param_opt.py
+
+seed:  0
+
+Traceback (most recent call last):
+
+  File "C:\pythonProject\fourier-pulse-qc\src\param_opt.py", line 68, in <module>
+
+    result = gp_minimize(
+
+             ^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\optimizer\gp.py", line 281, in gp_minimize
+
+    return base_minimize(
+
+           ^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\optimizer\base.py", line 333, in base_minimize
+
+    result = optimizer.tell(next_x, next_y)
+
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\optimizer\optimizer.py", line 570, in tell
+
+    return self._tell(x, y, fit=fit)
+
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\optimizer\optimizer.py", line 637, in _tell
+
+    values = _gaussian_acquisition(
+
+             ^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\acquisition.py", line 59, in _gaussian_acquisition
+
+    func_and_grad = gaussian_ei(X, model, y_opt, xi, return_grad)
+
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\acquisition.py", line 299, in gaussian_ei
+
+    mu, std = model.predict(X, return_std=True)
+
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\learning\gaussian_process\gpr.py", line 332, in predict
+
+    K_trans = self.kernel_(X, self.X_train_)
+
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\sklearn\gaussian_process\kernels.py", line 868, in __call__
+
+    return self.k1(X, Y) + self.k2(X, Y)
+
+           ^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\sklearn\gaussian_process\kernels.py", line 968, in __call__
+
+    return self.k1(X, Y) * self.k2(X, Y)
+
+                           ^^^^^^^^^^^^^
+
+  File "C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\sklearn\gaussian_process\kernels.py", line 1726, in __call__
+
+    K = (1.0 + K + K**2 / 3.0) * np.exp(-K)
+
+                   ~^^~
+
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 15.9 MiB for an array with shape (10000, 209) and data type float64
+
+
+Process finished with exit code 1
+
+
+###########################################
+n_calls 500, 1seed ~ 4h with CNOT_pulseNew:
+--------------------
+seed:  0
+Restart 1:
+  Best parameters: g=0.05, ds=1.0728385125463975, cnot_dur=239, cnot_p=1.7554873088999543, cnot_sigma=1.5
+  Maximum similarity: 0.9557507462886321
+--------------------
+
+########################################
+########################################
+ORIGINAL CNOT_pulse2
+def CNOT_pulseOriginal(current_state, control_qubit, target_qubit, omega_list, g, drive_strength):
+    """
+    Implements a CNOT gate at the pulse level using cross-resonance with compensating single-qubit gates.
+    """
+    num_qubits = int(np.log2(current_state.dim))
+    t_span = np.linspace(0, duration * dt_, duration + 1)
+
+    # First, apply RX(π/2) on control qubit
+    theta = np.pi / 2
+    center = duration * dt_ / 2
+
+    def envelope(t): return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    integral, _ = quad(envelope, t_span[0], t_span[-1])
+    strength_scale = 0.3183109217857033
+    drive_strength_rx = theta / integral * strength_scale
+
+    H_drive_control = operator_on_qubit(drive_hamiltonian(drive_strength_rx), control_qubit, num_qubits)
+    H_static_multi = sum_operator(static_hamiltonian(omega_list[control_qubit]), num_qubits)
+    ham_solver = Solver(static_hamiltonian=H_static_multi, hamiltonian_operators=[H_drive_control], rotating_frame=H_static_multi)
+
+    def gaussian_envelope(t): return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    gaussian_signal = Signal(envelope=gaussian_envelope, carrier_freq=omega_list[control_qubit], phase=0.0)
+    state = ham_solver.solve(t_span=t_span, y0=current_state, method='jax_odeint', signals=[gaussian_signal]).y[-1]
+
+    # Then RX(-π/2) on target qubit
+    theta = -np.pi / 2
+    drive_strength_rx = theta / integral * strength_scale
+    H_drive_target = operator_on_qubit(drive_hamiltonian(drive_strength_rx), target_qubit, num_qubits)
+    H_static_multi = sum_operator(static_hamiltonian(omega_list[target_qubit]), num_qubits)
+    ham_solver = Solver(static_hamiltonian=H_static_multi, hamiltonian_operators=[H_drive_target], rotating_frame=H_static_multi)
+    gaussian_signal = Signal(envelope=gaussian_envelope, carrier_freq=omega_list[target_qubit], phase=0.0)
+    state = ham_solver.solve(t_span=t_span, y0=state, method='jax_odeint', signals=[gaussian_signal]).y[-1]
+
+    # Now the cross-resonance pulse (original CNOT_pulse core)
+    H_static_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    for k in range(num_qubits): H_static_multi += operator_on_qubit(static_hamiltonian(omega_list[k]), k, num_qubits)
+    H_static_multi += coupling_hamiltonian(num_qubits, control_qubit, target_qubit, g)
+    H_drive_control = operator_on_qubit(drive_hamiltonian(drive_strength), control_qubit, num_qubits)
+    ham_solver = Solver(static_hamiltonian=H_static_multi, hamiltonian_operators=[H_drive_control], rotating_frame=H_static_multi)
+
+    def gaussian_envelope(t): return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    gaussian_signal = Signal(envelope=gaussian_envelope, carrier_freq=omega_list[target_qubit], phase=0.0)
+    state = ham_solver.solve(t_span=t_span, y0=state, method='jax_odeint', signals=[gaussian_signal]).y[-1]
+
+    # After CR, apply RX(π/2) on control
+    theta = np.pi / 2
+    drive_strength_rx = theta / integral * strength_scale
+    H_drive_control = operator_on_qubit(drive_hamiltonian(drive_strength_rx), control_qubit, num_qubits)
+    H_static_multi = sum_operator(static_hamiltonian(omega_list[control_qubit]), num_qubits)
+    ham_solver = Solver(static_hamiltonian=H_static_multi, hamiltonian_operators=[H_drive_control], rotating_frame=H_static_multi)
+    gaussian_signal = Signal(envelope=gaussian_envelope, carrier_freq=omega_list[control_qubit], phase=0.0)
+    state = ham_solver.solve(t_span=t_span, y0=state, method='jax_odeint', signals=[gaussian_signal]).y[-1]
+
+    # Then RX(-π/2) on target
+    theta = -np.pi / 2
+    drive_strength_rx = theta / integral * strength_scale
+    H_drive_target = operator_on_qubit(drive_hamiltonian(drive_strength_rx), target_qubit, num_qubits)
+    H_static_multi = sum_operator(static_hamiltonian(omega_list[target_qubit]), num_qubits)
+    ham_solver = Solver(static_hamiltonian=H_static_multi, hamiltonian_operators=[H_drive_target], rotating_frame=H_static_multi)
+    gaussian_signal = Signal(envelope=gaussian_envelope, carrier_freq=omega_list[target_qubit], phase=0.0)
+    state = ham_solver.solve(t_span=t_span, y0=state, method='jax_odeint', signals=[gaussian_signal]).y[-1]
+
+    return None, None, state
+
+#############################################################
+#############################################################
+OLD RX PULSE###########
+def RX_pulseALL(theta, current_state, plot_prob=False, plot_blochsphere=False):
+    """
+    Implements an RX gate (rotation around X-axis) by angle theta on all qubits in current_state.
+    Uses a constant drive Hamiltonian with X operator, with final state transformed to lab frame.
+    """
+    num_qubits = int(np.log2(current_state.dim))  # Determine number of qubits from state vector dimension
+    # expected_state = current_state.evolve(RZGate(theta).control(num_qubits))
+
+    t_span = np.linspace(0, duration * dt_, duration + 1)
+
+    # RX:
+    center = duration * dt_ / 2
+    def envelope(t):
+        return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    integral, _ = quad(envelope, t_span[0], t_span[-1])
+    # Calculate drive_strength
+    strength_scale = 0.3183109217857033
+    drive_strength = theta / integral
+    drive_strength = drive_strength * strength_scale
+
+    # Construct multi-qubit static and drive Hamiltonians
+    H_static_single = static_hamiltonian(omega=omega)
+    H_drive_X_single = drive_hamiltonian(drive_strength)
+
+    H_static_multi = sum_operator(H_static_single, num_qubits)
+    H_drive_X_multi = sum_operator(H_drive_X_single, num_qubits)
+
+    ham_solver = Solver(
+        static_hamiltonian=H_static_multi,
+        hamiltonian_operators=[H_drive_X_multi],
+        rotating_frame=H_static_multi
+    )
+
+    def gaussian_envelope(t):
+        center = duration * dt_ / 2
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    gaussian_signal = Signal(
+        envelope=gaussian_envelope,
+        carrier_freq=omega,  # No oscillation for Z drive
+        phase=0.0
+    )
+
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=[gaussian_signal]
+    )
+
+    # Transform final state from rotating frame to lab frame
+    # t_max = t_span[-1]
+    # U_static = expm(-1j * H_static_multi * t_max)
+    # final_state_rot = result.y[-1].data
+    # final_state_lab = U_static @ final_state_rot
+    # final_state_lab = Statevector(final_state_lab)
+
+    # Compute probabilities (frame-invariant)
+    # state_probs = prob(result.y)
+    # final_probs = prob(result.y[-1])
+
+    # Compute overlap in lab frame
+    # ol = overlap(expected_state, final_state_lab)
+
+    # Optionally transform all states for plotting (lab frame)
+    # if plot_prob:
+    #     plot_probabilities
+    # if plot_blochsphere:
+    #     trajectory_lab = []
+    #     for state in result.y:
+    #         # print(f"state.data shape: {state.data.shape}")
+    #         trajectory_lab.append(Statevector(U_static @ state.data))
+    #     bloch_sphere_multiqubit_trajectory(trajectory_lab, list(range(num_qubits)), False)
+
+    return None, None, result.y
+##################################
+##################################
+0 for correct expected CNOT
+Restart 1:
+  Best parameters: g=0.777115530224123, ds=1.6298912697634949, p=0.32050792582482457
+  Maximum similarity: 0.7701242579011847
+--------------------
+Best parameters: g=0.777115530224123, ds=1.6298912697634949, p=0.32050792582482457
+Maximum similarity: 0.7701242579011847
+
+
+Expected statevector: [ 0.5+0.j   0. -0.5j -0.5+0.j   0. -0.5j]
+Best statevector so far: [ 6.16662418e-02+0.00551691j  2.74453624e-02-0.45269502j
+ -5.19297488e-01+0.18348464j -1.62053599e-04-0.69795778j]
+
+
+
+0 LONG RUN
+1
+2
+3
+4
+Restart 1:
+  Best parameters: g=1.315446016350669, ds=0.30701325608532004, p=1.8972146006269979
+  Maximum similarity: 0.6728476895131236
+--------------------
+Restart 2:
+  Best parameters: g=1.3081522173069757, ds=0.30847185995429055, p=1.883524550865514
+  Maximum similarity: 0.6719733271892951
+--------------------
+Restart 3:
+  Best parameters: g=1.310251962883061, ds=0.30989365930973706, p=1.8881834520743022
+  Maximum similarity: 0.6732092473414183
+--------------------
+Restart 4:
+  Best parameters: g=1.310445965296242, ds=0.30872279877786996, p=1.8805004506367184
+  Maximum similarity: 0.6738940734687529
+--------------------
+Restart 5:
+  Best parameters: g=1.315393503164784, ds=0.30790869979769625, p=1.9028814702359753
+  Maximum similarity: 0.6720774866579357
+--------------------
+Best parameters: g=1.310445965296242, ds=0.30872279877786996, p=1.8805004506367184
+Maximum similarity: 0.6738940734687529
+
+
+Expected statevector: [ 0.5+0.j  -0.5+0.j   0. -0.5j  0. -0.5j]
+Best statevector so far: [ 0.4989624 +0.03224559j -0.3621654 -0.00240185j -0.03272727-0.0100058j
+ -0.59664767-0.51153492j]
+
+
+ -----------------------------------------------------------------------------------------------------------------------------------------------
+ -----------------------------------------------------------------------------------------------------------------------------------------------
+SIMILARITY TEST CASES:
+
+# Test cases
+
+target1 = np.array([1 + 0j, 0 + 0j, 0 + 0j, 0 + 0j])
+actual1 = np.array([1 + 0j, 0 + 0j, 0 + 0j, 0 + 0j])
+print(f"Test 1: Similarity = {statevector_similarity(target1, actual1)}")  # Expected: 1.0
+
+target2 = np.array([1 + 0j, 0 + 0j, 0 + 0j, 0 + 0j])
+actual2 = np.array([0.9 + 0.05j, 0.1 - 0.05j, 0 + 0j, 0 + 0j])
+print(f"Test 2: Similarity = {statevector_similarity(target2, actual2)}")  # Expected: close to 1.0, but slightly less
+
+target3 = np.array([1 + 0j, 0 + 0j, 0 + 0j, 0 + 0j])
+actual3 = np.array([0.5 + 0.5j, 0.5 - 0.5j, 0 + 0j, 0 + 0j])
+print(f"Test 3: Similarity = {statevector_similarity(target3, actual3)}")  # Expected: significantly less than 1.0
+
+target4 = np.array([1 + 0j, 0 + 0j, 0 + 0j, 0 + 0j])
+actual4 = np.array([0 + 1j, 0 + 0j, 0 + 0j, 0 + 0j])
+print(f"Test 4: Similarity = {statevector_similarity(target4, actual4)}") #Expected: 0.0
+
+target5 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0+0j])
+actual5 = np.array([0.707 + 0.0001j, 0.707 + 0.0001j, 0+0j, 0+0j])
+print(f"Test 5: similarity = {statevector_similarity(target5, actual5)}") #expected: close to 1.0
+
+target6 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0+0j])
+actual6 = np.array([0.707 + 0.2j, 0.707 + 0.2j, 0+0j, 0+0j])
+print(f"Test 6: similarity = {statevector_similarity(target6, actual6)}") #expected: much less than 1.0.
+
+target7 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0+0j])
+actual7 = np.array([0 + 0j, 1+0j, 0+0j, 0+0j])
+print(f"Test 7: similarity = {statevector_similarity(target7, actual7)}") #expected: 0.0
+
+target8 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0+0j])
+actual8 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0.099999j])
+print(f"Test 8: similarity = {statevector_similarity(target8, actual8)}") #expected: close to 1.0
+
+target9 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0+0j])
+actual9 = np.array([0.707 + 0j, 0.707 + 0j, 0+0j, 0.100001j])
+print(f"Test 9: similarity = {statevector_similarity(target9, actual9)}") #expected: much less than 1.0.
+
+
+
+0
+1
+2
+C:\pythonProject\fourier-pulse-qc\.venv\Lib\site-packages\skopt\optimizer\optimizer.py:517: UserWarning: The objective has been evaluated at point [2.0, 0.0, 0.0] before, using random point [0.37965087305147793, 0.98909290726395, 1.0440792700869101]
+  warnings.warn(
+3
+4
+Restart 1:
+  Best parameters: g=1.3725219567952514, ds=0.07875360720683314, p=1.9185437548952768
+  Maximum similarity: 0.5
+--------------------
+Restart 2:
+  Best parameters: g=1.6236773134104694, ds=0.05618158945906935, p=1.0344874951673089
+  Maximum similarity: 0.5
+--------------------
+Restart 3:
+  Best parameters: g=2.0, ds=0.0, p=0.8649267652629364
+  Maximum similarity: 0.5
+--------------------
+Restart 4:
+  Best parameters: g=1.9937032401894517, ds=0.05883960294100367, p=0.15286107841456278
+  Maximum similarity: 0.5
+--------------------
+Restart 5:
+  Best parameters: g=1.265926208784922, ds=0.010318297113255605, p=1.1447129825203604
+  Maximum similarity: 0.5
+--------------------
+Best parameters: g=1.3725219567952514, ds=0.07875360720683314, p=1.9185437548952768
+Maximum similarity: 0.5
+
+
+Expected statevector: [ 0.5+0.j  -0.5+0.j   0. -0.5j  0. -0.5j]
+Best statevector so far: [ 0.51348487+0.03067802j -0.04073246-0.46217222j  0.00621588-0.48172334j
+ -0.5339753 -0.05389251j]
+
+
+ ###########
+ ###########
+     if plot:
+        tolerance = 0.1
+        diff_values = np.linspace(0, 2 * tolerance, 100)  # Differences from 0 to 2*tolerance
+
+        quadratic_similarity = 1.0 - (diff_values / tolerance) ** 2
+        exponential_similarity = np.exp(-diff_values / tolerance)
+
+        plt.plot(diff_values, quadratic_similarity, label="Quadratic Scaling")
+        plt.plot(diff_values, exponential_similarity, label="Exponential Scaling")
+        plt.xlabel("Component Difference")
+        plt.ylabel("Similarity")
+        plt.title("Comparison of Scaling Functions")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+##########################################
+PARAM OPT RESULTS: HIGHEST FIDELITY
+search_space = [
+    Real(0, 1, name='g'),
+    Real(0, 1, name='ds'),
+    Real(0, 1, name='p'),
+]
+num_restarts = 5
+n_initial_points = 10
+n_calls = 100
+
+Restart 1:
+  Best parameters: g=0.9241352713700527, ds=0.3251353530692094, p=0.9349890550262165
+  Maximum fidelity: 0.9082175433130879
+--------------------
+Restart 2:
+  Best parameters: g=0.9239670742667196, ds=0.3245031103680644, p=0.940966337349962
+  Maximum fidelity: 0.908210208474459
+--------------------
+Restart 3:
+  Best parameters: g=0.9243751770044104, ds=0.32501586285719314, p=0.9402407086499058
+  Maximum fidelity: 0.9082346581058685
+--------------------
+Restart 4:
+  Best parameters: g=0.924134061665496, ds=0.32531508748406807, p=0.9391674710008715
+  Maximum fidelity: 0.9082269444700671
+--------------------
+Restart 5:
+  Best parameters: g=0.9243829429470746, ds=0.32507000352340254, p=0.940620978682747
+  Maximum fidelity: 0.9082341086310716
+--------------------
+Best parameters: g=0.9243751770044104, ds=0.32501586285719314, p=0.9402407086499058
+Maximum fidelity: 0.9082346581058685
+
+##########################################
+def CNOT_fidelity(g, ds, p):
+    omega_list = [5.0, 4.9]
+    _, _, trajectory_afterCNOT = CNOT_pulse(perfect_statevector_afterRX, 0, 1, omega_list, g=g, ds=ds, phase_test=p)
+    fid = fidelity(trajectory_afterCNOT[-1], perfect_statevector_afterCNOT.data)
+    return fid
+
+# result = gp_minimize(
+#     objective_function,
+#     search_space,
+#     n_calls=50,  # Number of function evaluations
+#     random_state=42,
+#     n_jobs=-1,
+# )
+#
+# best_params = result.x
+# best_value = -result.fun  # Negate back to original value
+#
+# print(f"Best parameters: g={best_params[0]}, ds={best_params[1]}, p={best_params[2]}")
+# print(f"Maximum fidelity: {best_value}")
+
+
+# results: Best parameters: g=0.9247234358392111, ds=0.32334595561495116, p=1.0
+# Maximum fidelity: 0.9059860925782496
+
+# import numpy as np
+# from skopt import BayesSearchCV
+# from skopt.space import Real, Integer
+# from sklearn.base import BaseEstimator, TransformerMixin  # Import dummy estimator classes
+# from sklearn.model_selection import KFold
+#
+# from src.pulse_gates import *
+#
+# single_split_cv = KFold(n_splits=1)
+#
+# def CNOT_fidelity(g, ds, p):
+#     num_qubits = 2
+#     theta = np.pi / 2
+#
+#     init_state = GROUND_STATE(num_qubits)
+#
+#     _, _, trajectory_afterRX = RX_pulseMULT(theta, init_state, False, False)
+#
+#     omega_list = [5.0, 4.9]
+#     _, _, trajectory_afterCNOT = CNOT_pulse(trajectory_afterRX[-1], 0, 1, omega_list, g=g, drive_strength=ds, phase_test=p)
+#
+#     fid = fidelity(trajectory_afterCNOT[-1], np.array([0.5 + 0.j, -0.5 + 0.j, 0. - 0.5j, 0. - 0.5j]))
+#
+#     return fid
+#
+#
+# search_space = {
+#     'g': Real(0, 1),
+#     'ds': Real(0, 1),
+#     'p': Real(0, 1),
+# }
+#
+# def objective_function(params):
+#     return -CNOT_fidelity(params['g'], params['ds'], params['p'])
+#
+#
+# def objective_function(params):
+#     return -CNOT_fidelity(params['g'], params['ds'], params['p'])
+#
+# class DummyEstimator(BaseEstimator, TransformerMixin):
+#     def fit(self, X, y=None):
+#         return self
+#
+#     def transform(self, X):
+#         return X
+#
+#
+# dummy_estimator = DummyEstimator()
+#
+#
+# opt = BayesSearchCV(
+#     dummy_estimator,
+#     search_space,
+#     scoring=objective_function,
+#     n_iter=50,  # Number of iterations (adjust as needed)
+#     random_state=42,    # for repeatability
+#     n_jobs=-1,
+#     cv=single_split_cv,
+# )
+#
+# X_dummy = np.zeros((1, 1))  # Create a dummy 2D array
+# y_dummy = np.zeros(1)  # Create a dummy 1D array
+#
+# opt.fit(X_dummy, y_dummy)
+# # We are not fitting a model, but rather optimizing a function.
+#
+# # Get the best parameters and the corresponding maximum value
+# best_params = opt.best_params_
+# best_value = -opt.best_score_  # negate back to original value.
+#
+# print(f"Best parameters: {best_params}")
+# print(f"Maximum value: {best_value}")
+#
+#
+# # Example of how to access the found values
+# print(f"Best x: {best_params['x']}")
+# print(f"Best y: {best_params['y']}")
+# print(f"Best z: {best_params['z']}")
+#
+
+
+##########################################
 def Hadamard_pulse(current_state, target_qubit):
     """
     Implements a Hadamard gate on a specific qubit at the pulse level using an RX(pi/2) pulse.
@@ -164,6 +690,13 @@ def CNOT_Pulse(drive_strength, sigma, current_state, plot_prob=False, plot_bloch
 def X_fidelity(u):
     return jnp.abs(jnp.sum(SIGMA_X * u))**2 / 4.
 
+
+def tensor_product_2(operator, num_qubits):
+    """Creates a tensor product of operator with identities for num_qubits."""
+    result = operator
+    for _ in range(num_qubits - 1):
+        result = np.kron(result, operator)
+    return result
 
 # TWO QUBIT STATES: |ψ⟩ = α|00⟩ + β|01⟩ + γ|10⟩ + δ|11⟩ s.t. |α|² + |β|² + |γ|² + |δ|² = 1
 GROUND_GROUND = Statevector([1.0, 0.0, 0.0, 0.0])

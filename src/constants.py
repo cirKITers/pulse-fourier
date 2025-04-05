@@ -5,6 +5,10 @@ amp = 1.0  # Amplitude, height gaussian bell at peak, default Max
 omega = 5.0
 duration = 120
 
+# CNOT
+sigmaCNOT = 1.5
+durationCNOT = 300
+
 
 pulse_file = "../data/pulse_fourier.jsonl"
 gate_file = "../data/gate_fourier.jsonl"

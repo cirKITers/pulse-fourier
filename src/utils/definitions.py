@@ -46,6 +46,7 @@ def coupling_hamiltonian(total_qubits, qubit_k, qubit_m, g):
     op_Y_m = operator_on_qubit(SIGMA_Y, qubit_m, total_qubits)
     return (g / 2) * (op_X_k @ op_X_m + op_Y_k @ op_Y_m)
 
+
 def operator_on_qubit(operator, qubit_index, num_qubits):
     """Places an operator on the specified qubit with identities on others."""
     ops = [I] * num_qubits
@@ -53,28 +54,22 @@ def operator_on_qubit(operator, qubit_index, num_qubits):
     result = ops[0]
     for op in ops[1:]:
         result = np.kron(result, op)
-    return result
+    return Operator(result)
+
 
 def sum_operator(operator, num_qubits):
     """Creates a sum of the operator applied to each qubit individually."""
-    total = np.zeros((2**num_qubits, 2**num_qubits), dtype=complex)
+    total = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
     for k in range(num_qubits):
         total += operator_on_qubit(operator, k, num_qubits)
     return total
+
 
 def tensor_product_identity(operator, num_qubits):
     """Creates a tensor product of operator with identities for num_qubits."""
     result = operator
     for _ in range(num_qubits - 1):
         result = np.kron(result, np.eye(2))
-    return result
-
-
-def tensor_product_2(operator, num_qubits):
-    """Creates a tensor product of operator with identities for num_qubits."""
-    result = operator
-    for _ in range(num_qubits - 1):
-        result = np.kron(result, operator)
     return result
 
 
@@ -98,10 +93,12 @@ X0 = kron(X, I)  # X on qubit 0
 X1 = kron(I, X)  # X on qubit 1
 P1 = 0.5 * (I0 - Z0)
 
+
 # HAMILTONIAN
 # like in: https://qiskit-community.github.io/qiskit-dynamics/tutorials/optimizing_pulse_sequence.html
 def static_hamiltonian(omega):
     return 2 * np.pi * omega * SIGMA_Z / 2
+
 
 def drive_hamiltonian(drive_strength):
     if isinstance(drive_strength, np.ndarray):
@@ -110,32 +107,51 @@ def drive_hamiltonian(drive_strength):
 
 
 # ONE QUBIT STATES
-GROUND_STATE_OneQ = Statevector([1.0, 0.0])
-EXCITED_STATE_OneQ = Statevector([0.0, 1.0])
-SUPERPOSITION_STATE_OneQ = Statevector([1 / np.sqrt(2), 1 / np.sqrt(2)])
+GROUND_STATE_OneQ = Statevector([1.0, 0.0])  # |0>
+EXCITED_STATE_OneQ = Statevector([0.0, 1.0])  # |1>
+SUPERPOSITION_STATE_H_OneQ = Statevector([1 / np.sqrt(2), 1 / np.sqrt(2)])
+SUPERPOSITION_STATE_RX_OneQ = Statevector([1 / np.sqrt(2), -1j / np.sqrt(2)])
 PHASE_SHIFTED_STATE_OneQ = Statevector([1 / np.sqrt(2), 1j / np.sqrt(2)])
 RANDOM_STATE_A_OneQ = Statevector([0.8, 0.6])
 
-
 # MULTI QUBIT STATES
-BELL_STATE = Statevector([1/np.sqrt(2), 0, 0, 1/np.sqrt(2)])
-GHZ_STATE = Statevector([1/np.sqrt(2), 0, 0, 0, 0, 0, 0, 1/np.sqrt(2)])
+
+# Bell states / EPR pairs:
+PHI_PLUS = Statevector([1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)])        # ∣Φ+⟩, H(0) CNOT(0,1)
+PSI_PLUS = Statevector([0, 1 / np.sqrt(2), 1 / np.sqrt(2), 0])        # |Ψ⁺⟩, X(1) H(0) CNOT(0,1)
+PHI_MINUS = Statevector([1 / np.sqrt(2), 0, 0, -1 / np.sqrt(2)])      # ∣Φ-⟩, H(0) Z(0) CNOT(0,1)
+PSI_MINUS = Statevector([0, 1 / np.sqrt(2), -1 / np.sqrt(2), 0])      # |Ψ-⟩, X(1) H(0) Z(0) CNOT(0,1)
+
+
+# The above, before CNOT(0, 1)
+PHI_PLUS_NO_CNOT = Statevector([1 / np.sqrt(2), 0, 1 / np.sqrt(2), 0])        # H(0)
+PSI_PLUS_NO_CNOT = Statevector([0, 1 / np.sqrt(2), 0, 1 / np.sqrt(2)])        # X(1) H(0)
+PHI_MINUS_NO_CNOT = Statevector([1 / np.sqrt(2), 0, -1 / np.sqrt(2), 0])      # H(0) Z(0)
+PSI_MINUS_NO_CNOT = Statevector([0, 1 / np.sqrt(2), 0, -1 / np.sqrt(2)])      # X(1) H(0)
+
+
+GHZ_STATE = Statevector([1 / np.sqrt(2), 0, 0, 0, 0, 0, 0, 1 / np.sqrt(2)])
+PLUS_ZERO_STATE = Statevector([1 / np.sqrt(2) + 0.j, 0. + 0.j, 1 / np.sqrt(2) + 0.j, 0. + 0.j])
+
 
 def GROUND_STATE(num_qubits):
     """Returns the ground state |00...0> for the given number of qubits."""
-    return Statevector.from_int(0, 2**num_qubits)
+    return Statevector.from_int(0, 2 ** num_qubits)
+
 
 def EXCITED_STATE(num_qubits):
     """Returns the fully excited state |11...1> for the given number of qubits."""
-    return Statevector.from_int(2**num_qubits - 1, 2**num_qubits)
+    return Statevector.from_int(2 ** num_qubits - 1, 2 ** num_qubits)
 
-def SUPERPOSITION_STATE(num_qubits):
+
+def SUPERPOSITION_STATE_H(num_qubits):
     """Returns an equal superposition state (|0> + |1>)/sqrt(2) for one qubit,
     or a tensor product of single-qubit superpositions for multiple qubits."""
     if num_qubits == 1:
-        return Statevector([1/np.sqrt(2), 1/np.sqrt(2)])
+        return Statevector([1 / np.sqrt(2), 1 / np.sqrt(2)])
     else:
-        return Statevector.from_label('+' * num_qubits) / (2**(num_qubits/2))
+        return Statevector.from_label('+' * num_qubits)
+
 
 def PHASESHIFTED_STATE(num_qubits):
     """Returns a phase-shifted state (|0> + i|1>)/sqrt(2) for one qubit,
@@ -149,14 +165,12 @@ def PHASESHIFTED_STATE(num_qubits):
             result = np.kron(result, state)
         return Statevector(result)
 
+
 def RANDOM_STATE(num_qubits):
     """Generates a normalized random statevector for the given number of qubits."""
-    num_dims = 2**num_qubits
+    num_dims = 2 ** num_qubits
     random_vector = np.random.randn(num_dims) + 1j * np.random.randn(num_dims)
     norm = np.linalg.norm(random_vector)
     if norm == 0:
         return Statevector(np.zeros(num_dims))
     return Statevector(random_vector / norm)
-
-
-
