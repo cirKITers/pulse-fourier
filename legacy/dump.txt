@@ -1,4 +1,19 @@
 
+HADMARD TESTING
+for i in range(tries):
+    _, _, current_state = H_pulseSPEC(GROUND_STATE(1), ds[i])
+    prints(current_state[-1])
+    sim = statevector_similarity(penny_state, current_state[-1])
+    if sim > 0.999:
+        pairs.append((ds, sim))
+        print("GOOD##################################")
+    print("ds", ds[i])
+    print("sim", sim)
+    print("\n")
+
+print(pairs)
+
+
 C:\pythonProject\fourier-pulse-qc\.venv\Scripts\python.exe C:\pythonProject\fourier-pulse-qc\src\pennylane_models.py
 -3.141592653589793 computing...
 [(-3.141592653589793, np.float64(0.04208416833667334)), (-3.141592653589793, np.float64(0.20841683366733466)), (-3.141592653589793, np.float64(0.374749498997996)), (-3.141592653589793, np.float64(0.625250501002004)), (-3.141592653589793, np.float64(0.7915831663326652)), (-3.141592653589793, np.float64(0.9579158316633266))]

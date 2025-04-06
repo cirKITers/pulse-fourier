@@ -6,7 +6,7 @@ import pennylane as qml
 # from skopt.space import Real
 #
 # from src.utils.definitions import *
-from src.pulse_gates import RZ_pulseSPEC, RX_pulseSPEC
+from src.pulse_gates import *
 from src.utils.definitions import *
 from src.utils.helpers import *
 
@@ -18,85 +18,38 @@ class PennyCircuit:
 
         self.num_qubits = num_qubits
 
-    def run_quick_circuit(self, theta, init_state=None):
+    def run_quick_circuit(self, init_state=None):
         dev = qml.device('default.qubit', wires=self.num_qubits)
 
         @qml.qnode(dev)
         def general_circuit():
             if init_state is not None:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
+
+            qml.Hadamard(1)
+            # qml.Hadamard(1)
+            # qml.Hadamard(2)
             # qml.CNOT(wires=[0, 1])  # big endian
-            qml.RX(np.pi/2, 0)
-            qml.RX(np.pi/2, 1)
-            qml.RZ(theta, 0)
-            qml.RZ(theta, 1)
+            # qml.RX(np.pi/2, 0)
+            # qml.RX(np.pi/2, 1)
+            # qml.CZ([0, 1])
+            # qml.RZ(theta, 0)
+            # qml.RZ(theta, 1)
             return qml.state()
 
         return general_circuit()
 
 
-num_q = 2
+num_q = 10
 c = PennyCircuit(num_q)
 
-# current_state = GROUND_STATE(num_q)
-# _, _, current_state = RX_pulseSPEC(np.pi/2, current_state, "all")
-# prints(current_state[-1])
+penny_state = c.run_quick_circuit()
+prints(penny_state)
 
-# after all RX(pi/2)
+_, _, current_state = H_pulseSPEC(GROUND_STATE(num_q), 1)
+prints(current_state[-1])
 
-tries = 1
-# k = np.linspace(0.04166614976713962, 0.041666966010380106, tries)
-k_best = 0.04208416833667334
-
-k_best_negative_pi = 0.04166666094977508
-best_vals = []
-typ_theta = [-np.pi, -np.pi/2, -np.pi/4, 0, np.pi/4, np.pi/2, np.pi]
-
-for t in range(100):
-
-    for i in range(tries):
-
-        theta = random_theta()
-
-        penny_state = c.run_quick_circuit(theta)
-
-        _, _, current_state = RZ_pulseSPEC(theta, Statevector([0.50000000 + 0.00000000j, 0.00000000 - 0.50000000j, 0.00000000 - 0.50000000j, -0.50000000 + 0.00000000j]), "all", k_best_negative_pi)
-
-        sim = statevector_similarity(current_state[-1], penny_state)
-        if sim > 0.99:
-
-            print(f"works for {theta}")
-            print(sim)
-            prints(penny_state)
-            prints(current_state[-1])
-            print("\n")
-
-        else:
-            print(f"############################################################################DID NOT work for {theta}")
-            print(sim)
-            prints(penny_state)
-            prints(current_state[-1])
-            print("\n")
-            # print(k[i], sim)
-            # val_pair = (theta, k[i])
-            # best_vals.append(val_pair)
-
-    # print(best_vals)
-
-# [-np.pi, -np.pi/2, -np.pi/4, 0, np.pi/4, np.pi/2, np.pi]
-
-# 0:
-
-# 1:
-# 2:
-# 3:
-# 4:
-# 5:
-# 6:
-
-
-
-
+print(statevector_similarity(penny_state, current_state[-1]))
 
 # num_q = 2
 # c = Circuit(num_q)
