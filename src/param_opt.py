@@ -128,3 +128,66 @@ for seed in range(num_restarts):
     print(f"Final Maximum average similarity: {final_best_value}")
 
 
+
+
+def objective_function(k, current_state):
+    """Objective function to maximize statevector similarity."""
+    theta = typical_theta()
+    _, _, final_state = RZ_pulseSPEC(theta, current_state, "all", k)
+    return -statevector_similarity(c.run_quick_circuit(theta), final_state[-1])  # Negate for maximization
+
+def optimize_k2(initial_state, k2_bounds=(0.1, 8.0), n_calls=1000, n_init_values=20, seeds=[0, 1, 2]):
+    """Optimizes k2 with multiple initial values and seeds."""
+
+    search_space = [Real(k2_bounds[0], k2_bounds[1], name='k2')]
+    best_overall_k2 = None
+    best_overall_similarity = -float('inf')
+
+    for seed in seeds:
+        print(f"\nStarting optimization with seed: {seed}")
+        initial_points = [[np.random.uniform(k2_bounds[0], k2_bounds[1])] for _ in range(n_init_values)]
+        initial_values = [objective_function(k2, initial_state) for k2 in [point[0] for point in initial_points]]
+
+        result = gp_minimize(
+            lambda k2: objective_function(k2[0], initial_state),
+            search_space,
+            n_calls=n_calls,
+            random_state=seed,
+            n_jobs=-1,
+            x0=initial_points,
+            y0=initial_values,
+        )
+
+        best_k2 = result.x[0]
+        best_similarity = -result.fun
+
+        print(f"Seed {seed}: Best k: {best_k2}, Best Similarity: {best_similarity}")
+        print("Best parameters from this seed:")
+        print(result)
+
+        if best_similarity > best_overall_similarity:
+            best_overall_similarity = best_similarity
+            best_overall_k2 = best_k2
+
+    return best_overall_k2, best_overall_similarity
+#
+# num_q = 2
+# c = PennyCircuit(num_q)
+# current_state = GROUND_STATE(num_q)
+# _, _, current_state = RX_pulseSPEC(np.pi/2, current_state, "all")
+#
+# best_k, best_similarity = optimize_k2(current_state[-1])
+#
+# print(f"Best k: {best_k}")
+# print(f"Best Similarity: {best_similarity}")
+#
+# # Test for every theta:
+# theta_values = [-np.pi, -np.pi/2, -np.pi/4, 0, np.pi/4, np.pi/2, np.pi]
+# print("\nTesting similarity for each theta:")
+#
+#
+# for theta in theta_values:
+#     _, _, final_state = RZ_pulseSPEC(theta, current_state[-1], "all", best_k)
+#     similarity = statevector_similarity(c.run_quick_circuit(theta), final_state[-1])
+#     print(f"Theta: {theta}, Similarity: {similarity}")
+

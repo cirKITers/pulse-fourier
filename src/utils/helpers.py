@@ -133,7 +133,7 @@ def bool_statevector_closeness(state1, state2, atol=1e-2, rtol=1e-2):
     else:
         raise ValueError("Input states must be Statevector or DensityMatrix.")
 
-# F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2, insensitive to global phase differences
+# F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2, insensitive to global phase differences. Measures the closeness of overall probability distribution
 def fidelity(target_state, actual_state):
     """
     Calculates the fidelity between two quantum statevectors.  Best measure for how "close" two quantum states are
@@ -178,6 +178,13 @@ def fourier_series(x, coeffs):
 
 
 # PARAMETER GENERATION
+
+def typical_theta(num="one"):
+    theta_values = [-np.pi, -np.pi/2, -np.pi/4, 0, np.pi/4, np.pi/2, np.pi]
+    if num == "one":
+        return np.random.choice(theta_values)
+    elif num == "all":
+        return theta_values
 
 def random_theta():
     return np.random.uniform(-2*np.pi, 2*np.pi)
