@@ -1,8 +1,8 @@
-from gate_fourier_models import GateONEQFourier
-from pulse_fourier_models import PulseONEQFourier
+from src.qft_models.gate_fourier_models import GateONEQFourier
+from src.qft_models.pulse_fourier_models import PulseONEQFourier
 from utils.helpers import *
-from src.visualize.fx import *
-from coefficients import *
+from src.visuals.fx import *
+from fft.coefficients import *
 
 
 simulator = 'statevector_simulator'

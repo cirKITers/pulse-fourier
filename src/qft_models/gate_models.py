@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 import qiskit_aer
 
-from src.visualize.bloch_sphere import *
+from visuals.bloch_sphere import *
 
 def q_circuit(qubits):
     circuit = QuantumCircuit(qubits)

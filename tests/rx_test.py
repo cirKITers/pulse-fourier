@@ -1,5 +1,5 @@
 import unittest
-from src.pulse_gates import *
+from pulse.pulse_gates import *
 
 # Passed all tests
 class TestRXPulseSPEC(unittest.TestCase):

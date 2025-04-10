@@ -1,5 +1,5 @@
-import oneQ_pulse_gates as plsg
-from src.visualize.fx import plot_fx
+import pulse.oneQ_pulse_gates as plsg
+from visuals.fx import plot_fx
 from constants import *
 from utils.helpers import *
 

@@ -1,16 +1,4 @@
-import numpy as np
 import pennylane as qml
-from qiskit.quantum_info import Statevector
-
-# import numpy as np
-# from skopt import gp_minimize
-# from skopt.space import Real
-#
-# from src.utils.definitions import *
-from .pulse_gates import *
-from .utils.definitions import *
-from .utils.helpers import *
-
 
 class PennyCircuit:
 
@@ -38,52 +26,6 @@ class PennyCircuit:
             return qml.state()
 
         return general_circuit()
-
-
-num_q = 10
-c = PennyCircuit(num_q)
-
-penny_state = c.run_quick_circuit()
-prints(penny_state)
-
-_, _, current_state = H_pulseSPEC(GROUND_STATE(num_q), 1)
-prints(current_state[-1])
-
-print(statevector_similarity(penny_state, current_state[-1]))
-
-# num_q = 2
-# c = Circuit(num_q)
-#
-# PHI_PLUS_NO_CNOT = Statevector([1 / np.sqrt(2), 0, 1 / np.sqrt(2), 0])        # H(0)
-# PSI_PLUS_NO_CNOT = Statevector([0, 1 / np.sqrt(2), 0, 1 / np.sqrt(2)])        # X(1) H(0)
-# PHI_MINUS_NO_CNOT = Statevector([1 / np.sqrt(2), 0, -1 / np.sqrt(2), 0])      # H(0) Z(0)
-# PSI_MINUS_NO_CNOT = Statevector([0, 1 / np.sqrt(2), 0, -1 / np.sqrt(2)])      # X(1) H(0)
-#
-# phi_plus = c.run_quick_circuit(PHI_PLUS_NO_CNOT.data)
-# psi_plus = c.run_quick_circuit(PSI_PLUS_NO_CNOT.data)
-# phi_minus = c.run_quick_circuit(PHI_MINUS_NO_CNOT.data)
-# psi_minus = c.run_quick_circuit(PSI_MINUS_NO_CNOT.data)
-#
-#
-# print(phi_plus)
-# prints(PHI_PLUS)
-# print(np.equal(phi_plus, PHI_PLUS.data))
-# print("\n")
-#
-# print(psi_plus)
-# prints(PSI_PLUS)
-# print(np.equal(psi_plus, PSI_PLUS.data))
-# print("\n")
-#
-# print(phi_minus)
-# prints(PHI_MINUS)
-# print(np.equal(phi_minus, PHI_MINUS.data))
-# print("\n")
-#
-# print(psi_minus)
-# prints(PSI_MINUS)
-# print(np.equal(psi_minus, PSI_MINUS.data))
-# print("\n")
 
 
 # ∣Φ+⟩, H(0) CNOT(0,1)
@@ -123,6 +65,8 @@ class BellStateCircuits:
         return bell_circuits()
 
 
+# TESTING BellState Circuit Class
+
 # num_q = 2
 # bell_circuit = BellStateCircuits(num_q)
 #
@@ -148,4 +92,41 @@ class BellStateCircuits:
 # print(psi_minus)
 # # print(PSI_MINUS.data)
 # # print(np.equal(psi_minus, PSI_MINUS.data))
+# print("\n")
+
+
+# TESTING BellState circuit 2.0
+
+# num_q = 2
+# c = Circuit(num_q)
+#
+# PHI_PLUS_NO_CNOT = Statevector([1 / np.sqrt(2), 0, 1 / np.sqrt(2), 0])        # H(0)
+# PSI_PLUS_NO_CNOT = Statevector([0, 1 / np.sqrt(2), 0, 1 / np.sqrt(2)])        # X(1) H(0)
+# PHI_MINUS_NO_CNOT = Statevector([1 / np.sqrt(2), 0, -1 / np.sqrt(2), 0])      # H(0) Z(0)
+# PSI_MINUS_NO_CNOT = Statevector([0, 1 / np.sqrt(2), 0, -1 / np.sqrt(2)])      # X(1) H(0)
+#
+# phi_plus = c.run_quick_circuit(PHI_PLUS_NO_CNOT.data)
+# psi_plus = c.run_quick_circuit(PSI_PLUS_NO_CNOT.data)
+# phi_minus = c.run_quick_circuit(PHI_MINUS_NO_CNOT.data)
+# psi_minus = c.run_quick_circuit(PSI_MINUS_NO_CNOT.data)
+#
+#
+# print(phi_plus)
+# prints(PHI_PLUS)
+# print(np.equal(phi_plus, PHI_PLUS.data))
+# print("\n")
+#
+# print(psi_plus)
+# prints(PSI_PLUS)
+# print(np.equal(psi_plus, PSI_PLUS.data))
+# print("\n")
+#
+# print(phi_minus)
+# prints(PHI_MINUS)
+# print(np.equal(phi_minus, PHI_MINUS.data))
+# print("\n")
+#
+# print(psi_minus)
+# prints(PSI_MINUS)
+# print(np.equal(psi_minus, PSI_MINUS.data))
 # print("\n")

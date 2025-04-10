@@ -12,3 +12,4 @@ plotly~=6.0.0
 optax~=0.2.4
 PennyLane~=0.40.0
 joblib~=1.4.2
+qiskit-aer~=0.17.0

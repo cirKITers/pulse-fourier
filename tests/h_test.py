@@ -1,8 +1,8 @@
 import pennylane as qml
 
-from src.pulse_gates import H_pulseSPEC
-from src.utils.definitions import GROUND_STATE
-from src.utils.helpers import prints, statevector_similarity
+from pulse.pulse_gates import H_pulseSPEC
+from utils.definitions import GROUND_STATE
+from utils.helpers import prints, statevector_similarity
 
 
 class PennyCircuit:

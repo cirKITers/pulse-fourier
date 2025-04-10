@@ -1,11 +1,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.fft import fft, ifft, rfft
+from scipy.fft import fft, rfft
 from scipy.integrate import quad
 from sklearn.metrics import mean_squared_error
 
-from data.save import *
-from src.constants import *
+from utils.save import *
+
 
 # task: Analysis how derivable from gate level -> qml-essentials
 

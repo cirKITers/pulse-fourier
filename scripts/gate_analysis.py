@@ -1,7 +1,9 @@
-from coefficients import coefficient_distribution_fft
-from gate_fourier_models import GateONEQFourier
-from data.load import *
-from correlation import *
+import numpy as np
+
+from fft.coefficients import coefficient_distribution_fft
+from src.qft_models.gate_fourier_models import GateONEQFourier
+from src.utils.load import *
+from visuals.correlation import *
 
 # Current TASKS:
 # Wiedmann Fourier Trees

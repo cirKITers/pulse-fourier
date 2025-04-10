@@ -5,10 +5,10 @@ from scipy.integrate import quad
 from qiskit.circuit.library import RXGate, HGate, RZGate
 from scipy.linalg import expm  # For matrix exponentiation
 
-from src.utils.definitions import *
+from utils.definitions import *
 from utils.helpers import *
-from src.visualize.bloch_sphere import bloch_sphere_trajectory
-from src.visualize.probabilites import plot_probabilities
+from visuals.bloch_sphere import bloch_sphere_trajectory
+from visuals.probabilites import plot_probabilities
 from constants import *
 
 matplotlib.use('TkAgg')  # Force TkAgg backend

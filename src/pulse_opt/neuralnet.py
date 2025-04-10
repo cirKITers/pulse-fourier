@@ -1,6 +1,6 @@
 # import torch
 #
-# from src.pulse_gates import *
+# from pulse.pulse_gates import *
 #
 #
 # def obj_function(x, params):

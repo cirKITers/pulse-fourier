@@ -2,8 +2,8 @@ from qiskit import QuantumCircuit
 import qiskit_aer
 from qiskit.circuit import Parameter
 
-from src.visualize import fx
-from src.visualize.bloch_sphere import *
+from visuals import fx
+from visuals.bloch_sphere import *
 
 # https://quantum.ibm.com/composer/files/new
 

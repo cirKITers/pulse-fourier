@@ -2,7 +2,7 @@ import jax
 from qiskit_dynamics import Solver, Signal
 from scipy.integrate import quad
 
-from src.visualize.bloch_sphere import *
+from visuals.bloch_sphere import *
 from constants import *
 
 matplotlib.use('TkAgg')  # Force TkAgg backend

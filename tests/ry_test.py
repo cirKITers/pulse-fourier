@@ -2,8 +2,8 @@ import numpy as np
 from qiskit.quantum_info import Statevector
 import pennylane as qml
 
-from src.pulse_gates import RZ_pulseSPEC
-from src.utils.helpers import random_theta, prints, statevector_similarity
+from pulse.pulse_gates import RZ_pulseSPEC
+from utils.helpers import random_theta, prints, statevector_similarity
 
 
 # ALL PASSED, two qubit random theta

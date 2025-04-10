@@ -971,7 +971,7 @@ OLD PULSE ANALYSIS
 import math
 import numpy as np
 
-from src.pulse_gates import *
+from pulse_gates import *
 from utils.visualize import bloch_sphere
 
 from scipy.optimize import minimize
