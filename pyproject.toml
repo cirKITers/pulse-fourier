@@ -12,7 +12,7 @@ authors = [{name = "Tilmann Rothe Santos"}]
 requires-python = ">=3.8"
 dependencies = [
     "numpy~=2.0.2",
-    "qutip~=5.1.1",
+    "qutip~=5.0.4",         # "qutip~=5.1.1"
     "qiskit==1.4.2",
     "sympy~=1.13.3",
     "matplotlib~=3.9.0",       #"matplotlib~=3.10.0"
