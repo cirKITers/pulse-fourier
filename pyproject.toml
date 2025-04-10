@@ -16,7 +16,7 @@ dependencies = [
     "qiskit==1.4.2",
     "sympy~=1.13.3",
     "matplotlib~=3.9.0",       #"matplotlib~=3.10.0"
-    "scipy~=1.15.1",
+    "scipy~=1.13.1",            # "scipy~=1.15.1
     "scikit-learn~=1.6.1",
     "jax~=0.4.3",               # "jax~=0.5.0"
     "pandas~=2.2.3",
