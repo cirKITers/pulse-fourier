@@ -3,7 +3,7 @@ Evaluating Pulse Level Quantum Fourier Models (QFMs), using pulse-level paramete
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/pulse-fourier.git
+    git clone https://github.com/cirKITers/pulse-fourier.git
     cd pulse-fourier
     ```
 
