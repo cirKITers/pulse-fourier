@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/fourier-pulse-qc.iml" filepath="$PROJECT_DIR$/.idea/fourier-pulse-qc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pulse-fourier.iml" filepath="$PROJECT_DIR$/.idea/pulse-fourier.iml" />
     </modules>
   </component>
 </project>

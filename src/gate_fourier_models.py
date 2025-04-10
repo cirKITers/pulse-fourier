@@ -1,12 +1,9 @@
-import numpy as np
-import matplotlib
 from qiskit import QuantumCircuit
 import qiskit_aer
 from qiskit.circuit import Parameter
 
-from src.utils.visualize import fx
-from src.utils.helpers import *
-from src.utils.visualize.bloch_sphere import *
+from src.visualize import fx
+from src.visualize.bloch_sphere import *
 
 # https://quantum.ibm.com/composer/files/new
 

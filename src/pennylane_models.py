@@ -1,16 +1,16 @@
 import numpy as np
 import pennylane as qml
+from qiskit.quantum_info import Statevector
 
 # import numpy as np
 # from skopt import gp_minimize
 # from skopt.space import Real
 #
 # from src.utils.definitions import *
-from src.pulse_gates import *
-from src.utils.definitions import *
-from src.utils.helpers import *
+from .pulse_gates import *
+from .utils.definitions import *
+from .utils.helpers import *
 
-from qiskit.quantum_info import Statevector
 
 class PennyCircuit:
 

@@ -1,10 +1,3 @@
-import numpy as np
-from qiskit_aer import Aer
-
-from src.gate_fourier_models import *
-from src.utils.visualize.fx import *
-from src.coefficients import *
-
 from src.pulse_gates import *
 
 # FIXED PARAMS

@@ -24,12 +24,4 @@ drive_strength, final_probs, result = CNOT_Pulse(drive_strength, sigma, current_
 # fx = qm.predict_interval(x_)
 
 
-# SAVE DATA
-# data_to_save = {
-#     "model_name": qm.model_name+"("+str(parameter.shape).replace("(", "").replace(")", "").replace(" ", "")+")",
-#     "x": x_.tolist(),  #
-#     "fx": [val.tolist() if isinstance(val, np.ndarray) else val for val in fx],
-#     "parameters": parameter.tolist(),
-# }
-#
-# save_to(data_to_save, pulse_file)
+

@@ -7,8 +7,8 @@ from scipy.linalg import expm  # For matrix exponentiation
 
 from src.utils.definitions import *
 from utils.helpers import *
-from utils.visualize.bloch_sphere import bloch_sphere_trajectory
-from utils.visualize.probabilites import plot_probabilities
+from src.visualize.bloch_sphere import bloch_sphere_trajectory
+from src.visualize.probabilites import plot_probabilities
 from constants import *
 
 matplotlib.use('TkAgg')  # Force TkAgg backend

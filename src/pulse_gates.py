@@ -1,14 +1,8 @@
 import jax
-import matplotlib
 from qiskit_dynamics import Solver, Signal
 from scipy.integrate import quad
-from qiskit.circuit.library import RXGate, HGate, RZGate
-from scipy.linalg import expm
 
-from src.utils.definitions import *
-from src.utils.helpers import *
-from utils.visualize.bloch_sphere import *
-from utils.visualize.probabilites import plot_probabilities
+from src.visualize.bloch_sphere import *
 from constants import *
 
 matplotlib.use('TkAgg')  # Force TkAgg backend

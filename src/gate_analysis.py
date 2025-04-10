@@ -1,12 +1,6 @@
-import numpy as np
-from matplotlib import pyplot as plt
-
 from coefficients import coefficient_distribution_fft
 from gate_fourier_models import GateONEQFourier
-from utils.helpers import *
-from utils.visualize.fx import *
 from data.load import *
-from constants import *
 from correlation import *
 
 # Current TASKS:

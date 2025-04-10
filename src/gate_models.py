@@ -1,10 +1,7 @@
-from qiskit import QuantumCircuit, transpile, assemble
+from qiskit import QuantumCircuit
 import qiskit_aer
-from qiskit.circuit.library import HGate, RXGate
-from qiskit.quantum_info import Statevector
 
-from src.utils.helpers import prob
-from src.utils.visualize.bloch_sphere import *
+from src.visualize.bloch_sphere import *
 
 def q_circuit(qubits):
     circuit = QuantumCircuit(qubits)

@@ -1,7 +1,5 @@
-from qiskit.circuit import Parameter
-
 import oneQ_pulse_gates as plsg
-from src.utils.visualize.fx import plot_fx
+from src.visualize.fx import plot_fx
 from constants import *
 from utils.helpers import *
 
