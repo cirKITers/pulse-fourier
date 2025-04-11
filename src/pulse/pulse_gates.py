@@ -12,7 +12,7 @@ def cnot(
         current_state,
         newHds
 ):
-    _, _, current_state = H_pulseSPEC(current_state, 1)
+    _, _, current_state = H_pulseSPEC(current_state, 1, newHds)
 
     # _, _, current_state = cz_gate_solver(current_state[-1])
     # _, _, current_state = H_pulseSPEC(current_state[-1], 1)
@@ -85,7 +85,7 @@ def cz_gate_solver(
 # TODO use sparse pauli opt where possible to accelerate code
 
 
-def H_pulseSPEC(current_state, target_qubits, plot=False, bool_blochsphere=False):
+def H_pulseSPEC(current_state, target_qubits, kp, plot=False, bool_blochsphere=False):
     num_qubits = int(np.log2(current_state.dim))
 
     if target_qubits == 'all':
@@ -95,14 +95,18 @@ def H_pulseSPEC(current_state, target_qubits, plot=False, bool_blochsphere=False
     invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
     assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
 
+    # phase = pi / 2 gives PSI PLUS, - pi / 2 gives PHI MINUS
     phase = np.pi / 2
 
-    # k = 0.042780586392198006  somehow wrong phase, psi plus instead of phiplus
+    # well calibrated for drive_hamiltonian function
+    k = 0.042780586392198006
 
     H_static_single = static_hamiltonian(omega=omega)
     H_static_multi = sum_operator(H_static_single, num_qubits)
 
-    H_drive_single = drive_hamiltonian(drive_strength=k)
+    # ds = k*np.pi/2
+    H_drive_single = drive_hamiltonian2(drive_strength=k)
+
     # Construct drive Hamiltonian (applied only to target_qubits)
     if not target_qubits:  # If empty, no rotation
         H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
@@ -147,6 +151,92 @@ def H_pulseSPEC(current_state, target_qubits, plot=False, bool_blochsphere=False
     #     plot_probabilities(t_span, state_probs)
     # if bool_blochsphere:
     #     plot_bloch_sphere(result.y)
+
+    return None, None, result.y
+
+
+def RY_pulseSPEC(theta, current_state, ds, target_qubits='all', plot_prob=False, plot_blochsphere=False):
+    num_qubits = int(np.log2(current_state.dim))
+
+    if target_qubits == 'all':
+        target_qubits = list(range(num_qubits))
+    elif isinstance(target_qubits, int):
+        target_qubits = [target_qubits]
+    invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
+    assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
+
+    t_span = np.linspace(0, duration * dt_, duration + 1)
+
+    drive_strength = 0.027235035038834040234 * theta                   # 0.042780692999130815               # temporarily not high accuracy
+
+    # Construct multi-qubit static Hamiltonian (applied to all qubits)
+    H_static_single = static_hamiltonian(omega=omega)
+    H_static_multi = sum_operator(H_static_single, num_qubits)
+
+    H_drive_X_single = drive_Y_hamiltonian(drive_strength)
+    # Construct drive Hamiltonian (applied only to target_qubits)
+    if not target_qubits:  # If empty, no rotation
+        H_drive_X_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    else:
+        H_drive_X_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+        for k in target_qubits:
+            H_drive_X_multi += operator_on_qubit(H_drive_X_single, k, num_qubits)
+
+    ham_solver = Solver(
+        static_hamiltonian=H_static_multi,
+        hamiltonian_operators=[H_drive_X_multi],
+        rotating_frame=H_static_multi
+    )
+
+    def gaussian_envelope(t):
+        center = duration * dt_ / 2
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    delta = 0.05
+
+    def DRAG_gaussian_envelope(t):
+        """Gaussian envelope with DRAG correction."""
+        center = duration * dt_ / 2
+        gaussian = amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+        derivative = -amp * (t - center) / sigma ** 2 * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+        return gaussian + delta * derivative
+
+    gaussian_signal = Signal(
+        envelope=gaussian_envelope,
+        carrier_freq=omega,  # No oscillation for Z drive
+        phase=0.0
+    )
+
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=[gaussian_signal]
+    )
+
+    # Transform final state from rotating frame to lab frame
+    # t_max = t_span[-1]
+    # U_static = expm(-1j * H_static_multi * t_max)
+    # final_state_rot = result.y[-1].data
+    # final_state_lab = U_static @ final_state_rot
+    # final_state_lab = Statevector(final_state_lab)
+
+    # Compute probabilities (frame-invariant)
+    # state_probs = prob(result.y)
+    # final_probs = prob(result.y[-1])
+
+    # Compute overlap in lab frame
+    # ol = overlap(expected_state, final_state_lab)
+
+    # Optionally transform all states for plotting (lab frame)
+    # if plot_prob:
+    #     plot_probabilities
+    # if plot_blochsphere:
+    #     trajectory_lab = []
+    #     for state in result.y:
+    #         # print(f"state.data shape: {state.data.shape}")
+    #         trajectory_lab.append(Statevector(U_static @ state.data))
+    #     bloch_sphere_multiqubit_trajectory(trajectory_lab, list(range(num_qubits)), False)
 
     return None, None, result.y
 

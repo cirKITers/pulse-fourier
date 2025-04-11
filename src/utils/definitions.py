@@ -1,3 +1,5 @@
+import numpy as np
+
 from utils.helpers import *
 
 
@@ -100,10 +102,20 @@ def static_hamiltonian(omega):
     return 2 * np.pi * omega * SIGMA_Z / 2
 
 
+def drive_hamiltonian2(drive_strength):
+    # if isinstance(drive_strength, np.ndarray):
+    #     drive_strength = drive_strength[0]
+    return drive_strength/2 * SIGMA_Y
+
 def drive_hamiltonian(drive_strength):
-    if isinstance(drive_strength, np.ndarray):
-        drive_strength = drive_strength[0]
+    # if isinstance(drive_strength, np.ndarray):
+    #     drive_strength = drive_strength[0]
     return 2 * np.pi * drive_strength * SIGMA_X / 2
+
+def drive_Y_hamiltonian(drive_strength):
+    # if isinstance(drive_strength, np.ndarray):
+    #     drive_strength = drive_strength[0]
+    return 2 * np.pi * drive_strength * SIGMA_Y / 2
 
 
 # ONE QUBIT STATES

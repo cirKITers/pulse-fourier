@@ -15,7 +15,8 @@ class PennyCircuit:
             if init_state is not None:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
-            qml.Hadamard(1)
+            qml.RY(np.pi/2, 0)
+            # qml.Hadamard(1)
             # qml.CNOT(wires=[0, 1])  # big endian
             # qml.RX(np.pi/2, 0)
             # qml.RX(np.pi/2, 1)
