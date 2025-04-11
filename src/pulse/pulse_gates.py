@@ -8,6 +8,67 @@ from constants import *
 jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
+def cnot(
+        current_state,
+        newHds
+):
+    _, _, current_state = H_pulseSPEC(current_state, 1)
+
+    # _, _, current_state = cz_gate_solver(current_state[-1])
+    # _, _, current_state = H_pulseSPEC(current_state[-1], 1)
+
+    return None, None, current_state
+
+
+def cz_gate_solver(
+        current_state,
+        num_qubits=2,
+        control_qubit=0,
+        target_qubit=1,
+):
+
+    if control_qubit == target_qubit or control_qubit >= num_qubits or target_qubit >= num_qubits:
+        raise ValueError("Invalid control or target qubit indices")
+
+    # Static Hamiltonian: sum of ω * σ_z/2 for each qubit
+    H_static_single = static_hamiltonian(omega)
+    H_static_multi = sum_operator(H_static_single, num_qubits)
+
+    # Drive Hamiltonian: (π/4) * Z ⊗ Z for CZ interaction
+    H_drive_zz_single = Operator(np.kron(Z, Z))
+
+    diagonal_values = [0, 0, 0, np.pi]      # (1/4)(I ⊗ I - I ⊗ Z - Z ⊗ I + Z ⊗ Z)
+    matrix = np.diag(diagonal_values)
+
+    # H_drive_zz_multi = cs*np.pi/2*H_drive_zz_single  # Scale by drive strength
+
+    ham_solver = Solver(
+        static_hamiltonian=H_static_multi,
+        hamiltonian_operators=[matrix],
+        rotating_frame=H_static_multi
+    )
+
+    t_span = np.arange(0, duration * dt_, dt_)
+
+    def constant_envelope(t):
+        return 0.11884147603542072   # for phase = np.pi/4  (drive_strength)
+
+    signal = Signal(
+        envelope=constant_envelope,
+        carrier_freq=0.0,  # No oscillation for Z ⊗ Z drive
+        phase=np.pi/4       # TODO why does it converge much better?
+    )
+
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=[signal]
+    )
+
+    return None, None, result.y
+
+
 
 # TASK simplify drive strength but save derivation
 
@@ -20,6 +81,8 @@ jax.config.update('jax_platform_name', 'cpu')
 # TODO plot probabilities, plot entanglement, plot blochsphere in lab frame
 
 # TODO clean pulse parameter and isolate as far as possible in k, to minimize pulse parameters
+
+# TODO use sparse pauli opt where possible to accelerate code
 
 
 def H_pulseSPEC(current_state, target_qubits, plot=False, bool_blochsphere=False):
@@ -34,7 +97,7 @@ def H_pulseSPEC(current_state, target_qubits, plot=False, bool_blochsphere=False
 
     phase = np.pi / 2
 
-    k = 0.042780586392198006
+    # k = 0.042780586392198006  somehow wrong phase, psi plus instead of phiplus
 
     H_static_single = static_hamiltonian(omega=omega)
     H_static_multi = sum_operator(H_static_single, num_qubits)
@@ -45,8 +108,8 @@ def H_pulseSPEC(current_state, target_qubits, plot=False, bool_blochsphere=False
         H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
     else:
         H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
-        for k in target_qubits:
-            H_drive_multi += operator_on_qubit(H_drive_single, k, num_qubits)
+        for q in target_qubits:
+            H_drive_multi += operator_on_qubit(H_drive_single, q, num_qubits)
 
     ham_solver = Solver(
         static_hamiltonian=H_static_multi,
@@ -282,90 +345,6 @@ def RX_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plo
 
     return None, None, result.y
 
-
-def CZ_2(current_state, control_qubit, target_qubit, plot_prob=False, plot_blochsphere=False):
-
-
-    num_qubits = 2  # int(np.log2(current_state.dim))
-
-
-    t_span = np.linspace(0, duration * dt_, duration + 1)
-    t_max = t_span[-1]
-
-    # RZ:
-    # k_old = 5.524648297886591 # transpose conjugate
-    # k = 6.87777037921978  # best k, but bad
-
-    # 1. drive_strength = (theta/2 - omega/2 * t + 2 * np.pi * k) / t  # t = 12
-    # drive_strength = (theta / 2 - 5.0 / 2 * 12 + 2 * np.pi * k) / 12
-    # 2. RZdrive_strength = theta / (2 * t_max)
-
-    theta = np.pi
-    k = 0.04166666094977508
-    drive_strength = theta * k
-
-    # static
-    H_static_single = static_hamiltonian(omega=omega)
-    H_static_multi = sum_operator(H_static_single, num_qubits)
-
-    # drive
-    H_drive_Z_single = SIGMA_Z
-    if not target_qubits:
-        H_drive_Z_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
-    else:
-        H_drive_Z_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
-        for k in target_qubits:
-            H_drive_Z_multi += operator_on_qubit(H_drive_Z_single, k, num_qubits)
-
-    ham_solver = Solver(
-        static_hamiltonian=H_static_multi,
-        hamiltonian_operators=[H_drive_Z_multi],
-        rotating_frame=H_static_multi
-    )
-
-    def constant_envelope(t):
-        return drive_strength
-
-    signal = Signal(
-        envelope=constant_envelope,
-        carrier_freq=0.0,  # No oscillation for Z drive
-        phase=0.0
-    )
-
-    result = ham_solver.solve(
-        t_span=t_span,
-        y0=current_state,
-        method='jax_odeint',
-        signals=[signal]
-    )
-
-    # Transform final state from rotating frame to lab frame
-    # U_static = expm(-1j * H_static_multi * t_max)
-    # final_state_rot = result.y[-1].data
-    # final_state_lab = U_static @ final_state_rot
-    # final_state_lab = Statevector(final_state_lab)
-
-    # Compute probabilities (frame-invariant)
-    # state_probs = prob(result.y)
-    # final_probs = prob(result.y[-1])
-
-    # Compute overlap in lab frame
-    # ol = overlap(expected_state, final_state_lab)
-
-    # Optionally transform all states for plotting (lab frame)
-    # if plot_prob:
-    #     plot_probabilities
-    # print(f"initial state: {current_state}")
-    # print(f"result.y[-1]: {result.y[-1]}")
-    # print(f"U_static shape: {U_static.shape}")
-    if plot_blochsphere:
-        trajectory_lab = []
-        for state in result.y:
-            # print(f"state.data shape: {state.data.shape}")
-            trajectory_lab.append(Statevector(U_static @ state.data))
-        bloch_sphere_multiqubit_trajectory(trajectory_lab, list(range(num_qubits)), False)
-
-    return None, None, result.y
 
 
 

@@ -1,3 +1,4 @@
+import numpy as np
 import pennylane as qml
 
 class PennyCircuit:
@@ -15,14 +16,11 @@ class PennyCircuit:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
             qml.Hadamard(1)
-            # qml.Hadamard(1)
-            # qml.Hadamard(2)
             # qml.CNOT(wires=[0, 1])  # big endian
             # qml.RX(np.pi/2, 0)
             # qml.RX(np.pi/2, 1)
             # qml.CZ([0, 1])
-            # qml.RZ(theta, 0)
-            # qml.RZ(theta, 1)
+            # qml.Hadamard(1)
             return qml.state()
 
         return general_circuit()
@@ -65,7 +63,7 @@ class BellStateCircuits:
         return bell_circuits()
 
 
-# TESTING BellState Circuit Class
+# TESTING BellState Pennylane Circuit Class
 
 # num_q = 2
 # bell_circuit = BellStateCircuits(num_q)
