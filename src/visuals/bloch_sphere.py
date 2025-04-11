@@ -6,7 +6,7 @@ from qiskit.quantum_info import Statevector, Pauli
 from utils.definitions import *
 # from matplotlib import pyplot as plt
 from utils.helpers import *
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')             # 'TkAgg' normally, 'TkAgg' for cluster
 
 def bloch_sphere_multiqubit_trajectory(states, qubits_to_plot=None, laboratory_frame=False):
     """
