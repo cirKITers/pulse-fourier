@@ -5,7 +5,6 @@ from scipy.integrate import quad
 from visuals.bloch_sphere import *
 from constants import *
 
-matplotlib.use('TkAgg')  # Force TkAgg backend
 jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
