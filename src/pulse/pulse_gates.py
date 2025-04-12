@@ -8,18 +8,26 @@ from constants import *
 jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
+
+# TODO h pulse probabably needs phase correction
 def cnot(
         current_state
 ):
-    _, _, current_state = H_pulseSPEC2(current_state, 1)
 
-    _, _, current_state = cz_gate_solver(current_state[-1])
-    _, _, current_state = H_pulseSPEC2(current_state[-1], 1)
+    thetaOne = np.pi / 2
+    _, _, current_state = H_pulseSPEC(current_state, 1, thetaOne)
+
+    _, _, current_state = cz(current_state[-1])
+
+    thetaTwo = - np.pi / 2
+    _, _, current_state = H_pulseSPEC(current_state[-1], 1, thetaTwo)
+
+    _, _, current_state = cz(current_state[-1])         # for adjusting the global phase error
 
     return None, None, current_state
 
 
-def cz_gate_solver(
+def cz(
         current_state,
         num_qubits=2,
         control_qubit=0,
@@ -110,7 +118,7 @@ def H_pulseSPEC2(current_state, target_qubits, plot=False, bool_blochsphere=Fals
     return None, None, current_trajectory
 
 
-def H_pulseSPEC(current_state, target_qubits, kp, plot=False, bool_blochsphere=False):
+def H_pulseSPEC(current_state, target_qubits, phase, plot=False, bool_blochsphere=False):
     num_qubits = int(np.log2(current_state.dim))
 
     if target_qubits == 'all':
@@ -121,7 +129,7 @@ def H_pulseSPEC(current_state, target_qubits, kp, plot=False, bool_blochsphere=F
     assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
 
     # phase = pi / 2 gives PSI PLUS, - pi / 2 gives PHI MINUS
-    phase = np.pi / 2
+    phase = phase
 
     # well calibrated for drive_hamiltonian function
     k = 0.042780586392198006
@@ -130,7 +138,7 @@ def H_pulseSPEC(current_state, target_qubits, kp, plot=False, bool_blochsphere=F
     H_static_multi = sum_operator(H_static_single, num_qubits)
 
     # ds = k*np.pi/2
-    H_drive_single = drive_hamiltonian2(drive_strength=k)
+    H_drive_single = drive_hamiltonian(drive_strength=k)
 
     # Construct drive Hamiltonian (applied only to target_qubits)
     if not target_qubits:  # If empty, no rotation

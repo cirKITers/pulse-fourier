@@ -58,5 +58,5 @@ def test_cz_gate(cz_function):
 dsCZ = 0.11884149043553377
 
 # Example of how to use the test function with your CZ solver:
-test_cz_gate(lambda x: cz_gate_solver(x, dsCZ))
+test_cz_gate(lambda x: cz(x, dsCZ))
 
