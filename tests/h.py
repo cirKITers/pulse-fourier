@@ -1,6 +1,6 @@
 import pennylane as qml
 
-from pulse.pulse_gates import H_pulseSPEC
+from pulse.pulse_gates import H_pulseSPEC, H_pulseSPEC2
 from utils.definitions import GROUND_STATE
 from utils.helpers import prints, statevector_similarity
 
@@ -19,8 +19,8 @@ class PennyCircuit:
             if init_state is not None:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
+            qml.Hadamard(2)
             qml.Hadamard(1)
-            # qml.Hadamard(1)
             # qml.Hadamard(2)
             # qml.CNOT(wires=[0, 1])  # big endian
             # qml.RX(np.pi/2, 0)
@@ -33,13 +33,13 @@ class PennyCircuit:
         return general_circuit()
 
 
-num_q = 10
+num_q = 5
 c = PennyCircuit(num_q)
 
 penny_state = c.run_quick_circuit()
 prints(penny_state)
 
-_, _, current_state = H_pulseSPEC(GROUND_STATE(num_q), 1)
+_, _, current_state = H_pulseSPEC2(GROUND_STATE(num_q), [2, 1])
 prints(current_state[-1])
 
 print(statevector_similarity(penny_state, current_state[-1]))

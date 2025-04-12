@@ -18,10 +18,10 @@ prints(PHI_PLUS)
 
 print("-"*20)
 
-state = cnot(PHI_PLUS_NO_CNOT)
-prints(state)
+_, _, state = cnot(PHI_PLUS_NO_CNOT)
+prints(state[-1])
 
 print("-"*20)
 
-print(statevector_similarity(penny_state, state))
+print(statevector_similarity(penny_state, state[-1]))
 

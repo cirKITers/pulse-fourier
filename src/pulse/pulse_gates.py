@@ -9,13 +9,12 @@ jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
 def cnot(
-        current_state,
-        newHds
+        current_state
 ):
-    _, _, current_state = H_pulseSPEC(current_state, 1, newHds)
+    _, _, current_state = H_pulseSPEC2(current_state, 1)
 
-    # _, _, current_state = cz_gate_solver(current_state[-1])
-    # _, _, current_state = H_pulseSPEC(current_state[-1], 1)
+    _, _, current_state = cz_gate_solver(current_state[-1])
+    _, _, current_state = H_pulseSPEC2(current_state[-1], 1)
 
     return None, None, current_state
 
@@ -83,6 +82,32 @@ def cz_gate_solver(
 # TODO clean pulse parameter and isolate as far as possible in k, to minimize pulse parameters
 
 # TODO use sparse pauli opt where possible to accelerate code
+
+def H_pulseSPEC2(current_state, target_qubits, plot=False, bool_blochsphere=False):
+
+    _, _, current_trajectory = RY_pulseSPEC(np.pi/2, current_state, target_qubits)
+
+    _, _, current_trajectory = RX_pulseSPEC(np.pi, current_trajectory[-1], target_qubits)
+
+    _, _, current_trajectory = RX_pulseSPEC(-np.pi, current_trajectory[-1], target_qubits)
+
+    # _, _, current_trajectory = RZ_pulseSPEC(np.pi, current_trajectory[-1], target_qubits)
+
+
+    # final_probs = np.zeros(2)
+    # state_probs = prob(result.y)
+    # final_state = result.y[-1]
+    # overlap = np.abs(np.vdot(expected_state, final_state)) ** 2
+
+    # final_probs[0] = state_probs[-1, 0]
+    # final_probs[1] = state_probs[-1, 1]
+    #
+    # if plot:
+    #     plot_probabilities(t_span, state_probs)
+    # if bool_blochsphere:
+    #     plot_bloch_sphere(result.y)
+
+    return None, None, current_trajectory
 
 
 def H_pulseSPEC(current_state, target_qubits, kp, plot=False, bool_blochsphere=False):
@@ -155,7 +180,8 @@ def H_pulseSPEC(current_state, target_qubits, kp, plot=False, bool_blochsphere=F
     return None, None, result.y
 
 
-def RY_pulseSPEC(theta, current_state, ds, target_qubits='all', plot_prob=False, plot_blochsphere=False):
+# worst similarity around 0.99
+def RY_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plot_blochsphere=False):
     num_qubits = int(np.log2(current_state.dim))
 
     if target_qubits == 'all':
@@ -241,7 +267,8 @@ def RY_pulseSPEC(theta, current_state, ds, target_qubits='all', plot_prob=False,
     return None, None, result.y
 
 
-def RZ_pulseSPEC(theta, current_state, target_qubits, k, plot_prob=False, plot_blochsphere=False):
+# similarity of 1.0
+def RZ_pulseSPEC(theta, current_state, target_qubits, plot_prob=False, plot_blochsphere=False):
     """
     Implements an RZ gate (rotation around Z-axis) by angle theta on all qubits in current_state.
     Uses a constant drive Hamiltonian with Z operator, with final state transformed to lab frame.

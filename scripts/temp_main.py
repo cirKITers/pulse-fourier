@@ -5,21 +5,7 @@ from qft_models.pennylane_models import PennyCircuit
 from utils.definitions import *
 from utils.helpers import prints
 
-num_q = 2
-c = PennyCircuit(num_q)
 
-penny_state = c.run_quick_circuit(GROUND_STATE(2).data)
-prints(penny_state)
-ds = np.linspace(0.04278048312942711, 0.04278081292467579, 100)
-# ds = np.linspace(0.03, 0.05)
-
-for i in range(len(ds)):
-    _, _, states = RY_pulseSPEC(np.pi/2, GROUND_STATE(2), ds[i], 0)
-
-    sim = statevector_similarity(penny_state, states[-1])
-    print(sim, ds[i])
-    if sim > 0.999:
-        prints(states[-1])
 
 
 

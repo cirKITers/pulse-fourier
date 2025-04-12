@@ -46,7 +46,7 @@ for t in range(100):
 
         penny_state = c.run_quick_circuit(theta)
 
-        _, _, current_state = RZ_pulseSPEC(theta, Statevector([0.50000000 + 0.00000000j, 0.00000000 - 0.50000000j, 0.00000000 - 0.50000000j, -0.50000000 + 0.00000000j]), "all", k_best_negative_pi)
+        _, _, current_state = RZ_pulseSPEC(theta, Statevector([0.50000000 + 0.00000000j, 0.00000000 - 0.50000000j, 0.00000000 - 0.50000000j, -0.50000000 + 0.00000000j]), "all")
 
         sim = statevector_similarity(current_state[-1], penny_state)
         if sim > 0.99:

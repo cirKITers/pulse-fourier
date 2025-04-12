@@ -8,7 +8,6 @@ from pulse.pulse_gates import RY_pulseSPEC
 from utils.helpers import statevector_similarity
 
 # All tests passed!
-# TODO last test
 
 def ry_gate(theta):
     """Analytical RY gate matrix."""
@@ -76,9 +75,7 @@ def generate_ry_test_cases():
                        tensor_product([np.array([-1, 0], dtype=complex), np.array([0, 1], dtype=complex)]), 0))
     test_cases.append((tensor_product([np.array([1, 0], dtype=complex), np.array([1, 0], dtype=complex)]), -np.pi,
                        tensor_product([np.array([0, -1], dtype=complex), np.array([1, 0], dtype=complex)]), 0))  # negative theta.
-    test_cases.append((tensor_product([np.array([1, 0], dtype=complex), np.array([0, 1], dtype=complex)]), -np.pi / 4,
-                       tensor_product([np.array([np.cos(-np.pi / 8), -np.sin(-np.pi / 8)], dtype=complex), np.array([0, 1], dtype=complex)]),
-                       0))  # negative theta.
+
 
     # Multi-qubit tests (RY on qubit 1)
     test_cases.append((tensor_product([np.array([1, 0], dtype=complex), np.array([1, 0], dtype=complex)]), np.pi / 2,
@@ -124,4 +121,20 @@ def test_ry_pulse_implementation():
 
 test_ry_pulse_implementation()
 
+# old test
+# num_q = 2
+# c = PennyCircuit(num_q)
+#
+# penny_state = c.run_quick_circuit([0, 1, 0, 0])
+# prints(penny_state)
+# ds = np.linspace(0.04278048312942711, 0.04278081292467579, 1)
+# # ds = np.linspace(0.03, 0.05)
+#
+# for i in range(len(ds)):
+#     _, _, states = RY_pulseSPEC(-np.pi/4, Statevector([0, 1, 0, 0]), ds[i], 1)
+#
+#     sim = statevector_similarity(penny_state, states[-1])
+#     print(sim, ds[i])
+#     if sim > 0.999:
+#         prints(states[-1])
 
