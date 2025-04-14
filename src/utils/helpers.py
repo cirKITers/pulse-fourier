@@ -69,6 +69,19 @@ def round_statevector(statevector, tolerance=1e-3):
 
     return Statevector(rounded_data)
 
+
+def probability_similarity(statevector1, statevector2, tolerance=1e-6):
+    """Calculates the similarity of probability distributions."""
+    probs1 = prob(statevector1)
+    probs2 = prob(statevector2)
+
+    if len(probs1) != len(probs2):
+        raise ValueError("state vectors must have the same dimension")
+
+    close_values = np.isclose(probs1, probs2, atol=tolerance)
+    return np.sum(close_values) / len(probs1)
+
+
 def statevector_similarity(target_state, actual_state, tolerance=1e-6, scaling="linear"):
     """
     Calculates the component-wise similarity between two quantum statevectors,
@@ -134,19 +147,25 @@ def bool_statevector_closeness(state1, state2, atol=1e-2, rtol=1e-2):
         raise ValueError("Input states must be Statevector or DensityMatrix.")
 
 # F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2, insensitive to global phase differences. Measures the closeness of overall probability distribution
-def fidelity(target_state, actual_state):
+def statevector_fidelity(target_state, actual_state):
     """
-    Calculates the fidelity between two quantum statevectors.  Best measure for how "close" two quantum states are
+    Calculates the fidelity between two normalized quantum statevectors.
 
     Args:
-        target_state (numpy.ndarray): The expected statevector.
-        actual_state (numpy.ndarray): The resulting statevector.
+        target_state (numpy.ndarray): The expected normalized statevector.
+        actual_state (numpy.ndarray): The resulting normalized statevector.
 
     Returns:
-        float: The fidelity between the two statevectors. 0 no fidelity, 1 same vector
+        float: The fidelity between the two statevectors. 0 no fidelity, 1 same vector.
     """
     if len(target_state) != len(actual_state):
         raise ValueError("Statevectors must have the same dimension.")
+
+    target_norm = np.linalg.norm(target_state)
+    actual_norm = np.linalg.norm(actual_state)
+
+    if not np.isclose(target_norm, 1.0) or not np.isclose(actual_norm, 1.0):
+      raise ValueError("Statevectors must be normalized.")
 
     inner_product = np.dot(np.conjugate(target_state), actual_state)
     return np.abs(inner_product)**2
@@ -178,6 +197,11 @@ def fourier_series(x, coeffs):
 
 
 # PARAMETER GENERATION
+
+def typical_phases():
+    start = -2*np.pi
+    stop = 2*np.pi
+    return np.arange(start, stop + np.pi / 4, np.pi / 4)
 
 def typical_theta(num="one"):
     theta_values = [-np.pi, -np.pi/2, -np.pi/4, 0, np.pi/4, np.pi/2, np.pi]

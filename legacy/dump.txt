@@ -1,4 +1,147 @@
 
+
+#########################
+
+old structure
+
+1. Quantum Fourier Models
+    Definition, explanation, (and examples)
+    Are most quantum models essentially Quantum Fourier Models?
+    Applications and usage
+
+
+
+
+2. Gate-Level Architectures
+    Abstract perspective, independence of hardware 01/015
+    Frameworks like Qiskit, Pennylane
+        Big-Endian "Qubits in der Reihenfolge ihrer Indizes gelesen" (pennylane) vs Little-Endian convention (Qiskit) [https://quantumcomputing.stackexchange.com/questions/24401/qiskit-cnot-matrix-representation-confusion] [https://quantumcomputing.stackexchange.com/questions/18630/qiskit-cnot-gate-matrix-mixup]
+    Online circuit editors, like https://algassert.com/quirk, IBM Quantum Composer
+    Universal quantum gate sets
+    Multi Qubit systems
+        Entanglement: Bell state, EPR
+        While you can always take the tensor product of two single-qubit states to form a two-qubit state, not all two-qubit quantum states can be written as the tensor product of two single-qubit states (https://learn.microsoft.com/en-us/azure/quantum/concepts-multiple-qubits)
+
+
+
+
+3. Pulse-Level Architectures
+    Advantages (e.g., greater control, mitigate noise?, custom gates)
+    fundamentally "only way" to use quantum hardware
+    Pulse level optimizations help mitigating the noise
+
+
+    Types of pulse-level architectures and their mechanisms:
+
+        mention typical architectures, which companies use what, tendencies, historical
+
+        GENERAL
+        explain pulse level gates in general "aka digital quantum gates"
+
+        "In practical realization, single-qubit quantum gates are usually easy to implement and have high fidelities [3]. The multi-qubit quantum gates involve the interaction of multiple qubits, thus are much more difficult to implement, and have become one of the important indicators of whether quantum error correction can be achieved" (https://arxiv.org/pdf/2202.06616)
+
+
+
+        then focus superconducting qubits
+        FOCUS superconducting qubits
+
+        THEORETICAL / (ANALYTICAL - MATH)
+
+            - find a Hamiltonian whose time evolution matches this unitary operator
+
+            - https://www.rohde-schwarz.com/sg/about/magazine/how-to-control-a-qubit_256450.html#:~:text=Controlling%20quantum%20states%20with%20microwave,controlled%20with%20external%20microwave%20signals.
+
+            - "Superconducting qubits are quantum bits implemented using superconducting electrical circuits cooled to extremely low temperatures. They behave as artificial atoms with quantized energy levels: the two lowest energy states (ground and first excited state) serve as the qubit’s 0 and 1 states. These circuits often consist of an inductor and capacitor (an LC oscillator) made from superconducting materials (like aluminum, niobium, or tantalum) connected by a Josephson junction – a non-linear element that introduces anharmonicity." (https://postquantum.com/quantum-architecture/superconducting-qubits/)
+
+            - types (https://postquantum.com/quantum-architecture/superconducting-qubits/)
+            - nonlinear oscillators (?)
+            - The two lowest energy levels are used to represent the qubit's |0⟩ and |1⟩ states.
+                The frequency difference between these two levels is called the qubit's transition frequency.
+
+
+
+            MICROWAVE
+            - microwave: electromagnetic radiation with frequencies in the gigahertz range,  microwave pulses do interact with the electrical properties of the superconducting circuit
+
+            single qubit
+            - When a microwave pulse with a frequency matching the qubit's transition frequency is applied, it can induce transitions between the |0⟩ and |1⟩ states. This is a resonance phenomenon.
+            The microwave field induces oscillations in the circuit, which effectively transfer energy between the qubit's energy levels. This energy transfer is what causes the transitions between the |0⟩ and |1⟩ states, changing the qubit's state
+
+            - talk parameters:
+                - duration
+                - drive strength: faster transition
+                - pulse frequency (omega) needs to be near transition frequency (?)
+
+
+            two/multi qubit
+            - Tunable couplers (changes strength of the interaction between qubits)
+
+
+        IMPLEMENTATION / (NUMERICAL - EXPERIMENTAL)
+
+            How to generally implement, then mine  (or in the same chapter)
+
+            GENERAL
+                Mention typical frameworks / libraries
+                    - Qiskit Dynamics, JAX for ODE integration
+                    - Qiskit dynamics vs qutip: https://www.reddit.com/r/QuantumComputing/comments/r5shhv/introducing_qiskit_dynamics_a_new_qiskit_module/
+                    - Qutip: https://qutip.org/docs/4.7/guide/qip/qip-processor.html
+
+                Signal, Solver (blackbox)
+                Static hamiltonian(omega) (as rotating frame as well), drive hamiltonian (drive strength)  [Mention as principles also in theoretical already]
+
+                how to approximate/tune/optimize parameter:
+                    Literature:
+                    - RL (https://www.uni-augsburg.de/de/fakultaet/mntf/physik/groups/theo3/news/testartikel/)
+                    - Neural Networks probably not since solve from qiskit dynamics not differentiable (reafirm)
+                    -...
+
+                    LOSS function:
+                    fidelity: insensitive to global/relative (or/and?) phase differences
+                    similarity function [find literature for that]
+
+            "MINE"
+
+            single-qubit gates
+                - Hadamard
+                - RX, RZ: different envelopes
+
+            multi-qubits gates
+
+                - CNOT: cross resonance (driving the control qubit at the target qubit's frequency, leads to a conditional rotation of the target qubit based on the state of the control qubit)
+                - CZ: https://arxiv.org/abs/2202.06616
+
+            Approaches used:
+                Bloch sphere representation for single qubit gates
+
+            How optimized and outlook on how to improve
+
+
+            What algorithms can be made with them - Back to Fourier models
+
+
+
+4. Coefficient Computation
+    Fast Fourier Transform (FFT)
+    (QML essentials, if used in the end)
+    Wiedman Fourier Trees
+
+
+
+5. Effect of Pulse-Level parameter on Fourier series (and like that on its coefficients)
+
+
+
+6. Experiments / Results  ( or split in each chapter subchapter results)
+
+    6.1 Pulse-Level Implementation
+        Works with minor deviations (e-3)
+        Same function values and periods as gate level implementation
+        Figures
+
+    6.2 Gate-Level Parameters - Coefficient Correlation, Figures
+
+    6.3 Effect of Pulse-Level Constant Parameters on Coefficients
   ###########################################
     CZ parameter"""
 

@@ -5,7 +5,62 @@ from qft_models.pennylane_models import PennyCircuit
 from utils.definitions import *
 from utils.helpers import prints
 
+num_q = 2
+c = PennyCircuit(num_q)
 
+init = EXCITED_STATE(num_q)
+
+penny_state = c.run_quick_circuit(init.data)
+prints(penny_state)
+
+# bloch_sphere_trajectory([Statevector(penny_state)])
+
+
+_, _, state = H_pulseSPEC(init, 0, -np.pi/2)
+
+prints(state[-1])
+
+sim = statevector_similarity(penny_state, state[-1])
+print(sim)
+
+
+#
+# tries = 1
+# ds = np.linspace(0.01, 0.5, tries)
+# ds2 = np.random.uniform(0.01, 0.5, tries)
+#
+#
+# for i in range(tries):
+#     _, _, traj = H_pulseSPEC2(GROUND_STATE(1), 0, ds2[i], ds[i])
+#
+#     sim = statevector_similarity(penny_state, traj[-1])
+
+    # print(i, sim, ds[i], ds2[i])
+
+    # if sim > 0.9:
+    #     # bloch_sphere_trajectory(traj)
+    #     prints(traj[-1])
+    #     print(sim)
+
+
+# num_q = 2
+# c = PennyCircuit(num_q)
+#
+# penny_state = c.run_quick_circuit(PSI_MINUS_NO_CNOT.data)
+# prints(penny_state)
+#
+#
+# print("-"*20)
+# prints(PSI_MINUS)
+#
+# print("-"*20)
+#
+# _, _, state = cnot(PSI_MINUS_NO_CNOT)
+# prints(state[-1])
+#
+# print("-"*20)
+#
+# print(statevector_similarity(penny_state, state[-1]))
 
 
 

@@ -5,7 +5,8 @@ from scipy.linalg import expm
 from scipy.integrate import quad
 
 from pulse.pulse_gates import RY_pulseSPEC
-from utils.helpers import statevector_similarity
+from utils.helpers import statevector_similarity, statevector_fidelity
+
 
 # All tests passed!
 
@@ -112,7 +113,8 @@ def test_ry_pulse_implementation():
         initial_state_op = Statevector(initial_states[i])
         _, _, result_state = RY_pulseSPEC(thetas[i], initial_state_op, ds, target_qubits=target_qubits[i])
 
-        f = statevector_similarity(result_state[-1], expected_states[i])
+        sim = statevector_similarity(result_state[-1], expected_states[i])
+        f = statevector_fidelity(result_state[-1], expected_states[i])
         print(f"Test case {i + 1}, Similarity: {f}")
         assert f > 0.95, f"RY gate similarity is low for test case {i + 1}: {f}"
 

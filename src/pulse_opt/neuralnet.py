@@ -1,6 +1,11 @@
 # import torch
 #
 # from pulse.pulse_gates import *
+
+
+# When using with JAX Qiskit dynamics is fully differentable "... Furthermore, we have ensured that at every stage, a user can choose to use the JAX Python
+# library for numerical computing to represent and solve models, making Qiskit Dynamics code automatically differentiable, just-in-time compilable,
+# and executable on GPUs." - Abby Mitchell
 #
 #
 # def obj_function(x, params):

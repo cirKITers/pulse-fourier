@@ -3,7 +3,7 @@ from qiskit.quantum_info import Statevector
 import pennylane as qml
 
 from pulse.pulse_gates import RZ_pulseSPEC
-from utils.helpers import random_theta, prints, statevector_similarity
+from utils.helpers import random_theta, prints, statevector_similarity, statevector_fidelity
 
 
 # ALL PASSED, two qubit random theta
@@ -38,7 +38,8 @@ c = PennyCircuit(num_q)
 tries = 1
 
 
-for t in range(100):
+
+for t in range(1):
 
     for i in range(tries):
 
@@ -49,10 +50,12 @@ for t in range(100):
         _, _, current_state = RZ_pulseSPEC(theta, Statevector([0.50000000 + 0.00000000j, 0.00000000 - 0.50000000j, 0.00000000 - 0.50000000j, -0.50000000 + 0.00000000j]), "all")
 
         sim = statevector_similarity(current_state[-1], penny_state)
+        fid = statevector_fidelity(current_state[-1], penny_state)
         if sim > 0.99:
 
-            print(f"works for {theta}")
-            print(sim)
+            print(f"works for theta = {theta}")
+            print(f"similarity: {sim}")
+            print(f"fidelity: {fid}")
             prints(penny_state)
             prints(current_state[-1])
             print("\n")

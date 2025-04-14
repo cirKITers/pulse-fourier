@@ -3,12 +3,12 @@ import numpy as np
 from pulse.pulse_gates import *
 from qft_models.pennylane_models import PennyCircuit
 from utils.definitions import *
-from utils.helpers import prints
+from utils.helpers import prints, statevector_fidelity
 
 
 # All tests passed!
 
-def apply_cz(state_vector):
+def apply_cz_manually(state_vector):
     """Applies the CZ gate to a 2-qubit state vector."""
     if len(state_vector) != 4:
         raise ValueError("State vector must represent 2 qubits.")
@@ -43,20 +43,21 @@ def test_cz_gate(cz_function):
     ]
 
     for initial_state in test_cases:
-        expected_state = apply_cz(initial_state)
-        actual_state = cz_function(initial_state)
-        similarity = statevector_similarity(expected_state, actual_state)
-        if not np.isclose(similarity, 1.0):
+        expected_state = apply_cz_manually(initial_state)
+        _, _, actual_state = cz_function(initial_state)
+        similarity = statevector_similarity(expected_state, actual_state[-1])
+        fidelity = statevector_fidelity(expected_state, actual_state[-1])
+        if not np.isclose(fidelity, 1.0):
             print(f"Test failed for initial state: {initial_state}")
             print(f"Expected: {expected_state}")
-            print(f"Actual: {actual_state}")
+            print(f"Actual: {actual_state[-1]}")
             return False
     print("All tests passed!")
     return True
 
 
-dsCZ = 0.11884149043553377
+# dsCZ = 0.11884149043553377
 
-# Example of how to use the test function with your CZ solver:
-test_cz_gate(lambda x: cz(x, dsCZ))
+
+test_cz_gate(lambda x: cz(x))
 

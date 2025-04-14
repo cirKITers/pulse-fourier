@@ -9,6 +9,7 @@ from utils.save import *
 
 # task: Analysis how derivable from gate level -> qml-essentials
 
+# probably faster to compute f in the coefficients function
 def fourier_coefficients_fft(x, f_x, num_coeff=10, complex_valued_fx=False):
     f_x = f_x - np.mean(f_x)
     N = len(f_x)
@@ -22,6 +23,7 @@ def fourier_coefficients_fft(x, f_x, num_coeff=10, complex_valued_fx=False):
     c_n = c_n[:num_coeff]  # complex coefficients
 
     # trigonometric form
+    # TODO verify
     a_n = 2 * np.real(c_n)  # describes cosinus part
     b_n = -2 * np.imag(c_n)  # describes sinus part
     a_n[0] = a_n[0] / 2

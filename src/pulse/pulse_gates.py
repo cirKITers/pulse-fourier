@@ -5,24 +5,59 @@ from scipy.integrate import quad
 from visuals.bloch_sphere import *
 from constants import *
 
+import matplotlib
+matplotlib.use('TkAgg')  # Force TkAgg backend
+import matplotlib.pyplot as plt #import after setting backend
+
 jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
+# TODO plot the pulses themselves
 
-# TODO h pulse probabably needs phase correction
-def cnot(
-        current_state
+
+# TODO h pulse probably needs phase correction and higher accuracy
+
+# TODO pre calc common values like np.pi /2 for comp acceleration
+
+
+# not working after opt phases
+
+def cnot2(
+        current_state,
+        ryp,
+        rxp,
 ):
+    ryp = ryp
+    rxp = rxp
 
-    thetaOne = np.pi / 2
-    _, _, current_state = H_pulseSPEC(current_state, 1, thetaOne)
+    _, _, current_state = H_pulseSPEC2(current_state, 1, ryp, rxp)
 
     _, _, current_state = cz(current_state[-1])
 
-    thetaTwo = - np.pi / 2
+    _, _, current_state = H_pulseSPEC2(current_state[-1], 1, ryp, rxp)
+
+    # _, _, current_state = cz(current_state[-1])         # for adjusting the global phase error
+
+    return None, None, current_state
+
+
+# works for [0, 1] and [1, 0] but hadamard1 problem in phase
+# second hadamard phase = pi / 2 gives PSI PLUS, - pi / 2 gives PHI MINUS
+# find one phase that works always, already tried?
+def cnot(
+        current_state,
+        phase
+):
+
+    thetaOne = phase   # np.pi / 2
+    # _, _, current_state = H_pulseSPEC(current_state, 1, thetaOne)
+
+    _, _, current_state = cz(current_state)
+
+    thetaTwo = phase   # - np.pi / 2
     _, _, current_state = H_pulseSPEC(current_state[-1], 1, thetaTwo)
 
-    _, _, current_state = cz(current_state[-1])         # for adjusting the global phase error
+    # _, _, current_state = cz(current_state[-1])         # for adjusting the global phase error
 
     return None, None, current_state
 
@@ -76,10 +111,109 @@ def cz(
     return None, None, result.y
 
 
+def H_pulseSPEC3(current_state, target_qubits, k1, k2, plot=False, bool_blochsphere=False):
+    # num_qubits = int(np.log2(current_state.dim))
 
-# TASK simplify drive strength but save derivation
+    # if target_qubits == 'all':
+    #     target_qubits = list(range(num_qubits))
+    # elif isinstance(target_qubits, int):
+    #     target_qubits = [target_qubits]
+    # invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
+    # assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
 
-# Decoherence accounting (?)
+    # phase = pi / 2 gives PSI PLUS, - pi / 2 gives PHI MINUS
+    phase = 0.0
+
+    # well calibrated for drive_hamiltonian function
+    # k = 0.042780586392198006
+
+    H_static_single = static_hamiltonian(omega=omega)
+    # H_static_multi = sum_operator(H_static_single, num_qubits)
+
+    # # ds = k*np.pi/2
+    # H_drive_single = drive_hamiltonian(drive_strength=k)
+    #
+    # # Construct drive Hamiltonian (applied only to target_qubits)
+    # if not target_qubits:  # If empty, no rotation
+    #     H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    # else:
+    #     H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    #     for q in target_qubits:
+    #         H_drive_multi += operator_on_qubit(H_drive_single, q, num_qubits)
+
+    # matrix = (1 / np.sqrt(2)) * (k1*X + k2*Z)
+
+    theta = np.pi
+    t_span = np.linspace(0, duration * dt_, duration + 1)  # Tells solver when to check the qubits state
+
+    # RX:
+    def envelope(t):
+        center = duration * dt_ / 2
+        return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    integral, _ = quad(envelope, t_span[0], t_span[-1])
+    # Calculate drive_strength
+    strength_scale = 0.3183109217857033
+    drive_strength = theta / integral
+    drive_strength = drive_strength * strength_scale
+    kx = drive_strength
+
+
+    # RZ
+    k = 0.04166666094977508
+    drive_strength = theta * k
+    kz = drive_strength
+
+    X_part = drive_hamiltonian(kx)
+    Z_part = SIGMA_Z
+
+    ham_solver = Solver(
+        static_hamiltonian=H_static_single,
+        hamiltonian_operators=[X_part, Z_part],
+        rotating_frame=H_static_single
+    )
+
+    def gaussian_envelope(t):
+        center = duration * dt_ / 2
+        return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+
+    def constant_envelope(t):
+        return kz
+
+    gaussian_signal = Signal(
+        envelope=gaussian_envelope,
+        carrier_freq=omega,
+        phase=phase
+    )
+
+    constant_signal = Signal(
+        envelope=constant_envelope,
+        carrier_freq=omega,
+        phase=phase
+    )
+
+    result = ham_solver.solve(
+        t_span=t_span,
+        y0=current_state,
+        method='jax_odeint',
+        signals=[gaussian_signal, constant_signal]
+    )
+
+    # final_probs = np.zeros(2)
+    # state_probs = prob(result.y)
+    # final_state = result.y[-1]
+    # overlap = np.abs(np.vdot(expected_state, final_state)) ** 2
+
+    # final_probs[0] = state_probs[-1, 0]
+    # final_probs[1] = state_probs[-1, 1]
+    #
+    # if plot:
+    #     plot_probabilities(t_span, state_probs)
+    # if bool_blochsphere:
+    #     plot_bloch_sphere(result.y)
+
+    return None, None, result.y
+
 
 # TODO: At the end: build pulse machine as class with stored current_state, num_qubits etc; bundle calculation in init
 
@@ -91,16 +225,17 @@ def cz(
 
 # TODO use sparse pauli opt where possible to accelerate code
 
-def H_pulseSPEC2(current_state, target_qubits, plot=False, bool_blochsphere=False):
+def H_pulseSPEC2(current_state, target_qubits, ryp, rxp, plot=False, bool_blochsphere=False):
+    rx_phase = rxp
 
-    _, _, current_trajectory = RY_pulseSPEC(np.pi/2, current_state, target_qubits)
+    _, _, current_trajectory = RX_pulseSPEC(np.pi, current_state, rx_phase, target_qubits)
 
-    _, _, current_trajectory = RX_pulseSPEC(np.pi, current_trajectory[-1], target_qubits)
+    ry_phase = ryp
+    _, _, current_trajectory = RY_pulseSPEC(np.pi/2, current_trajectory[-1], ry_phase, target_qubits)
 
-    _, _, current_trajectory = RX_pulseSPEC(-np.pi, current_trajectory[-1], target_qubits)
+    _, _, current_trajectory = RX_pulseSPEC(-np.pi, current_trajectory[-1], rx_phase, target_qubits)
 
     # _, _, current_trajectory = RZ_pulseSPEC(np.pi, current_trajectory[-1], target_qubits)
-
 
     # final_probs = np.zeros(2)
     # state_probs = prob(result.y)
@@ -185,11 +320,13 @@ def H_pulseSPEC(current_state, target_qubits, phase, plot=False, bool_blochspher
     # if bool_blochsphere:
     #     plot_bloch_sphere(result.y)
 
-    return None, None, result.y
+    _, _, result = RZ_pulseSPEC(np.pi, result.y[-1], target_qubits)
+
+    return None, None, result
 
 
 # worst similarity around 0.99
-def RY_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plot_blochsphere=False):
+def RY_pulseSPEC(theta, current_state, temp_p, target_qubits='all', plot_prob=False, plot_blochsphere=False):
     num_qubits = int(np.log2(current_state.dim))
 
     if target_qubits == 'all':
@@ -238,7 +375,7 @@ def RY_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plo
     gaussian_signal = Signal(
         envelope=gaussian_envelope,
         carrier_freq=omega,  # No oscillation for Z drive
-        phase=0.0
+        phase=temp_p        # 0.0
     )
 
     result = ham_solver.solve(
@@ -333,6 +470,11 @@ def RZ_pulseSPEC(theta, current_state, target_qubits, plot_prob=False, plot_bloc
         phase=0.0
     )
 
+    # print("drawing...")
+    # # T = duration * dt_
+    # signal.draw(t0=0, tf=duration * dt_, n=100)
+    # plt.show()
+
     result = ham_solver.solve(
         t_span=t_span,
         y0=current_state,
@@ -368,8 +510,8 @@ def RZ_pulseSPEC(theta, current_state, target_qubits, plot_prob=False, plot_bloc
 
     return None, None, result.y
 
-
-def RX_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plot_blochsphere=False):
+# works duration independent!
+def RX_pulseSPEC(theta, current_state, temp_p, target_qubits='all', plot_prob=False, plot_blochsphere=False):
     """
     Implements an RX gate (rotation around X-axis) by angle theta on specified qubits in current_state.
     Uses a constant drive Hamiltonian with X operator on target qubits
@@ -434,8 +576,13 @@ def RX_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plo
     gaussian_signal = Signal(
         envelope=gaussian_envelope,
         carrier_freq=omega,  # No oscillation for Z drive
-        phase=0.0
+        phase=temp_p,    # 0.0
     )
+
+    # print("drawing...")
+    # # T = duration * dt_
+    # gaussian_signal.draw(t0=0, tf=duration * dt_, n=1000, function="signal")
+    # plt.show()
 
     result = ham_solver.solve(
         t_span=t_span,
@@ -467,6 +614,12 @@ def RX_pulseSPEC(theta, current_state, target_qubits='all', plot_prob=False, plo
     #         # print(f"state.data shape: {state.data.shape}")
     #         trajectory_lab.append(Statevector(U_static @ state.data))
     #     bloch_sphere_multiqubit_trajectory(trajectory_lab, list(range(num_qubits)), False)
+
+    # pop = [np.abs(y.data[0]) ** 2 for y in result.y]
+    # start = 50
+    # stop = 58
+    # plt.plot(t_span[start:stop], pop[start:stop])
+    # plt.show()
 
     return None, None, result.y
 
