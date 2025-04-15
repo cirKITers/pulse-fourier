@@ -81,6 +81,8 @@ X = np.array([[0, 1], [1, 0]], dtype=complex)
 Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
 Z = np.array([[1, 0], [0, -1]], dtype=complex)
 MINUS = np.array([[0, 0], [1, 0]], dtype=complex)
+ZERO = np.array([[0, 0], [0, 0]], dtype=complex)
+COND_PI = np.array([[0, 0], [0, np.pi]], dtype=complex)
 CNOT_MATRIX = jnp.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]], dtype=complex)
 
 # Pauli Operators

@@ -56,35 +56,45 @@ def generate_tests(num_tests):
     return test_cases
 
 def test_gate(gate_name):
-    num_tests = 20
-    test_cases = generate_tests(num_tests)
 
-    print(f"Testing gate: {gate_name}")
+    test_cases = generate_tests(20)
+    sequence_repetitions = 3
 
     for i, (num_qubits, target_qubits) in enumerate(test_cases):
+
         print(f"Test Case {i + 1}:")
         print(f"  Number of qubits (n): {num_qubits}")
-        print(f"  Target qubits: {target_qubits}")
+        print(f"  Target qubits: {target_qubits} \n")
 
         c = PennyCircuit(num_qubits)
-
         for init_function in possible_init_states:
             init = init_function(num_qubits)
 
             penny_state = c.run_quick_circuit(target_q=target_qubits, init_state=init.data)
+            for _ in range(sequence_repetitions):
+                penny_state = c.run_quick_circuit(target_q=[0], init_state=penny_state)
+
             prints(penny_state)
 
             _, _, current_state = H_pulseSPEC(init, target_qubits, -np.pi / 2, True)
 
+            for _ in range(sequence_repetitions):
+                _, _, current_state = H_pulseSPEC(current_state[-1], [0], -np.pi / 2, True)
+
+            # _, _, no_correction = H_pulseSPEC(init, target_qubits, -np.pi / 2, False)
+            # prints(no_correction[-1])
+
             result_state = current_state[-1]
             prints(result_state)
+
+            # manual_correction = global_phase_correction * current_state[-1].data
+            # prints(manual_correction)
+            # print("-")
 
             sim = statevector_similarity(penny_state, result_state)
             fid = statevector_fidelity(penny_state, result_state)
             print(f"sim = {sim}, fid = {fid}")
             print(20 * "-", "\n")
-
-        print("-" * 20)
 
 
 # def repeat_circuit(circuit_runner_func, initial_state, target_qubits, repetitions, *args, **kwargs):

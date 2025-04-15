@@ -12,7 +12,7 @@ class PennyCircuit:
 
         self.num_qubits = num_qubits
 
-    def run_quick_circuit(self, init_state=None):
+    def run_quick_circuit(self, wires, init_state=None):
         dev = qml.device('default.qubit', wires=self.num_qubits)
 
         @qml.qnode(dev)
@@ -20,11 +20,10 @@ class PennyCircuit:
             if init_state is not None:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
-            qml.Hadamard(1)
-            # qml.CNOT(wires=[0, 1])  # big endian
-
-            qml.CZ([0, 1])
-            qml.Hadamard(1)
+            # qml.Hadamard(1)
+            # qml.CZ([0, 1])
+            # qml.Hadamard(1)
+            qml.CNOT(wires=wires)  # big endian
 
             return qml.state()
 
@@ -32,9 +31,14 @@ class PennyCircuit:
 
 
 num_q = 2
-c = PennyCircuit(num_q)
+init = PHI_PLUS_NO_CNOT
 
-penny_state = c.run_quick_circuit(PSI_MINUS_NO_CNOT.data)
+# PASSED TEST FOR ALL BELL STATES
+BELL_STATE_NO_CNOT = PSI_PLUS_NO_CNOT
+wires = [0, 1]
+
+c = PennyCircuit(num_q)
+penny_state = c.run_quick_circuit(wires, init.data)
 prints(penny_state)
 
 
@@ -42,7 +46,7 @@ print("-"*20)
 # prints(PSI_MINUS)
 
 
-_, _, states = cnot(PSI_MINUS_NO_CNOT, -np.pi / 2)
+_, _, states = cnot(init, wires)
 
 final_state = states[-1]
 
@@ -50,7 +54,6 @@ prints(final_state)
 sim = statevector_similarity(penny_state, final_state)
 fid = statevector_fidelity(penny_state, final_state)
 print(f"sim = {sim}, fid = {fid}")
-
 
 
 # ps = typical_phases()

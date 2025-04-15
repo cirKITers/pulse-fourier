@@ -46,28 +46,25 @@ def cnot2(
 # find one phase that works always, already tried?
 def cnot(
         current_state,
-        phase
+        wires
 ):
+    _, _, current_state = H_pulseSPEC(current_state, [wires[1]])
 
-    thetaOne = phase   # np.pi / 2
-    _, _, current_state = H_pulseSPEC(current_state, [1], thetaOne)
+    _, _, current_state = cz(current_state[-1], wires)
 
-    _, _, current_state = cz(current_state[-1])
-
-    thetaTwo = phase   # - np.pi / 2
-    _, _, current_state = H_pulseSPEC(current_state[-1], [1], thetaTwo)
-
-    # _, _, current_state = cz(current_state[-1])         # for adjusting the global phase error
+    _, _, current_state = H_pulseSPEC(current_state[-1], [wires[1]])
 
     return None, None, current_state
 
 
 def cz(
         current_state,
-        num_qubits=2,
-        control_qubit=0,
-        target_qubit=1,
+        wires
 ):
+    num_qubits = int(np.log2(current_state.dim))
+
+    control_qubit = wires[0]
+    target_qubit = wires[1]
 
     if control_qubit == target_qubit or control_qubit >= num_qubits or target_qubit >= num_qubits:
         raise ValueError("Invalid control or target qubit indices")
@@ -76,17 +73,28 @@ def cz(
     H_static_single = static_hamiltonian(omega)
     H_static_multi = sum_operator(H_static_single, num_qubits)
 
-    # Drive Hamiltonian: (π/4) * Z ⊗ Z for CZ interaction
-    H_drive_zz_single = Operator(np.kron(Z, Z))
-
-    diagonal_values = [0, 0, 0, np.pi]      # (1/4)(I ⊗ I - I ⊗ Z - Z ⊗ I + Z ⊗ Z)
+    # (1/4)(I ⊗ I - I ⊗ Z - Z ⊗ I + Z ⊗ Z)
+    diagonal_values = [0, 0, 0, np.pi]
     matrix = np.diag(diagonal_values)
 
-    # H_drive_zz_multi = cs*np.pi/2*H_drive_zz_single  # Scale by drive strength
+    control_drive = ZERO
+    target_drive = COND_PI
+
+    H_drive = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+
+    for q in range(num_qubits):
+        if q == control_qubit:
+            H_drive += operator_on_qubit(control_drive, q, num_qubits)
+        elif q == target_qubit:
+            H_drive += operator_on_qubit(target_drive, q, num_qubits)
+        else:
+            H_drive += operator_on_qubit(I, q, num_qubits)
+
+    print(H_drive)
 
     ham_solver = Solver(
         static_hamiltonian=H_static_multi,
-        hamiltonian_operators=[matrix],
+        hamiltonian_operators=[H_drive],
         rotating_frame=H_static_multi
     )
 
@@ -243,7 +251,7 @@ def H_pulseSPEC2(current_state, target_qubits, ryp, rxp, plot=False, bool_blochs
 
 # TODO mix X and Z rotation and plot, probably acceleration when mixing pulses
 
-def H_pulseSPEC(current_state, target_qubits, phase, correction=True, plot=False, bool_blochsphere=False):
+def H_pulseSPEC(current_state, target_qubits, correction=True, plot=False, bool_blochsphere=False):
     num_qubits = int(np.log2(current_state.dim))
 
     if target_qubits == 'all':
@@ -253,10 +261,6 @@ def H_pulseSPEC(current_state, target_qubits, phase, correction=True, plot=False
     invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
     assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
 
-    # phase = pi / 2 gives PSI PLUS, - pi / 2 gives PHI MINUS
-    phase = phase
-
-    # well calibrated for drive_hamiltonian function
     k = 0.042780586392198006
 
     H_static_single = static_hamiltonian(omega=omega)
@@ -288,7 +292,7 @@ def H_pulseSPEC(current_state, target_qubits, phase, correction=True, plot=False
     gaussian_signal = Signal(
         envelope=gaussian_envelope,
         carrier_freq=omega,
-        phase=phase
+        phase=-np.pi/2
     )
     result = ham_solver.solve(
         t_span=t_span,
