@@ -147,6 +147,7 @@ def bool_statevector_closeness(state1, state2, atol=1e-2, rtol=1e-2):
         raise ValueError("Input states must be Statevector or DensityMatrix.")
 
 # F(|ψ⟩,|ϕ⟩)=|⟨ψ∣ϕ⟩|^2, insensitive to global phase differences. Measures the closeness of overall probability distribution
+# fidelity 0, means orthogonal
 def statevector_fidelity(target_state, actual_state):
     """
     Calculates the fidelity between two normalized quantum statevectors.

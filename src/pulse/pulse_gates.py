@@ -50,12 +50,12 @@ def cnot(
 ):
 
     thetaOne = phase   # np.pi / 2
-    # _, _, current_state = H_pulseSPEC(current_state, 1, thetaOne)
+    _, _, current_state = H_pulseSPEC(current_state, [1], thetaOne)
 
-    _, _, current_state = cz(current_state)
+    _, _, current_state = cz(current_state[-1])
 
     thetaTwo = phase   # - np.pi / 2
-    _, _, current_state = H_pulseSPEC(current_state[-1], 1, thetaTwo)
+    _, _, current_state = H_pulseSPEC(current_state[-1], [1], thetaTwo)
 
     # _, _, current_state = cz(current_state[-1])         # for adjusting the global phase error
 
@@ -111,92 +111,89 @@ def cz(
     return None, None, result.y
 
 
-def H_pulseSPEC3(current_state, target_qubits, k1, k2, plot=False, bool_blochsphere=False):
-    # num_qubits = int(np.log2(current_state.dim))
+# TODO: At the end: build pulse machine as class with stored current_state, num_qubits etc; bundle calculation in init
 
-    # if target_qubits == 'all':
-    #     target_qubits = list(range(num_qubits))
-    # elif isinstance(target_qubits, int):
-    #     target_qubits = [target_qubits]
-    # invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
-    # assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
+# TODO omega_list = [5.0, 4.9, 4.85, 4.95, ...] for n qubit systems
 
-    # phase = pi / 2 gives PSI PLUS, - pi / 2 gives PHI MINUS
-    phase = 0.0
+# TODO plot probabilities, plot entanglement, plot blochsphere in lab frame
 
-    # well calibrated for drive_hamiltonian function
-    # k = 0.042780586392198006
+# TODO clean pulse parameter and isolate as far as possible in k, to minimize pulse parameters
+
+# TODO use sparse pauli opt where possible to accelerate code
+
+def H_pulseSPEC3(current_state, target_qubits, phase, plot=False, bool_blochsphere=False):
+    num_qubits = int(np.log2(current_state.dim))
+
+    if target_qubits == 'all':
+        target_qubits = list(range(num_qubits))
+    elif isinstance(target_qubits, int):
+        target_qubits = [target_qubits]
+    invalid = [k for k in target_qubits if not 0 <= k < num_qubits]
+    assert not invalid, f"Target qubit(s) {invalid} are out of range [0, {num_qubits - 1}]."
+
+    # Z
+    k = 0.04166666094977508
+    theta = np.pi
+    drive_strength_Z = theta * k
+
+    # drive
+    H_drive_Z_single = SIGMA_Z
+    if not target_qubits:
+        H_drive_Z_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    else:
+        H_drive_Z_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+        for k in target_qubits:
+            H_drive_Z_multi += operator_on_qubit(H_drive_Z_single, k, num_qubits)
+
+    # X
+    k = 0.042780586392198006
 
     H_static_single = static_hamiltonian(omega=omega)
-    # H_static_multi = sum_operator(H_static_single, num_qubits)
+    H_static_multi = sum_operator(H_static_single, num_qubits)
 
-    # # ds = k*np.pi/2
-    # H_drive_single = drive_hamiltonian(drive_strength=k)
-    #
-    # # Construct drive Hamiltonian (applied only to target_qubits)
-    # if not target_qubits:  # If empty, no rotation
-    #     H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
-    # else:
-    #     H_drive_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
-    #     for q in target_qubits:
-    #         H_drive_multi += operator_on_qubit(H_drive_single, q, num_qubits)
+    # ds = k*np.pi/2
+    H_drive_single = drive_hamiltonian(drive_strength=k)
 
-    # matrix = (1 / np.sqrt(2)) * (k1*X + k2*Z)
-
-    theta = np.pi
-    t_span = np.linspace(0, duration * dt_, duration + 1)  # Tells solver when to check the qubits state
-
-    # RX:
-    def envelope(t):
-        center = duration * dt_ / 2
-        return np.exp(-((t - center) ** 2) / (2 * sigma ** 2))
-
-    integral, _ = quad(envelope, t_span[0], t_span[-1])
-    # Calculate drive_strength
-    strength_scale = 0.3183109217857033
-    drive_strength = theta / integral
-    drive_strength = drive_strength * strength_scale
-    kx = drive_strength
-
-
-    # RZ
-    k = 0.04166666094977508
-    drive_strength = theta * k
-    kz = drive_strength
-
-    X_part = drive_hamiltonian(kx)
-    Z_part = SIGMA_Z
+    # Construct drive Hamiltonian (applied only to target_qubits)
+    if not target_qubits:  # If empty, no rotation
+        H_drive_X_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+    else:
+        H_drive_X_multi = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+        for q in target_qubits:
+            H_drive_X_multi += operator_on_qubit(H_drive_single, q, num_qubits)
 
     ham_solver = Solver(
-        static_hamiltonian=H_static_single,
-        hamiltonian_operators=[X_part, Z_part],
-        rotating_frame=H_static_single
+        static_hamiltonian=H_static_multi,
+        hamiltonian_operators=[H_drive_X_multi, H_drive_Z_multi],
+        rotating_frame=H_static_multi
     )
+
+    t_span = np.linspace(0, duration * dt_, duration + 1)   # Tells solver when to check the qubits state
 
     def gaussian_envelope(t):
         center = duration * dt_ / 2
         return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
 
-    def constant_envelope(t):
-        return kz
+    def constant_envelopt(t):
+        return drive_strength_Z
 
-    gaussian_signal = Signal(
-        envelope=gaussian_envelope,
-        carrier_freq=omega,
-        phase=phase
+    mixed_signal = Signal(
+        envelope=[gaussian_envelope],
+        carrier_freq=[omega],
+        phase=0.0
     )
 
-    constant_signal = Signal(
-        envelope=constant_envelope,
-        carrier_freq=omega,
-        phase=phase
+    mixed_signal2 = Signal(
+        envelope=[constant_envelopt],
+        carrier_freq=[0.0],
+        phase=0.0
     )
 
     result = ham_solver.solve(
         t_span=t_span,
         y0=current_state,
         method='jax_odeint',
-        signals=[gaussian_signal, constant_signal]
+        signals=[mixed_signal, mixed_signal2]
     )
 
     # final_probs = np.zeros(2)
@@ -212,18 +209,9 @@ def H_pulseSPEC3(current_state, target_qubits, k1, k2, plot=False, bool_blochsph
     # if bool_blochsphere:
     #     plot_bloch_sphere(result.y)
 
-    return None, None, result.y
+    _, _, result = RZ_pulseSPEC(np.pi, result.y[-1], target_qubits)
 
-
-# TODO: At the end: build pulse machine as class with stored current_state, num_qubits etc; bundle calculation in init
-
-# TODO omega_list = [5.0, 4.9, 4.85, 4.95, ...] for n qubit systems
-
-# TODO plot probabilities, plot entanglement, plot blochsphere in lab frame
-
-# TODO clean pulse parameter and isolate as far as possible in k, to minimize pulse parameters
-
-# TODO use sparse pauli opt where possible to accelerate code
+    return None, None, result
 
 def H_pulseSPEC2(current_state, target_qubits, ryp, rxp, plot=False, bool_blochsphere=False):
     rx_phase = rxp
@@ -253,7 +241,9 @@ def H_pulseSPEC2(current_state, target_qubits, ryp, rxp, plot=False, bool_blochs
     return None, None, current_trajectory
 
 
-def H_pulseSPEC(current_state, target_qubits, phase, plot=False, bool_blochsphere=False):
+# TODO mix X and Z rotation and plot, probably acceleration when mixing pulses
+
+def H_pulseSPEC(current_state, target_qubits, phase, correction=True, plot=False, bool_blochsphere=False):
     num_qubits = int(np.log2(current_state.dim))
 
     if target_qubits == 'all':
@@ -321,6 +311,47 @@ def H_pulseSPEC(current_state, target_qubits, phase, plot=False, bool_blochspher
     #     plot_bloch_sphere(result.y)
 
     _, _, result = RZ_pulseSPEC(np.pi, result.y[-1], target_qubits)
+
+    def global_phase_correction(target_q):
+        global_phase_correction_angle = 0.0
+        case = len(target_q) % 4
+        if case == 1:
+            global_phase_correction_angle = -np.pi / 2
+        elif case == 2:
+            global_phase_correction_angle = -np.pi
+        elif case == 3:
+            global_phase_correction_angle = np.pi / 2
+        return global_phase_correction_angle
+
+    if correction:
+        glob_phase = global_phase_correction(target_qubits)
+        if glob_phase != 0.0:
+            glob_hamiltonian_single = glob_phase * I
+
+            if not target_qubits:  # If empty, no rotation
+                glob_hamiltonian = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+            else:
+                glob_hamiltonian = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
+                for q in target_qubits:
+                    glob_hamiltonian += operator_on_qubit(glob_hamiltonian_single, q, num_qubits)
+
+            glob_hamiltonian = glob_phase * np.eye(2 ** num_qubits, dtype=complex)
+            solver_phase = Solver(
+                static_hamiltonian=H_static_multi,
+                hamiltonian_operators=[glob_hamiltonian],
+                rotating_frame=H_static_multi  # No rotating frame for global phase
+            )
+            phase_correction_time = 1.0  # Choose a time for the phase evolution
+            t_span_phase = np.array([0., phase_correction_time])
+
+            result = solver_phase.solve(
+                t_span=t_span_phase,
+                y0=result[-1],
+                method='jax_odeint',
+                signals=[Signal(envelope=1.0, carrier_freq=0.0)]
+            )
+
+            result = result.y
 
     return None, None, result
 

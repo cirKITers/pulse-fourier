@@ -20,7 +20,7 @@ class PennyCircuit:
             if init_state is not None:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
-            # qml.Hadamard(1)
+            qml.Hadamard(1)
             # qml.CNOT(wires=[0, 1])  # big endian
 
             qml.CZ([0, 1])
@@ -34,20 +34,23 @@ class PennyCircuit:
 num_q = 2
 c = PennyCircuit(num_q)
 
-penny_state = c.run_quick_circuit(PSI_PLUS_NO_CNOT.data)
+penny_state = c.run_quick_circuit(PSI_MINUS_NO_CNOT.data)
 prints(penny_state)
 
 
 print("-"*20)
-# prints(PHI_PLUS)
+# prints(PSI_MINUS)
 
 
-_, _, states = cnot(PSI_PLUS_NO_CNOT, -np.pi / 2)
+_, _, states = cnot(PSI_MINUS_NO_CNOT, -np.pi / 2)
 
-prints(states[-1])
-sim = statevector_similarity(penny_state, states[-1])
+final_state = states[-1]
 
-print(sim)
+prints(final_state)
+sim = statevector_similarity(penny_state, final_state)
+fid = statevector_fidelity(penny_state, final_state)
+print(f"sim = {sim}, fid = {fid}")
+
 
 
 # ps = typical_phases()
