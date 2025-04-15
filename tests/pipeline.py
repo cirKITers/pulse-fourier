@@ -2,18 +2,20 @@ import numpy as np
 import pennylane as qml
 import random
 
-from pulse.pulse_gates import H_pulseSPEC, H_pulseSPEC2, H_pulseSPEC3
+from pulse.pulse_gates import *
 from utils.definitions import GROUND_STATE, EXCITED_STATE, SUPERPOSITION_STATE_H, RANDOM_STATE, PHASESHIFTED_STATE
 from utils.helpers import prints, statevector_similarity, statevector_fidelity
 from helpers import *
 
+
+# Pennylane Big Endian convention: |q0 q1 q2 q3 ... >
 class PennyCircuit:
 
     def __init__(self, num_qubits):
 
         self.num_qubits = num_qubits
 
-    def run_quick_circuit(self, target_q, init_state=None):
+    def run_quick_circuit(self, wires, init_state=None):
         dev = qml.device('default.qubit', wires=self.num_qubits)
 
         @qml.qnode(dev)
@@ -21,29 +23,77 @@ class PennyCircuit:
             if init_state is not None:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
-            for qubit in target_q:
-                if 0 <= qubit < self.num_qubits:
-                    qml.Hadamard(wires=qubit)
-                else:
-                    print(f"Warning: Target qubit {qubit} is out of range (0 to {self.num_qubits - 1}).")
+            qml.CZ(wires)
+            # for qubit in target_q:
+            #     if 0 <= qubit < self.num_qubits:
+            #         qml.Hadamard(wires=qubit)
+            #     else:
+            #         print(f"Warning: Target qubit {qubit} is out of range (0 to {self.num_qubits - 1}).")
 
             return qml.state()
 
+        # print(qml.draw(general_circuit)())
         return general_circuit()
 
 
-# GLOBAL PHASE ERRORS:
-# len(target_qubits) mod 4 = 0: 1 (no error)
-# len(target_qubits) mod 4 = 1: j
-# len(target_qubits) mod 4 = 2: -1
-# len(target_qubits) mod 4 = 3: -j
+
+# num_qubits = 3
+# init = RANDOM_STATE(num_qubits)
+# wires = [0, 1]
+#
+# prints(init)
+#
+# c = PennyCircuit(num_qubits)
+# penny_state = c.run_quick_circuit(wires, init_state=init.data)
+# prints(penny_state)
+#
+# _, _, current_state = cz(init, wires)
+# result_state = current_state[-1]
+# prints(result_state)
+#
+# sim = statevector_similarity(penny_state, result_state)
+# fid = statevector_fidelity(penny_state, result_state)
+# print(f"sim = {sim}, fid = {fid}")
+# print(20 * "-", "\n")
 
 
-# num_q = 6
-# target_qubits = [0, 1, 2, 5]
-global_phase_correction = -1j
+
+
 
 # PARALLEL TESTS GENERATION
+def generate_wire_pairs(num_tests, max_qubits=7):
+    """
+    Generates a list of test cases, where each test case contains the number of qubits
+    and a list of unique wire pairs.
+
+    Args:
+        num_tests (int): The number of test cases to generate.
+        max_qubits (int): The maximum number of qubits to consider (default is 7).
+
+    Returns:
+        list[tuple[int, list[list[int]]]]: A list of test cases. Each test case is a
+                                           tuple containing the number of qubits and a
+                                           list of unique wire pairs.
+    """
+    test_cases = []
+    for _ in range(num_tests):
+        num_qubits = np.random.randint(2, max_qubits + 1)  # Need at least 2 qubits for pairs
+        max_possible_pairs = num_qubits * (num_qubits - 1) // 2
+        num_pairs = np.random.randint(1, max_possible_pairs + 1)
+
+        possible_pairs_indices = np.arange(max_possible_pairs)
+        chosen_pair_indices = np.random.choice(possible_pairs_indices, size=num_pairs, replace=False)
+
+        all_pairs = []
+        for i in range(num_qubits):
+            for j in range(i + 1, num_qubits):
+                all_pairs.append([i, j])
+
+        chosen_pairs = [all_pairs[index] for index in chosen_pair_indices]
+
+        test_cases.append((num_qubits, chosen_pairs))
+    return test_cases
+
 def generate_tests(num_tests):
     test_cases = []
     for _ in range(num_tests):

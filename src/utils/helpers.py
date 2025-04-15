@@ -7,6 +7,18 @@ from qiskit_dynamics.signals import Convolution
 
 # GENERAL
 
+def binary_c_t(n, c, t):
+    if not (0 <= c < n and 0 <= t < n and c != t):
+        return []
+
+    indices = []
+    for i in range(2**n):
+        binary_repr = bin(i)[2:].zfill(n)
+        # Big Endian
+        if binary_repr[c] == '1' and binary_repr[t] == '1':
+            indices.append(i)
+    return indices
+
 def prints(statevector):
     """Prints the values of a Qiskit Statevector in one line, without brackets or string quotes."""
     def format_complex(z):

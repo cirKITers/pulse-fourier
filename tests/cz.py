@@ -1,9 +1,88 @@
 import numpy as np
+import pennylane as qml
 
 from pulse.pulse_gates import *
-from qft_models.pennylane_models import PennyCircuit
+from tests.helpers import possible_init_states
+from tests.pipeline import *
 from utils.definitions import *
 from utils.helpers import prints, statevector_fidelity
+
+class PennyCircuitCZ:
+
+    def __init__(self, num_qubits):
+
+        self.num_qubits = num_qubits
+
+    def run_quick_circuit(self, wire_pairs, init_state=None):
+        dev = qml.device('default.qubit', wires=self.num_qubits)
+
+        @qml.qnode(dev)
+        def general_circuit():
+            if init_state is not None:
+                qml.StatePrep(init_state, wires=range(self.num_qubits))
+
+            for wire_pair in wire_pairs:
+                if 0 <= wire_pair[0] < self.num_qubits:
+                    qml.CZ(wires=wire_pair)
+                else:
+                    print(f"Warning: Target qubit {wire_pair[0]} is out of range (0 to {self.num_qubits - 1}).")
+
+            return qml.state()
+
+        print(qml.draw(general_circuit)())
+        return general_circuit()
+
+
+test_cases = generate_wire_pairs(20, 7)
+
+for i, (num_qubits, wire_pairs) in enumerate(test_cases):
+
+    print(f"Test Case {i + 1}:")
+    print(f"  Number of qubits (n): {num_qubits}")
+    print(f"  Wire pairs: {wire_pairs} \n")
+
+    c = PennyCircuitCZ(num_qubits)
+    for init_function in possible_init_states:
+        init = init_function(num_qubits)
+
+        penny_state = c.run_quick_circuit(wire_pairs, init_state=init.data)
+        prints(penny_state)
+
+        current_state = [0]
+        current_state[-1] = init
+        for wire_pair in wire_pairs:
+            _, _, current_state = cz(current_state[-1], wire_pair)
+
+        result_state = current_state[-1]
+        prints(result_state)
+
+        sim = statevector_similarity(penny_state, result_state)
+        fid = statevector_fidelity(penny_state, result_state)
+        print(f"sim = {sim}, fid = {fid}")
+        print(20 * "-", "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # All tests passed!
@@ -59,5 +138,5 @@ def test_cz_gate(cz_function):
 # dsCZ = 0.11884149043553377
 
 
-test_cz_gate(lambda x: cz(x))
+# test_cz_gate(lambda x: cz(x))
 
