@@ -9,13 +9,13 @@ On hardware platforms such as superconducting circuits or trapped ions, the exec
 
 The goal of this project is twofold:
 
-First, to implement QFMs at the pulse level. This involves defining the underlying Hamiltonians and tuning pulse parameters $\phi$ to realize the desired data encoding circuits. The Qiskit Dynamics module, which provides a high degree of control over pulse definitions, is used for this implementation.
+First, to implement QFMs at the pulse level. This involves defining the underlying Hamiltonians and tuning pulse parameters $\phi$ to realize the desired data encoding circuits. The Qiskit Dynamics module, which provides a high degree of control over pulse definitions, is used for this implementation [[2]](https://joss.theoj.org/papers/10.21105/joss.05853).
 
 Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the resulting partial Fourier series representation of the quantum model's output, while keeping the abstract gate-level parameters $\theta$ constant.
 
 
 [1] https://pennylane.ai/qml/demos/tutorial_expressivity_fourier_series
-
+[2] https://joss.theoj.org/papers/10.21105/joss.05853
 
 ## Setup
 
