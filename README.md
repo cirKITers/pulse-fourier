@@ -15,6 +15,7 @@ Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the
 
 
 [1] https://pennylane.ai/qml/demos/tutorial_expressivity_fourier_series
+
 [2] https://joss.theoj.org/papers/10.21105/joss.05853
 
 ## Setup
