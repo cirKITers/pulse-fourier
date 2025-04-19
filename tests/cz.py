@@ -1,11 +1,12 @@
 import numpy as np
 import pennylane as qml
 
-from pulse.pulse_gates import *
+from pulse.pulse_system import *
 from tests.helpers import possible_init_states
 from tests.pipeline import *
 from utils.definitions import *
 from utils.helpers import prints, statevector_fidelity
+
 
 class PennyCircuitCZ:
 
@@ -48,41 +49,17 @@ for i, (num_qubits, wire_pairs) in enumerate(test_cases):
         penny_state = c.run_quick_circuit(wire_pairs, init_state=init.data)
         prints(penny_state)
 
-        current_state = [0]
-        current_state[-1] = init
+        pls = PulseSystem(num_qubits, init)
         for wire_pair in wire_pairs:
-            _, _, current_state = cz(current_state[-1], wire_pair)
+            pls.cz(wire_pair)
 
-        result_state = current_state[-1]
+        result_state = pls.current_state
         prints(result_state)
 
         sim = statevector_similarity(penny_state, result_state)
         fid = statevector_fidelity(penny_state, result_state)
         print(f"sim = {sim}, fid = {fid}")
         print(20 * "-", "\n")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # All tests passed!
@@ -102,6 +79,7 @@ def apply_cz_manually(state_vector):
     new_state = state_vector.copy()
     new_state[3] *= -1  # Apply phase flip to |11>
     return new_state
+
 
 def test_cz_gate(cz_function):
     """Tests the CZ gate with various state vectors."""
@@ -134,9 +112,7 @@ def test_cz_gate(cz_function):
     print("All tests passed!")
     return True
 
-
 # dsCZ = 0.11884149043553377
 
 
 # test_cz_gate(lambda x: cz(x))
-

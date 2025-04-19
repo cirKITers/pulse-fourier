@@ -2,7 +2,7 @@ import numpy as np
 from qiskit.quantum_info import Statevector
 import pennylane as qml
 
-from pulse.pulse_gates import RZ_pulseSPEC
+from pulse.pulse_system import RZ_pulseSPEC
 from utils.helpers import random_theta, prints, statevector_similarity, statevector_fidelity
 
 

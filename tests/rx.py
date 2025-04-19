@@ -1,5 +1,5 @@
 import unittest
-from pulse.pulse_gates import *
+from pulse.pulse_system import *
 
 # Passed all tests
 class TestRXPulseSPEC(unittest.TestCase):
@@ -8,9 +8,10 @@ class TestRXPulseSPEC(unittest.TestCase):
         theta = np.pi / 2
         initial_state = GROUND_STATE_OneQ
         target_qubits = [0]
-        _, _, result = RX_pulseSPEC(theta, initial_state, 0.0, target_qubits)
+        pls = PulseSystem(1, initial_state)
+        pls.rx(theta, initial_state, 0.0, target_qubits)
         expected_state = SUPERPOSITION_STATE_RX_OneQ
-        final_state = result[-1]
+        final_state = pls.current_state
         print(expected_state, final_state)
         # for i in range(len(result)):
         #     prints(result[i])

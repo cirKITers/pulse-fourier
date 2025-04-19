@@ -1,4 +1,4 @@
-from pulse.pulse_gates import *
+from pulse.pulse_system import *
 
 # FIXED PARAMS
 theta = np.pi / 2

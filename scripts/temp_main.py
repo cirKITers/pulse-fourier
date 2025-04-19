@@ -1,6 +1,6 @@
 import numpy as np
 
-from pulse.pulse_gates import *
+from pulse.pulse_system import *
 from qft_models.pennylane_models import PennyCircuit
 from utils.definitions import *
 from utils.helpers import prints

@@ -2,7 +2,7 @@ import qiskit_aer
 from qiskit import QuantumCircuit
 
 from utils.definitions import *
-from pulse.pulse_gates import *
+from pulse.pulse_system import *
 
 class QuickCircuit:
     def __init__(self, num_qubits):

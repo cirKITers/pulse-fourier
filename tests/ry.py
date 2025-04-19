@@ -4,7 +4,7 @@ from qiskit.quantum_info import Operator, Statevector
 from scipy.linalg import expm
 from scipy.integrate import quad
 
-from pulse.pulse_gates import RY_pulseSPEC
+from pulse.pulse_system import RY_pulseSPEC
 from utils.helpers import statevector_similarity, statevector_fidelity
 
 
