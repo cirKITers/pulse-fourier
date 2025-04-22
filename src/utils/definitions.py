@@ -1,78 +1,6 @@
 import numpy as np
-
-from utils.helpers import *
-
-
-# ENTANGLEMENT
-
-# TODO TEST IT MORE
-def quantify_entanglement(state):
-    """
-    Calculates the entanglement between each pair of qubits in a multi-qubit statevector.
-
-    Returns:
-        dict: A dictionary where keys are qubit pairs (tuples) and values are the entanglement measures. 0 min, max 1.
-    """
-
-    num_qubits = state.num_qubits
-    entanglement_measures = {}
-
-    for i in range(num_qubits):
-        for j in range(i + 1, num_qubits):  # Avoid redundant pairs
-            # Calculate the reduced density matrix for qubit i
-            remaining_qubits_i = [q for q in range(num_qubits) if q != i]
-            reduced_density_matrix_i = partial_trace(state, remaining_qubits_i).data
-
-            # Calculate the von Neumann entropy for qubit i
-            eigenvalues_i = np.linalg.eigvalsh(reduced_density_matrix_i)
-            eigenvalues_i = eigenvalues_i[eigenvalues_i > 1e-15]
-            entropy_i = -np.sum(eigenvalues_i * np.log2(eigenvalues_i))
-
-            entanglement_measures[(i, j)] = entropy_i
-
-    all_zero = all(np.isclose(value, 0) for value in entanglement_measures.values())
-
-    if all_zero:
-        return "No qubits are entangled"
-    else:
-        return entanglement_measures
-
-
-# OPERATOR CONSTRUCTION
-
-def coupling_hamiltonian(total_qubits, qubit_k, qubit_m, g):
-    """Coupling term between two qubits: g/2 * (X_k X_m + Y_k Y_m)."""
-    op_X_k = operator_on_qubit(SIGMA_X, qubit_k, total_qubits)
-    op_X_m = operator_on_qubit(SIGMA_X, qubit_m, total_qubits)
-    op_Y_k = operator_on_qubit(SIGMA_Y, qubit_k, total_qubits)
-    op_Y_m = operator_on_qubit(SIGMA_Y, qubit_m, total_qubits)
-    return (g / 2) * (op_X_k @ op_X_m + op_Y_k @ op_Y_m)
-
-
-def operator_on_qubit(operator, qubit_index, num_qubits):
-    """Places an operator on the specified qubit with identities on others."""
-    ops = [I] * num_qubits
-    ops[qubit_index] = operator
-    result = ops[0]
-    for op in ops[1:]:
-        result = np.kron(result, op)
-    return Operator(result)
-
-# TODO sources
-def sum_operator(operator, num_qubits):
-    """Creates a sum of the operator applied to each qubit individually."""
-    total = Operator(np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex))
-    for k in range(num_qubits):
-        total += operator_on_qubit(operator, k, num_qubits)
-    return total
-
-
-def tensor_product_identity(operator, num_qubits):
-    """Creates a tensor product of operator with identities for num_qubits."""
-    result = operator
-    for _ in range(num_qubits - 1):
-        result = np.kron(result, np.eye(2))
-    return result
+from qiskit.quantum_info import Operator, Statevector, partial_trace, DensityMatrix
+import jax.numpy as jnp
 
 
 # Matrices
@@ -92,34 +20,17 @@ SIGMA_Y = Operator(Y)
 SIGMA_Z = Operator(Z)
 SIGMA_MINUS = Operator(MINUS)
 
-# Two-qubit Matrices
-I0 = kron(I, I)  # Identity on two-qubit space
-Z0 = kron(Z, I)  # Z on qubit 0
-Z1 = kron(I, Z)  # Z on qubit 1
-X0 = kron(X, I)  # X on qubit 0
-X1 = kron(I, X)  # X on qubit 1
-P1 = 0.5 * (I0 - Z0)
-
 
 # HAMILTONIAN
 # like in: https://qiskit-community.github.io/qiskit-dynamics/tutorials/optimizing_pulse_sequence.html
 def static_hamiltonian(omega):
     return 2 * np.pi * omega * SIGMA_Z / 2
 
-
-def drive_hamiltonian2(drive_strength):
-    # if isinstance(drive_strength, np.ndarray):
-    #     drive_strength = drive_strength[0]
-    return drive_strength/2 * SIGMA_Y
-
 def drive_hamiltonian(drive_strength):
-    # if isinstance(drive_strength, np.ndarray):
-    #     drive_strength = drive_strength[0]
+    # TODO precompute
     return 2 * np.pi * drive_strength * SIGMA_X / 2
 
 def drive_Y_hamiltonian(drive_strength):
-    # if isinstance(drive_strength, np.ndarray):
-    #     drive_strength = drive_strength[0]
     return 2 * np.pi * drive_strength * SIGMA_Y / 2
 
 

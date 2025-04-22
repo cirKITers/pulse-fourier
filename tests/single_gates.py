@@ -1,3 +1,5 @@
+import numpy as np
+
 from pulse.pulse_system import PulseSystem
 from tests.helpers import possible_init_states
 from tests.pipeline import generate_tests
@@ -23,7 +25,7 @@ class PennyCircuit:
 
             for qubit in target_q:
                 if 0 <= qubit < self.num_qubits:
-                    qml.RZ(thet, wires=qubit)
+                    function_penny(thet, wires=qubit)
                 else:
                     print(f"Warning: Target qubit {qubit} is out of range (0 to {self.num_qubits - 1}).")
             return qml.state()
@@ -31,11 +33,8 @@ class PennyCircuit:
         return general_circuit()
 
 
-# GLOBAL PHASE ERRORS:
-# len(target_qubits) mod 4 = 0: 1 (no error)
-# len(target_qubits) mod 4 = 1: j
-# len(target_qubits) mod 4 = 2: -1
-# len(target_qubits) mod 4 = 3: -j
+# DEFINE PENNY GATE HERE
+function_penny = qml.RZ
 
 
 # PARALLEL TEST GENERATION, passed with fid ~ 0.99995, sim ~ 0.995
@@ -63,6 +62,8 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
         pls = PulseSystem(num_qubits, init)
 
         for _ in range(sequence_repetitions):
+
+            # DEFINE PULSE GATE HERE
             pls.rz(theta, target_qubits)
 
         result_state = pls.current_state

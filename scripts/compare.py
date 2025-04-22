@@ -1,5 +1,5 @@
 from qft_models.gate_models import *
-from pulse.oneQ_pulse_gates import *
+from legacy.oneQ_pulse_gates import *
 
 
 init_state = RANDOM_STATE()
