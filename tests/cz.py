@@ -56,7 +56,7 @@ for i, (num_qubits, wire_pairs) in enumerate(test_cases):
         result_state = pls.current_state
         prints(result_state)
 
-        sim = statevector_similarity(penny_state, result_state)
+        sim = overlap_components(penny_state, result_state)
         fid = statevector_fidelity(penny_state, result_state)
         print(f"sim = {sim}, fid = {fid}")
         print(20 * "-", "\n")
@@ -102,7 +102,7 @@ def test_cz_gate(cz_function):
     for initial_state in test_cases:
         expected_state = apply_cz_manually(initial_state)
         _, _, actual_state = cz_function(initial_state)
-        similarity = statevector_similarity(expected_state, actual_state[-1])
+        similarity = overlap_components(expected_state, actual_state[-1])
         fidelity = statevector_fidelity(expected_state, actual_state[-1])
         if not np.isclose(fidelity, 1.0):
             print(f"Test failed for initial state: {initial_state}")

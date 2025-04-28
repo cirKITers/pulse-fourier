@@ -15,7 +15,7 @@ class TestRXPulseSPEC(unittest.TestCase):
         print(expected_state, final_state)
         # for i in range(len(result)):
         #     prints(result[i])
-        print("sim", statevector_similarity(final_state, expected_state))
+        print("sim", overlap_components(final_state, expected_state))
         print("fid", statevector_fidelity(final_state, expected_state))
         self.assertTrue(bool_statevector_closeness(final_state, expected_state))
 

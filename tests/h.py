@@ -5,7 +5,7 @@ import random
 from pulse.pulse_system import PulseSystem
 from tests.pipeline import generate_tests
 from utils.definitions import GROUND_STATE, EXCITED_STATE, SUPERPOSITION_STATE_H, RANDOM_STATE, PHASESHIFTED_STATE
-from utils.helpers import prints, statevector_similarity, statevector_fidelity
+from utils.helpers import prints, overlap_components, statevector_fidelity
 from helpers import *
 
 class PennyCircuit:
@@ -71,7 +71,7 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
         # prints(manual_correction)
         # print("-")
 
-        sim = statevector_similarity(penny_state, result_state)
+        sim = overlap_components(penny_state, result_state)
         fid = statevector_fidelity(penny_state, result_state)
         print(f"sim = {sim}, fid = {fid}")
         print(20*"-", "\n")

@@ -23,12 +23,17 @@ SIGMA_MINUS = Operator(MINUS)
 
 # HAMILTONIAN
 # like in: https://qiskit-community.github.io/qiskit-dynamics/tutorials/optimizing_pulse_sequence.html
-def static_hamiltonian(omega):
-    return 2 * np.pi * omega * SIGMA_Z / 2
+# derived from:  2 * np.pi * vu * SIGMA_Z / 2
+def static_hamiltonian(vu):
+    return np.pi * vu * SIGMA_Z
 
 def drive_hamiltonian(drive_strength):
-    # TODO precompute
-    return 2 * np.pi * drive_strength * SIGMA_X / 2
+    # original: 2 * np.pi * drive_strength * SIGMA_X / 2
+    return np.pi * drive_strength * SIGMA_X
+
+def drive_X_hamiltonian(drive_strength):
+    # original: 2 * np.pi * drive_strength * SIGMA_X / 2
+    return drive_strength * SIGMA_X
 
 def drive_Y_hamiltonian(drive_strength):
     return 2 * np.pi * drive_strength * SIGMA_Y / 2

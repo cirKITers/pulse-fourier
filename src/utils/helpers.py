@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from qiskit.quantum_info import Operator, Statevector, partial_trace, DensityMatrix
 import jax.numpy as jnp
+from scipy.linalg import svd
 
 
 # GENERAL
@@ -97,7 +98,7 @@ def probability_similarity(statevector1, statevector2, tolerance=1e-6):
     return np.sum(close_values) / len(probs1)
 
 
-def statevector_similarity(target_state, actual_state, tolerance=1e-6, scaling="linear"):
+def overlap_components(target_state, actual_state, tolerance=1e-6, scaling="linear"):
     """
     Calculates the component-wise similarity between two quantum statevectors,
     sensitive to individual complex component values.
@@ -206,11 +207,6 @@ def magnitude_spectrum(c_n):
     magnitude = np.abs(c_n)
     return magnitude
 
-
-def prob(statevector):
-    return np.abs(statevector) ** 2
-
-
 def state_normalized(statevector):
     """Checks if a statevector is normalized. Returns bool"""
     norm = np.sum(np.abs(statevector.data) ** 2)
@@ -221,10 +217,20 @@ def fourier_series(x, coeffs):
     return sum(c * np.cos(2 * np.pi * k * x) for k, c in enumerate(coeffs))
 
 
+def prob(statevector):
+    return np.abs(statevector) ** 2
+
+def normalized_ground_state_prob(statevector):
+    if isinstance(statevector, Statevector):
+        statevector = statevector.data
+    # print(statevector)
+    # print(prob(statevector))
+    # print(statevector[0])
+    # print(prob(statevector[0]))
+    return 2*prob(statevector[0])-1
+
 
 # ENTANGLEMENT
-
-# TODO TEST IT MORE
 def quantify_entanglement(state):
     """
     Calculates the entanglement between each pair of qubits in a multi-qubit statevector.
@@ -256,6 +262,66 @@ def quantify_entanglement(state):
     else:
         return entanglement_measures
 
+def is_three_qubit_entangled(state_vector, epsilon=1e-10):
+    """
+    Checks for entanglement in a three-qubit pure state using Schmidt decomposition
+    across the A-BC bipartition.
+
+    Args:
+        state_vector (Statevector or numpy.ndarray): The three-qubit statevector.
+        epsilon (float): Tolerance for considering singular values as zero.
+
+    Returns:
+        bool: True if entangled (based on A-BC bipartition), False otherwise.
+    """
+    if isinstance(state_vector, Statevector):
+        psi = state_vector.data
+    else:
+        psi = np.array(state_vector)
+
+    if len(psi) != 8:
+        raise ValueError("Input statevector must have dimension 8 for three qubits.")
+
+    # Reshape for A vs BC bipartition (qubit 0 vs qubits 1 and 2)
+    # Indices: (q0 q1 q2) -> reshape to (q0, q1 q2)
+    matrix_AB_C = psi.reshape((2, 4))
+
+    # Perform Singular Value Decomposition
+    U, s, Vh = svd(matrix_AB_C)
+
+    # Schmidt rank is the number of non-zero singular values
+    schmidt_rank = np.sum(s > epsilon)
+
+    return schmidt_rank > 1
+
+def is_two_qubit_entangled(state_vector):
+    """
+    Checks if a two-qubit statevector is entangled.
+
+    Args:
+        state_vector (Statevector or numpy.ndarray): The two-qubit statevector.
+
+    Returns:
+        bool: True if entangled, False otherwise.
+    """
+    if isinstance(state_vector, Statevector):
+        psi = state_vector.data
+    else:
+        psi = np.array(state_vector)
+
+    if len(psi) != 4:
+        raise ValueError("Input statevector must have dimension 4 for two qubits.")
+
+    # Coefficients of the basis states |00>, |01>, |10>, |11>
+    a = psi[0]
+    b = psi[1]
+    c = psi[2]
+    d = psi[3]
+
+    # A two-qubit state is separable if and only if:
+    # ac = bd
+    return not np.isclose(a * d, b * c)
+
 
 
 # PARAMETER GENERATION
@@ -272,6 +338,10 @@ def typical_theta(num="one"):
         return np.random.choice(theta_values)
     elif num == "all":
         return theta_values
+    elif isinstance(num, int):
+        return np.linspace(0, np.pi, num)
+    else:
+        raise ValueError("Invalid input for 'num'. It should be 'one', 'all', or an integer.")
 
 
 def random_theta():
@@ -283,6 +353,12 @@ def random_theta_positive():
 
 
 # GATE PARAMETER GENERATION
+def gradual_parameter_set(num_layer, num_qubits, num_gates, num_samples):
+    parameter_set = []
+    for theta in typical_theta(num_samples):
+        parameter_set.append(fixed_parameter(num_layer, num_qubits, num_gates, theta))
+    return parameter_set
+
 def fixed_parameter_set(num_layer, num_qubits, num_gates, num_samples, fixed_param):
     parameter_set = []
     for _ in range(num_samples):

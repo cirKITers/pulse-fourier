@@ -25,7 +25,7 @@ def CNOT_correctness(g, ds, cnot_dur, cnot_p, cnot_sigma):
     for init_state, exp_state in zip(init_states, expected_states):
         _, _, state_afterCNOT = CNOT_pulseEcho(init_state, 0, 1, [5.0, 4.9], g=g, drive_strength=ds, cnot_duration=cnot_dur, cnot_phase=cnot_p,
                                                cnot_sigma=cnot_sigma)
-        sim_score = statevector_similarity(state_afterCNOT, exp_state.data)
+        sim_score = overlap_components(state_afterCNOT, exp_state.data)
         similarities.append(sim_score)
     return np.mean(similarities)  # try other aggregations...
 
@@ -104,7 +104,7 @@ for seed in range(num_restarts):
         for initial_statevector, expected_statevector in zip(init_states, expected_states):
             _, _, CNOTEcho_state = CNOT_pulseEcho(initial_statevector, 0, 1, [5.0, 4.9], g=best_params[0], drive_strength=best_params[1],
                                                   cnot_duration=best_params[2], cnot_phase=best_params[3], cnot_sigma=best_params[4])
-            sim = statevector_similarity(CNOTEcho_state, expected_statevector.data)
+            sim = overlap_components(CNOTEcho_state, expected_statevector.data)
             print("Expected:")
             prints(expected_statevector)
             print("CNOTEcho:")
@@ -134,7 +134,7 @@ def objective_function(k, current_state):
     """Objective function to maximize statevector similarity."""
     theta = typical_theta()
     _, _, final_state = RZ_pulseSPEC(theta, current_state, "all", k)
-    return -statevector_similarity(c.run_quick_circuit(theta), final_state[-1])  # Negate for maximization
+    return -overlap_components(c.run_quick_circuit(theta), final_state[-1])  # Negate for maximization
 
 def optimize_k2(initial_state, k2_bounds=(0.1, 8.0), n_calls=1000, n_init_values=20, seeds=[0, 1, 2]):
     """Optimizes k2 with multiple initial values and seeds."""

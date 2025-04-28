@@ -3,20 +3,9 @@ import numpy as np
 from scipy.stats import stats
 
 
-def plot_fx(x_data, y_data, title):
-    plt.figure(figsize=(8, 6))
-    plt.plot(x_data, y_data, label=title, color='b')
-    plt.title(title)
-    plt.xlabel("Input x")
-    plt.ylabel("Predicted f(x)")
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
-
-def plot_fx_advanced(x_data, y_data, title="Plot",
-                     xlabel="Input x", ylabel="Predicted f(x)",
-                     uncertainty=None, statistical_analysis=False):
+def plot_fx(x_data, y_data, title="Plot",
+            xlabel="Input x", ylabel="Predicted f(x)",
+            uncertainty=None, statistical_analysis=False):
     """
     Plots f(x) with advanced features, including uncertainty visualization and
     optional statistical analysis.
@@ -60,11 +49,11 @@ def plot_fx_advanced(x_data, y_data, title="Plot",
     plt.show()
 
 
-def plot_2fx_advanced(x, fx1, fx2, label1="Expectations on Pulse level", label2="Expectations on Gate level",
-                      title="Comparison",
-                      xlabel="X Interval", ylabel="Quantum Fourier Expectation Value",
-                      uncertainty1=None, uncertainty2=None,
-                      statistical_test=True):
+def plot_2fx(x, fx1, fx2, label1="Expectations on Pulse level", label2="Expectations on Gate level",
+             title="Comparison",
+             xlabel="X Interval", ylabel="Quantum Fourier Expectation Value",
+             uncertainty1=None, uncertainty2=None,
+             statistical_test=True):
 
     plt.figure(figsize=(12, 8))
     plt.plot(x, fx1, label=label1, color='blue', linewidth=2)
@@ -90,4 +79,41 @@ def plot_2fx_advanced(x, fx1, fx2, label1="Expectations on Pulse level", label2=
                  transform=plt.gca().transAxes, verticalalignment='top', fontsize=10,
                  bbox=dict(facecolor='white', alpha=0.7))
 
+    plt.show()
+
+
+def plot_nfx(x, fx_list):
+    """
+    Plots a list of functions with gradually different colors.
+
+    Args:
+        x (array-like): The x-values for the plots.
+        fx_list (list of array-like): A list of y-values (functions) to plot.
+    """
+    num_fx = len(fx_list)
+    if num_fx == 0:
+        return
+
+    plt.figure(figsize=(12, 8))
+    cmap = plt.cm.get_cmap('viridis', num_fx)
+
+    for i, fx in enumerate(fx_list):
+        color = cmap(i / num_fx)
+        plt.plot(x, fx, color=color)
+
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_fx_old(x_data, y_data, title):
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_data, y_data, label=title, color='b')
+    plt.title(title)
+    plt.xlabel("Input x")
+    plt.ylabel("Predicted f(x)")
+    plt.grid(True)
+    plt.legend()
     plt.show()

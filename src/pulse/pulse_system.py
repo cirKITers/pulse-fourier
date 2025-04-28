@@ -15,6 +15,8 @@ jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
 
+# TODO probably make pulse duration T independent
+
 # TODO test soon: Effect of Pulse-Level parameter on Fourier series (and like that on its coefficients)
 
 # TODO plot the pulses themselves
@@ -45,13 +47,14 @@ class PulseSystem:
         self.current_state = initial_state
         self.operator = PulseOperator(num_qubits)
 
+    # fod 0.9998
     def h(self, target_qubits, correction=True, plot=False, bool_blochsphere=False):
 
         target_qubits = self.operator.verify_wires(target_qubits, "H")
 
         k = 0.042780586392198006
 
-        H_static_single = static_hamiltonian(omega=omega)
+        H_static_single = static_hamiltonian(vu=vu)
         H_drive_single = drive_hamiltonian(drive_strength=k)
 
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -65,7 +68,7 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=omega,
+            carrier_freq=vu,
             phase=-np.pi / 2
         )
         result = ham_solver.solve(
@@ -79,21 +82,20 @@ class PulseSystem:
 
         self.rz(np.pi, target_qubits)
 
-        def global_phase_correction(target_q):
-            global_phase_correction_angle = 0.0
-            case = len(target_q) % 4
-            if case == 1:
-                global_phase_correction_angle = -np.pi / 2
-            elif case == 2:
-                global_phase_correction_angle = -np.pi
-            elif case == 3:
-                global_phase_correction_angle = np.pi / 2
-            return global_phase_correction_angle
-
         if correction:
+            def global_phase_correction(target_q):
+                global_phase_correction_angle = 0.0
+                case = len(target_q) % 4
+                if case == 1:
+                    global_phase_correction_angle = -np.pi / 2
+                elif case == 2:
+                    global_phase_correction_angle = -np.pi
+                elif case == 3:
+                    global_phase_correction_angle = np.pi / 2
+                return global_phase_correction_angle
+
             glob_phase = global_phase_correction(target_qubits)
             if glob_phase != 0.0:
-
                 glob_hamiltonian = glob_phase * np.eye(2 ** self.num_qubits, dtype=complex)
                 solver_phase = Solver(
                     static_hamiltonian=H_static_multi,
@@ -132,12 +134,14 @@ class PulseSystem:
 
         # RX:
         integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])
-        strength_scale = 0.3183109217857033
-        drive_strength = theta / integral
-        drive_strength = drive_strength * strength_scale
 
-        H_static_single = static_hamiltonian(omega=omega)
-        H_drive_X_single = drive_hamiltonian(drive_strength)
+        # strength_scale = 0.3183109217857033     # close to 1/pi
+        drive_strength = theta / integral
+
+        # drive_strength = drive_strength * strength_scale
+
+        H_static_single = static_hamiltonian(vu=vu)
+        H_drive_X_single = drive_X_hamiltonian(drive_strength)
 
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
         H_drive = self.operator.parallel_hamiltonian("drive", target_qubits, H_drive_X_single)
@@ -150,13 +154,12 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=omega,  # No oscillation for Z drive
-            phase=0.0,  # 0.0
+            carrier_freq=vu,
+            phase=0.0,
         )
 
         # print("drawing...")
-        # # T = duration * dt_
-        # gaussian_signal.draw(t0=0, tf=duration * dt_, n=1000, function="signal")
+        # gaussian_signal.draw(t0=0, tf=duration, n=1000, function="signal")
         # plt.show()
 
         result = ham_solver.solve(
@@ -166,6 +169,7 @@ class PulseSystem:
             signals=[gaussian_signal]
         )
 
+        # Does not work for multi qubit
         # plot probs
         # pop = [np.abs(y.data[0]) ** 2 for y in result.y]
         # start = 50
@@ -183,7 +187,7 @@ class PulseSystem:
         drive_strength = 0.027235035038834040234 * theta  # 0.042780692999130815               # temporarily not high accuracy
 
         # Construct multi-qubit static Hamiltonian (applied to all qubits)
-        H_static_single = static_hamiltonian(omega=omega)
+        H_static_single = static_hamiltonian(vu=vu)
         H_drive_Y_single = drive_Y_hamiltonian(drive_strength)
 
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -197,7 +201,7 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=omega,
+            carrier_freq=vu,
             phase=0.0
         )
 
@@ -218,13 +222,11 @@ class PulseSystem:
         """
         target_qubits = self.operator.verify_wires(target_qubits, "RZ")
 
-        # drive_strength = (theta/2 - omega/2 * t + 2 * np.pi * k) / t  # t = 12
-
-        k = 0.04166666094977508
-        drive_strength = theta * k
+        # k = 0.04166666094977508 old k used for tuning
+        drive_strength = theta / (2 * T * dt)
 
         # static
-        H_static_single = static_hamiltonian(omega=omega)
+        H_static_single = static_hamiltonian(vu=vu)
         H_drive_Z_single = SIGMA_Z
 
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -237,7 +239,7 @@ class PulseSystem:
         )
 
         signal = Signal(
-            envelope=drive_strength,   # constant envelope
+            envelope=drive_strength,  # constant envelope
             carrier_freq=0.0,  # No oscillation for Z drive
             phase=0.0
         )
@@ -268,15 +270,13 @@ class PulseSystem:
         if control_qubit == target_qubit or control_qubit >= num_qubits or target_qubit >= num_qubits:
             raise ValueError("Invalid control or target qubit indices")
 
-        # Static Hamiltonian: sum of ω * σ_z/2 for each qubit
-        H_static_single = static_hamiltonian(omega)
+        H_static_single = static_hamiltonian(vu)
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
 
-        # (1/4)(I ⊗ I - I ⊗ Z - Z ⊗ I + Z ⊗ Z)
-        diagonal_values = [0, 0, 0, np.pi]
-        matrix = np.diag(diagonal_values)
-
-        H_drive = np.diag([0, 0, 0, 0, 0, 0, np.pi, np.pi])
+        # (pi/4)(I ⊗ I - I ⊗ Z - Z ⊗ I + Z ⊗ Z)
+        # diagonal_values = [0, 0, 0, np.pi]
+        # matrix = np.diag(diagonal_values)
+        # H_drive = np.diag([0, 0, 0, 0, 0, 0, np.pi, np.pi])
 
         H_drive = np.zeros((2 ** num_qubits, 2 ** num_qubits), dtype=complex)  # TODO precompute
 
@@ -289,12 +289,11 @@ class PulseSystem:
             rotating_frame=H_static_multi
         )
 
-        t_span = np.arange(0, duration * dt_, dt_)      # accidently finetuned on one less time step
-
+        drive_strength = 1 / (T * dt)       # making time independence
         signal = Signal(
-            envelope=0.11884147603542072,  # constant envelope for this phase
-            carrier_freq=0.0,  # No oscillation for Z ⊗ Z drive
-            phase=np.pi / 4  # TODO why does it converge much better?
+            envelope=drive_strength,
+            carrier_freq=0.0,
+            phase=0.0
         )
 
         result = ham_solver.solve(

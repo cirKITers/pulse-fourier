@@ -191,7 +191,7 @@ def predict_interval(qm, simulator, shots, x, plot=False):
         mapped_probability0, resulting_statevector = compute_expectations(qc, simulator, shots)
         f_x.append(mapped_probability0.item())
     if plot:
-        fx.plot_fx_advanced(x, f_x, "Gate level Fourier Model Prediction")
+        fx.plot_fx(x, f_x, "Gate level Fourier Model Prediction")
     return f_x
 
 def predict_single(qm, simulator, shots, x):

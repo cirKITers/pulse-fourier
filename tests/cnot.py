@@ -57,7 +57,7 @@ for i, (num_qubits, wire_pairs) in enumerate(test_cases):
         result_state = pls.current_state
         prints(result_state)
 
-        sim = statevector_similarity(penny_state, result_state)
+        sim = overlap_components(penny_state, result_state)
         fid = statevector_fidelity(penny_state, result_state)
         print(f"sim = {sim}, fid = {fid}")
         print(20 * "-", "\n")

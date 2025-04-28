@@ -29,6 +29,7 @@ class PulseOperator:
             target_qubits = range(self.num_qubits)
         for q in target_qubits:
             total += self.operator_on_qubit(operator, q)
+
         return total
 
     def operator_on_qubit(self, operator, qubit_index):
