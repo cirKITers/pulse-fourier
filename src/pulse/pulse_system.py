@@ -15,18 +15,13 @@ jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
 
 
-# TODO probably make pulse duration T independent
-
-# TODO test soon: Effect of Pulse-Level parameter on Fourier series (and like that on its coefficients)
+# TODO test: Effect of Pulse-Level parameter on Fourier series (and like that on its coefficients)
 
 # TODO plot the pulses themselves
-
-# TODO: At the end: build pulse machine as class with stored current_state, num_qubits etc; bundle calculation in init
 
 # TODO: play with gate level parameter
 
 # TODO find out if trajectory might be needed and return all together
-
 
 # TODO plot probabilities, plot entanglement, plot blochsphere in lab frame
 
@@ -54,7 +49,7 @@ class PulseSystem:
 
         k = 0.042780586392198006
 
-        H_static_single = static_hamiltonian(vu=vu)
+        H_static_single = static_hamiltonian(vu=nu)
         H_drive_single = drive_hamiltonian(drive_strength=k)
 
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -68,7 +63,7 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=vu,
+            carrier_freq=nu,
             phase=-np.pi / 2
         )
         result = ham_solver.solve(
@@ -133,14 +128,14 @@ class PulseSystem:
         target_qubits = self.operator.verify_wires(target_qubits, "RX")
 
         # RX:
-        integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])
+        integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])        # this equals out exactly the gauss deviations
 
         # strength_scale = 0.3183109217857033     # close to 1/pi
         drive_strength = theta / integral
 
         # drive_strength = drive_strength * strength_scale
 
-        H_static_single = static_hamiltonian(vu=vu)
+        H_static_single = static_hamiltonian(vu=nu)
         H_drive_X_single = drive_X_hamiltonian(drive_strength)
 
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -154,12 +149,12 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=vu,
+            carrier_freq=nu,
             phase=0.0,
         )
 
         # print("drawing...")
-        # gaussian_signal.draw(t0=0, tf=duration, n=1000, function="signal")
+        # gaussian_signal.draw(t0=0, tf=T/2, n=100, function="signal")
         # plt.show()
 
         result = ham_solver.solve(
@@ -184,10 +179,11 @@ class PulseSystem:
     def ry(self, theta, target_qubits='all', plot_prob=False, plot_blochsphere=False):
         target_qubits = self.operator.verify_wires(target_qubits, "RY")
 
-        drive_strength = 0.027235035038834040234 * theta  # 0.042780692999130815               # temporarily not high accuracy
+        integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])
+        drive_strength = theta / integral
 
         # Construct multi-qubit static Hamiltonian (applied to all qubits)
-        H_static_single = static_hamiltonian(vu=vu)
+        H_static_single = static_hamiltonian(vu=nu)
         H_drive_Y_single = drive_Y_hamiltonian(drive_strength)
 
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -201,7 +197,7 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=vu,
+            carrier_freq=nu,
             phase=0.0
         )
 
@@ -226,7 +222,7 @@ class PulseSystem:
         drive_strength = theta / (2 * T * dt)
 
         # static
-        H_static_single = static_hamiltonian(vu=vu)
+        H_static_single = static_hamiltonian(vu=nu)
         H_drive_Z_single = SIGMA_Z
 
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
@@ -244,10 +240,9 @@ class PulseSystem:
             phase=0.0
         )
 
-        # print("drawing...")
-        # # T = duration * dt_
-        # signal.draw(t0=0, tf=duration * dt_, n=100)
-        # plt.show()
+        print("drawing...")
+        signal.draw(t0=0, tf=T/2, n=100, function="signal")
+        plt.show()
 
         result = ham_solver.solve(
             t_span=t_span,
@@ -270,7 +265,7 @@ class PulseSystem:
         if control_qubit == target_qubit or control_qubit >= num_qubits or target_qubit >= num_qubits:
             raise ValueError("Invalid control or target qubit indices")
 
-        H_static_single = static_hamiltonian(vu)
+        H_static_single = static_hamiltonian(nu)
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
 
         # (pi/4)(I ⊗ I - I ⊗ Z - Z ⊗ I + Z ⊗ Z)

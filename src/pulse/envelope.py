@@ -41,7 +41,7 @@ def signal_mapping(params):
     output_signal = convolution(DiscreteSignal(dt=0.1, samples=padded_samples))
 
     # set carrier frequency to v
-    output_signal.carrier_freq = vu
+    output_signal.carrier_freq = nu
 
     return output_signal
 

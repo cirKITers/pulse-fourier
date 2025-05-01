@@ -14,12 +14,12 @@ amp_dissipator = np.sqrt(gamma_amp) * SIGMA_MINUS
 phase_dissipator = np.sqrt(gamma_phase) * SIGMA_Z
 
 hamiltonian_solver = Solver(
-    static_hamiltonian=Operator(vu * SIGMA_Z),
+    static_hamiltonian=Operator(nu * SIGMA_Z),
     hamiltonian_operators=[Operator(drive_strength * SIGMA_X)],
     dissipator_operators=[amp_dissipator, phase_dissipator],
 )
 
-gauss_signal = Signal(envelope=lambda t: 1.0, carrier_freq=vu)
+gauss_signal = Signal(envelope=lambda t: 1.0, carrier_freq=nu)
 
 
 t_span = [0.0, 10.0]

@@ -1,13 +1,16 @@
+import random
+
 import numpy as np
 from matplotlib import pyplot as plt
 
 
-def subplot(coeffs_cos, coeffs_sin):
+def subplot(coeffs_cos, coeffs_sin, coloring="gradual"):
     num_samples = coeffs_cos.shape[0]
     num_coeff = coeffs_cos.shape[1]
 
     num_fx = num_samples  # Assuming num_fx is the same as num_samples for consistency
     cmap = plt.cm.get_cmap('viridis', num_fx)
+    colors = [(random.random(), random.random(), random.random()) for _ in range(num_fx)]
 
     # Assuming coeffs_cos and coeffs_sin are already calculated
 
@@ -16,7 +19,15 @@ def subplot(coeffs_cos, coeffs_sin):
     for idx, ax_ in enumerate(ax):
         ax_.set_title(r"$c_{:02d}$".format(idx))
         for i in range(num_samples):
-            color = cmap(i / num_fx)
+            if coloring == "gradual":
+                color = cmap(i / num_fx)
+
+            elif coloring == "random":
+                color = colors[i]
+
+            else:
+                color = complex_coloring(coeffs_cos[i, idx] + 1j * coeffs_sin[i, idx])
+
             size = 15 + (25 - 15) * (i / (num_samples - 1)) if num_samples > 1 else 20
             ax_.scatter(
                 coeffs_cos[i, idx],
@@ -35,70 +46,95 @@ def subplot(coeffs_cos, coeffs_sin):
     plt.show()
 
 
-
-
-
-
-
-
-
-def plot_multiple_fourier_series(coefficients_list):
+def complex_coloring(z: complex) -> str:
     """
-    Plots the real and imaginary parts of multiple Fourier series, each with a different color.
+    Returns a color (blue, red, green, or purple) based on which component
+    (positive real, negative real, positive imaginary, negative imaginary)
+    has the largest magnitude for a given complex number.
 
     Args:
-        coefficients_list: A list of lists or numpy arrays. Each inner list/array
-                           contains 10 complex Fourier coefficients for one series.
+        z: The complex number.
+
+    Returns:
+        A string representing the color: "blue", "red", "green", or "purple".
     """
-    num_fx = len(coefficients_list)
-    if num_fx == 0:
-        print("No Fourier series to plot.")
-        return
+    real_part = z.real
+    imag_part = z.imag
 
-    cmap = plt.cm.get_cmap('viridis', num_fx)  # Get a colormap
+    magnitudes = {
+        "red": abs(real_part) if real_part > 0 else -1,  # Only positive contributes
+        "blue": abs(real_part) if real_part < 0 else -1,  # Only negative contributes
+        "green": abs(imag_part) if imag_part > 0 else -1,  # Only positive contributes
+        "purple": abs(imag_part) if imag_part < 0 else -1  # Only negative contributes
+    }
 
-    plt.figure(figsize=(16, 8))  # Make the figure bigger
+    largest_magnitude = -1
+    dominant_color = ""
 
-    for i, coefficients in enumerate(coefficients_list):
-        if len(coefficients) != 10:
-            print(f"Warning: Fourier series {i+1} has {len(coefficients)} coefficients, expected 10. Skipping.")
-            continue
+    for color, magnitude in magnitudes.items():
+        if magnitude > largest_magnitude:
+            largest_magnitude = magnitude
+            dominant_color = color
 
-        t = np.linspace(0, 1, 500)
-        f_t = np.zeros_like(t, dtype=complex)
+    return dominant_color
 
-        f_t += coefficients[0]
-
-        for n in range(1, 5):
-            f_t += coefficients[n] * np.exp(2j * np.pi * n * t)
-            f_t += np.conj(coefficients[n]) * np.exp(-2j * np.pi * n * t)
-
-        f_t += coefficients[5] * np.exp(2j * np.pi * 5 * t)
-        f_t += np.conj(coefficients[5]) * np.exp(-2j * np.pi * 5 * t)
-
-        color = cmap(i / num_fx)  # Get color for this series
-
-        plt.subplot(1, 2, 1)  # Real part subplot
-        plt.plot(t, np.real(f_t), color=color, label=f'Series {i+1}')
-        plt.title("Real Part of Fourier Series")
-        plt.xlabel("t")
-        plt.ylabel("Re(f(t))")
-        plt.grid(True)
-
-        plt.subplot(1, 2, 2)  # Imaginary part subplot
-        plt.plot(t, np.imag(f_t), color=color, label=f'Series {i+1}')
-        plt.title("Imaginary Part of Fourier Series")
-        plt.xlabel("t")
-        plt.ylabel("Im(f(t))")
-        plt.grid(True)
-
-    plt.subplot(1, 2, 1)
-    plt.legend()  # Show legend in the real part plot
-
-    plt.subplot(1, 2, 2)
-    plt.legend()  # Show legend in the imaginary part plot
-
-    plt.tight_layout()
-    plt.show()
-
-
+#
+#
+# def plot_multiple_fourier_series(coefficients_list):
+#     """
+#     Plots the real and imaginary parts of multiple Fourier series, each with a different color.
+#
+#     Args:
+#         coefficients_list: A list of lists or numpy arrays. Each inner list/array
+#                            contains 10 complex Fourier coefficients for one series.
+#     """
+#     num_fx = len(coefficients_list)
+#     if num_fx == 0:
+#         print("No Fourier series to plot.")
+#         return
+#
+#     cmap = plt.cm.get_cmap('viridis', num_fx)  # Get a colormap
+#
+#     plt.figure(figsize=(16, 8))  # Make the figure bigger
+#
+#     for i, coefficients in enumerate(coefficients_list):
+#         if len(coefficients) != 10:
+#             print(f"Warning: Fourier series {i+1} has {len(coefficients)} coefficients, expected 10. Skipping.")
+#             continue
+#
+#         t = np.linspace(0, 1, 500)
+#         f_t = np.zeros_like(t, dtype=complex)
+#
+#         f_t += coefficients[0]
+#
+#         for n in range(1, 5):
+#             f_t += coefficients[n] * np.exp(2j * np.pi * n * t)
+#             f_t += np.conj(coefficients[n]) * np.exp(-2j * np.pi * n * t)
+#
+#         f_t += coefficients[5] * np.exp(2j * np.pi * 5 * t)
+#         f_t += np.conj(coefficients[5]) * np.exp(-2j * np.pi * 5 * t)
+#
+#         color = cmap(i / num_fx)  # Get color for this series
+#
+#         plt.subplot(1, 2, 1)  # Real part subplot
+#         plt.plot(t, np.real(f_t), color=color, label=f'Series {i+1}')
+#         plt.title("Real Part of Fourier Series")
+#         plt.xlabel("t")
+#         plt.ylabel("Re(f(t))")
+#         plt.grid(True)
+#
+#         plt.subplot(1, 2, 2)  # Imaginary part subplot
+#         plt.plot(t, np.imag(f_t), color=color, label=f'Series {i+1}')
+#         plt.title("Imaginary Part of Fourier Series")
+#         plt.xlabel("t")
+#         plt.ylabel("Im(f(t))")
+#         plt.grid(True)
+#
+#     plt.subplot(1, 2, 1)
+#     plt.legend()  # Show legend in the real part plot
+#
+#     plt.subplot(1, 2, 2)
+#     plt.legend()  # Show legend in the imaginary part plot
+#
+#     plt.tight_layout()
+#     plt.show()

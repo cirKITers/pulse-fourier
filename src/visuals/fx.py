@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import stats
+import random
 
 
 def plot_fx(x_data, y_data, title="Plot",
@@ -82,23 +83,27 @@ def plot_2fx(x, fx1, fx2, label1="Expectations on Pulse level", label2="Expectat
     plt.show()
 
 
-def plot_nfx(x, fx_list):
+def plot_nfx(x, fx_list, random_color=False):
     """
     Plots a list of functions with gradually different colors.
-
-    Args:
-        x (array-like): The x-values for the plots.
-        fx_list (list of array-like): A list of y-values (functions) to plot.
     """
     num_fx = len(fx_list)
     if num_fx == 0:
         return
 
     plt.figure(figsize=(12, 8))
+
+    # gradual
     cmap = plt.cm.get_cmap('viridis', num_fx)
 
+    # random
+    colors = [(random.random(), random.random(), random.random()) for _ in range(num_fx)]
+
     for i, fx in enumerate(fx_list):
-        color = cmap(i / num_fx)
+        if random_color:
+            color = colors[i]
+        else:
+            color = cmap(i / num_fx)
         plt.plot(x, fx, color=color)
 
     plt.grid(True, linestyle='--', alpha=0.7)

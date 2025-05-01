@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # import after setting backend
 
 signal1 = Signal(
     envelope=gaussian_envelope,
-    carrier_freq=vu,
+    carrier_freq=nu,
     phase=0.0,
 )
 

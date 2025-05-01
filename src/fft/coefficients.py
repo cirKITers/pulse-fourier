@@ -10,7 +10,7 @@ num_coefficients = 10
 
 # TODO verify correctness
 def coefficients(f_x, num_coeff=num_coefficients, complex_valued_fx=False):
-    f_x = f_x - np.mean(f_x)
+    f_x = f_x - np.mean(f_x)    # convention
     N = len(f_x)
     if complex_valued_fx:
         fourier_transform = fft
@@ -19,13 +19,13 @@ def coefficients(f_x, num_coeff=num_coefficients, complex_valued_fx=False):
     c_n = fourier_transform(f_x) / N  # complex coefficients, divided by N for scaling
 
     # exponential form
-    c_n = c_n[:num_coeff]  # complex coefficients truncated
+    c_n = c_n[:num_coeff+1]  # complex coefficients truncated
 
     # trigonometric form
     a_n = 2 * np.real(c_n)  # describes cosinus part
     b_n = -2 * np.imag(c_n)  # describes sinus part
-    a_n[0] = a_n[0] / 2
-    return a_n, b_n
+    a_n[0] = a_n[0]/ 2       # to get rid of the *2 from above, always practically 0
+    return a_n[1:], b_n[1:]  # Return from the second element onwards
 
 
 def coefficient_set(fx_set):

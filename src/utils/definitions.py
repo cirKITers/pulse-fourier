@@ -35,8 +35,9 @@ def drive_X_hamiltonian(drive_strength):
     # original: 2 * np.pi * drive_strength * SIGMA_X / 2
     return drive_strength * SIGMA_X
 
+#2 * np.pi * drive_strength * SIGMA_Y / 2
 def drive_Y_hamiltonian(drive_strength):
-    return 2 * np.pi * drive_strength * SIGMA_Y / 2
+    return drive_strength  * SIGMA_Y
 
 
 # ONE QUBIT STATES
