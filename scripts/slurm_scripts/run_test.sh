@@ -1,1 +1,1 @@
-python scripts/test.py
+python scripts/test_run.py
