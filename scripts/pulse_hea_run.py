@@ -1,6 +1,6 @@
 import numpy as np
 
-from qft_models.pulse_hae import PulseHE
+from qft_models.pulse_hea import PulseHE
 
 from utils.helpers import random_parameter_set2
 from utils.data_handler import save

@@ -1,6 +1,6 @@
 import numpy as np
 
-from qft_models.circuit_hae import CircuitHE
+from qft_models.circuit_hea import CircuitHE
 
 from utils.helpers import random_parameter_set2
 from utils.data_handler import save
