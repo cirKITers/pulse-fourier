@@ -6,9 +6,13 @@ from sklearn.metrics import mean_squared_error
 
 from utils.save import *
 
-num_coefficients = 10
+num_coefficients = 30
 
-# TODO verify correctness
+
+def magnitude(z):
+    return np.abs(z)
+
+
 def coefficients(f_x, num_coeff=num_coefficients, complex_valued_fx=False):
     f_x = f_x - np.mean(f_x)    # convention
     N = len(f_x)
@@ -24,28 +28,28 @@ def coefficients(f_x, num_coeff=num_coefficients, complex_valued_fx=False):
     # trigonometric form
     a_n = 2 * np.real(c_n)  # describes cosinus part
     b_n = -2 * np.imag(c_n)  # describes sinus part
-    a_n[0] = a_n[0]/ 2       # to get rid of the *2 from above, always practically 0
-    return a_n[1:], b_n[1:]  # Return from the second element onwards
+    a_n[0] = a_n[0] / 2       # to get rid of the *2 from above, always practically 0
+    return a_n[1:], b_n[1:], c_n[1:]  # Return from the second element onwards
 
 
 def coefficient_set(fx_set):
     num_samples = len(fx_set)
     coeffs_cos = np.zeros((num_samples, num_coefficients))
     coeffs_sin = np.zeros((num_samples, num_coefficients))
-    # coeffs_all = np.zeros((num_samples, num_coefficients), dtype=np.complex128)
+    coeffs_all = np.zeros((num_samples, num_coefficients), dtype=np.complex128)
 
     for _ in range(num_samples):
-        a, b = coefficients(fx_set[_], num_coeff=num_coefficients)
+        a, b, c = coefficients(fx_set[_], num_coeff=num_coefficients)
         # f_series, mse = fourier_series_tri(x, f_x, a, b, plot=False)
         # print(f"Fourier Approximation MSE: {mse:.6f}")
         coeffs_cos[_, :] = a
         coeffs_sin[_, :] = b
-        # coeffs_all[_, :] = c
+        coeffs_all[_, :] = c
 
-    return coeffs_cos, coeffs_sin
+    return coeffs_cos, coeffs_sin, coeffs_all
 
 
-# Computes for multiple fourier series (a set) samples the coefficients with FFT and returns a visual distribution
+# OLD: Computes for multiple fourier series (a set) samples the coefficients with FFT and returns a visual distribution
 def coefficient_distribution_fft(num_samples, num_coeff, x, fx_set, plot=True):
     coeffs_cos = np.zeros((num_samples, num_coeff))
     coeffs_sin = np.zeros((num_samples, num_coeff))

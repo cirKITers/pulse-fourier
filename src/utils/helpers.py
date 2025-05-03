@@ -4,6 +4,31 @@ from qiskit.quantum_info import Operator, Statevector, partial_trace, DensityMat
 import jax.numpy as jnp
 from scipy.linalg import svd
 
+def is_hermitian(matrix):
+  """
+  Verifies if a given square matrix is Hermitian.
+
+  A matrix A is Hermitian if its conjugate transpose is equal to itself: A^H = A.
+  The conjugate transpose (or Hermitian transpose) is obtained by taking the
+  transpose of the matrix and then taking the complex conjugate of each entry.
+
+  Args:
+    matrix: A square NumPy array representing the matrix to be checked.
+
+  Returns:
+    True if the matrix is Hermitian, False otherwise.
+  """
+  if not isinstance(matrix, np.ndarray):
+    raise TypeError("Input must be a NumPy array.")
+  if matrix.ndim != 2:
+    raise ValueError("Input must be a 2-dimensional array (a matrix).")
+  rows, cols = matrix.shape
+  if rows != cols:
+    raise ValueError("Input matrix must be square.")
+
+  conjugate_transpose = np.conjugate(matrix.T)
+  return np.allclose(matrix, conjugate_transpose)
+
 
 # GENERAL
 def binary_c_t(n, c, t):
@@ -220,6 +245,7 @@ def fourier_series(x, coeffs):
 def prob(statevector):
     return np.abs(statevector) ** 2
 
+# normalized [0, 1]
 def normalized_ground_state_prob(statevector):
     if isinstance(statevector, Statevector):
         statevector = statevector.data
@@ -322,6 +348,13 @@ def is_two_qubit_entangled(state_vector):
     # ac = bd
     return not np.isclose(a * d, b * c)
 
+
+# PARAMETER GENERATION CIRCUIT 15
+def random_parameter_set2(num_samples, ansatze, num_qubits, num_gates):
+    parameter_set = []
+    for times in range(num_samples):
+        parameter_set.append(np.random.uniform(low=-np.pi, high=np.pi, size=(ansatze, num_qubits * num_gates)))
+    return parameter_set
 
 
 # PARAMETER GENERATION

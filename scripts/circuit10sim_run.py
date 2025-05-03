@@ -14,7 +14,7 @@ from fft.coefficients import *
 
 
 num_qubits = 4
-num_layers = 5
+num_layers = 1
 
 # model = Circuit10(num_qubits)
 #
@@ -32,11 +32,11 @@ num_layers = 5
 
 x, fx_set = load_set("../results/fx_data.txt", 1)
 
-a, b = coefficient_set(fx_set)
+_, _, c = coefficient_set(fx_set)
 
-complex_coeffs = a + 1j * b
+magnitude_c = magnitude(c)
 
-complex_correlation(complex_coeffs)
+print(magnitude_c.shape)
 
 
 

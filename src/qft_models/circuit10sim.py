@@ -34,16 +34,22 @@ class Circuit10:
                 qml.StatePrep(init_state, wires=range(self.num_qubits))
 
             for layer_idx in range(num_layers):
-                # Apply RY rotations using trainable parameters
+
+                # ANSATZ
                 for q in range(self.num_qubits):
                     qml.RY(trainable_params[layer_idx, q, 0], wires=q)
-
                 # Fully connected ring
                 for i in range(self.num_qubits):
                     qml.CZ(wires=[i, (i + 1) % self.num_qubits])
+                for q in range(self.num_qubits):
+                    qml.RY(trainable_params[layer_idx, q, 1], wires=q)
 
                 for q in range(self.num_qubits):
-                    qml.RY(features[q], wires=q)
+                    qml.RX(features[q], wires=q)
+
+            # closing train block
+            for q in range(self.num_qubits):
+                qml.RY(trainable_params[layer_idx, q, 0], wires=q)
 
             return qml.state()
 

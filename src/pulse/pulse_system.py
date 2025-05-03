@@ -1,4 +1,5 @@
 import jax
+import numpy as np
 from qiskit_dynamics import Solver, Signal
 from scipy.integrate import quad
 
@@ -47,10 +48,10 @@ class PulseSystem:
 
         target_qubits = self.operator.verify_wires(target_qubits, "H")
 
-        k = 0.042780586392198006
+        k = 0.042780586392198006 * np.pi
 
         H_static_single = static_hamiltonian(vu=nu)
-        H_drive_single = drive_hamiltonian(drive_strength=k)
+        H_drive_single = drive_X_hamiltonian(drive_strength=k)
 
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
         H_drive_multi = self.operator.parallel_hamiltonian("drive", target_qubits, H_drive_single)
@@ -128,7 +129,7 @@ class PulseSystem:
         target_qubits = self.operator.verify_wires(target_qubits, "RX")
 
         # RX:
-        integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])        # this equals out exactly the gauss deviations
+        integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])  # this equals out exactly the gauss deviations
 
         # strength_scale = 0.3183109217857033     # close to 1/pi
         drive_strength = theta / integral
@@ -136,9 +137,9 @@ class PulseSystem:
         # drive_strength = drive_strength * strength_scale
 
         H_static_single = static_hamiltonian(vu=nu)
-        H_drive_X_single = drive_X_hamiltonian(drive_strength)
-
         H_static = self.operator.parallel_hamiltonian("static", "all", H_static_single)
+
+        H_drive_X_single = drive_X_hamiltonian(drive_strength)
         H_drive = self.operator.parallel_hamiltonian("drive", target_qubits, H_drive_X_single)
 
         ham_solver = Solver(
@@ -147,14 +148,20 @@ class PulseSystem:
             rotating_frame=H_static
         )
 
+        # tests
+        # const = gaussian_envelope(T * dt)
+        # print(T*dt)
+        # print(const)
+
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=nu,
+            carrier_freq=0.0,
             phase=0.0,
         )
 
         # print("drawing...")
-        # gaussian_signal.draw(t0=0, tf=T/2, n=100, function="signal")
+        # gaussian_signal.draw(t0=0, tf=60, n=1000000, function="signal")
+        # plt.axvline(x=12, color='red', linestyle='--')
         # plt.show()
 
         result = ham_solver.solve(
@@ -240,9 +247,9 @@ class PulseSystem:
             phase=0.0
         )
 
-        print("drawing...")
-        signal.draw(t0=0, tf=T/2, n=100, function="signal")
-        plt.show()
+        # print("drawing...")
+        # signal.draw(t0=0, tf=T / 2, n=100, function="signal")
+        # plt.show()
 
         result = ham_solver.solve(
             t_span=t_span,
@@ -284,7 +291,7 @@ class PulseSystem:
             rotating_frame=H_static_multi
         )
 
-        drive_strength = 1 / (T * dt)       # making time independence
+        drive_strength = 1 / (T * dt)  # making time independence
         signal = Signal(
             envelope=drive_strength,
             carrier_freq=0.0,
@@ -304,10 +311,10 @@ class PulseSystem:
             self,
             wires
     ):
-        self.h([wires[1]])
-
+        # self.h([wires[1]])
+        self.ry(np.pi / 2, wires[1])
         self.cz(wires)
-
-        self.h([wires[1]])
+        self.ry(np.pi / 2, wires[1])
+        # self.h([wires[1]])
 
         return self.current_state

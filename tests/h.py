@@ -45,9 +45,13 @@ sequence_repetitions = 3
 
 for i, (num_qubits, target_qubits) in enumerate(test_cases):
 
+    num_qubits = 1
+    target_qubits = [0]
+
     print(f"Test Case {i + 1}:")
     print(f"  Number of qubits (n): {num_qubits}")
     print(f"  Target qubits: {target_qubits} \n")
+
 
     c = PennyCircuit(num_qubits)
     for init_function in possible_init_states:
@@ -62,7 +66,7 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
         pls = PulseSystem(num_qubits, init)
 
         for _ in range(sequence_repetitions):
-            pls.h(target_qubits)
+            pls.hadamard(target_qubits)
 
         result_state = pls.current_state
         prints(result_state)

@@ -34,7 +34,7 @@ class PennyCircuit:
 
 
 # DEFINE PENNY GATE HERE
-function_penny = qml.RZ
+function_penny = qml.RX
 
 
 # PARALLEL TEST GENERATION, passed with fid ~ 0.99995, sim ~ 0.995
@@ -63,15 +63,15 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
 
         pls = PulseSystem(num_qubits, init)
 
-
-
-
-
-
         for _ in range(sequence_repetitions):
 
+
+
+
+
+
             # DEFINE PULSE GATE HERE
-            pls.rz(theta, target_qubits)
+            pls.rx(theta, target_qubits)
 
         result_state = pls.current_state
         prints(result_state)

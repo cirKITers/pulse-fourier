@@ -29,15 +29,15 @@ def static_hamiltonian(vu):
 
 def drive_hamiltonian(drive_strength):
     # original: 2 * np.pi * drive_strength * SIGMA_X / 2
-    return np.pi * drive_strength * SIGMA_X
+    return drive_strength * SIGMA_X
 
+# original: 2 * np.pi * drive_strength * SIGMA_X / 2
 def drive_X_hamiltonian(drive_strength):
-    # original: 2 * np.pi * drive_strength * SIGMA_X / 2
     return drive_strength * SIGMA_X
 
 #2 * np.pi * drive_strength * SIGMA_Y / 2
 def drive_Y_hamiltonian(drive_strength):
-    return drive_strength  * SIGMA_Y
+    return drive_strength * SIGMA_Y
 
 
 # ONE QUBIT STATES
