@@ -1,11 +1,8 @@
-import numpy as np
 # import time
 
 from qft_models.hubregtsen import *
 from utils.helpers import *
-from utils.definitions import *
-from utils.load import *
-from visuals.fx import *
+from legacy.load import *
 from visuals.coefficients import *
 from fft.coefficients import *
 
@@ -27,7 +24,7 @@ parameter_set = gradual_parameter_set(num_layers, num_qubits, len(["RZ"]), num_s
 
 # plot_nfx(x, fx_set)
 
-x, fx_set = load_set("../results/fx_data.txt", 0)
+x, fx_set = load_set("../results/_legacy/fx_data.txt", 0)
 
 a, b = coefficient_set(fx_set)
 

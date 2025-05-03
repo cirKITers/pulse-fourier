@@ -38,6 +38,13 @@ class PennyCircuit:
 # len(target_qubits) mod 4 = 2: -1
 # len(target_qubits) mod 4 = 3: -j
 
+a = [-0.30722329+0.00000000j, 0.38777628+0.00000000j, -0.25139828+0.00000000j, -0.10535539+0.00000000j, 0.40421610+0.00000000j, -0.29910115+0.00000000j, 0.01741878+0.00000000j, -0.02537806+0.00000000j, -0.25574962+0.00000000j, -0.32134936+0.00000000j, 0.00120608+0.00000000j, -0.17928497+0.00000000j, -0.04647479+0.00000000j, -0.08830558+0.00000000j, 0.26809529+0.00000000j, -0.38012136+0.00000000j]
+
+b = [0.06105852+0.00014391j, 0.03151961+0.00053626j, -0.39439265-0.00435227j, 0.50940695+0.00095206j, -0.05306745-0.00230890j, -0.12141158+0.00028316j, -0.00620323+0.00083608j, 0.09475259+0.00053844j, 0.07350615-0.00008159j, 0.09102138+0.00001935j, -0.28471323-0.00134931j, -0.34005901+0.00169489j, 0.12227507-0.00121028j, -0.11277453+0.00148208j, 0.43902033+0.00079908j, 0.35047266-0.00296480j]
+
+print(statevector_fidelity(a, b))
+print(overlap_components(a, b))
+
 
 # PARALLEL TEST GENERATION, passed with fid ~ 0.99995, sim ~ 0.995
 test_cases = generate_tests(20)
@@ -66,7 +73,7 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
         pls = PulseSystem(num_qubits, init)
 
         for _ in range(sequence_repetitions):
-            pls.hadamard(target_qubits)
+            pls.h(target_qubits)
 
         result_state = pls.current_state
         prints(result_state)

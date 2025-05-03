@@ -50,6 +50,8 @@ for i, (num_qubits, wire_pairs) in enumerate(test_cases):
         prints(penny_state)
 
         pls = PulseSystem(num_qubits, init)
+
+
         for wire_pair in wire_pairs:
             pls.cz(wire_pair)
 

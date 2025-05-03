@@ -1,10 +1,10 @@
 import numpy as np
 import pennylane as qml
 
-from pulse.pulse_system import PulseSystem
 from utils.helpers import normalized_ground_state_prob
 
-class CircuitHE:
+
+class Circuit9:
 
     def __init__(self, num_qubits):
         self.num_qubits = num_qubits
@@ -16,18 +16,15 @@ class CircuitHE:
         def Ansatz(theta):
 
             for i in range(self.num_qubits):
-                qml.RY(theta[i], wires=i)
+                qml.Hadamard(wires=i)
 
-            for i in range(self.num_qubits):
-                qml.RZ(theta[self.num_qubits + i], wires=i)
-
-            for i in range(self.num_qubits):
-                qml.RY(theta[self.num_qubits*2 + i], wires=i)
-
-            for i in range(self.num_qubits):
+            for i in range(self.num_qubits - 1):
                 control_qubit = i
-                target_qubit = (i + 1) % self.num_qubits
-                qml.CNOT(wires=[control_qubit, target_qubit])
+                target_qubit = i + 1
+                qml.CZ(wires=[control_qubit, target_qubit])
+            #
+            for i in range(self.num_qubits):
+                qml.RX(theta[i], wires=i)
 
         def Encoding(feature):
             for i in range(self.num_qubits):
@@ -36,11 +33,11 @@ class CircuitHE:
         @qml.qnode(dev)
         def circuit():
 
-            Ansatz(theta=params[0])     # 2*num_qubits
+            Ansatz(theta=params[0])  # 2*num_qubits
 
             Encoding(x)
 
-            Ansatz(theta=params[1])     # 2*num_qubits
+            Ansatz(theta=params[1])  # 2*num_qubits
 
             return qml.state()
 
@@ -54,13 +51,17 @@ class CircuitHE:
             # Make fourier series for this sample
             fx = []
             for x_val in x:
-                feature = np.array([x_val] * self.num_qubits)
+
+                feature = x_val
                 param = parameter_set[sample]
-                final_state = self.run(feature, param, draw=True)
+
+                final_state = self.run(feature, param, draw=False)
+
                 fx_val = normalized_ground_state_prob(final_state)
+
                 fx.append(fx_val)
 
             fx_set.append(np.array(fx))
-        return fx_set
 
+        return fx_set
 

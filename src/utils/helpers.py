@@ -350,7 +350,9 @@ def is_two_qubit_entangled(state_vector):
 
 
 # PARAMETER GENERATION CIRCUIT 15
-def random_parameter_set2(num_samples, ansatze, num_qubits, num_gates):
+def random_parameter_set2(num_samples, ansatze, num_qubits, num_gates, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
     parameter_set = []
     for times in range(num_samples):
         parameter_set.append(np.random.uniform(low=-np.pi, high=np.pi, size=(ansatze, num_qubits * num_gates)))

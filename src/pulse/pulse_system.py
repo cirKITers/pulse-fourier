@@ -155,7 +155,7 @@ class PulseSystem:
 
         gaussian_signal = Signal(
             envelope=gaussian_envelope,
-            carrier_freq=0.0,
+            carrier_freq=nu,
             phase=0.0,
         )
 
@@ -311,10 +311,10 @@ class PulseSystem:
             self,
             wires
     ):
-        # self.h([wires[1]])
-        self.ry(np.pi / 2, wires[1])
+        self.h([wires[1]])
+        # self.ry(np.pi / 2, wires[1])
         self.cz(wires)
-        self.ry(np.pi / 2, wires[1])
-        # self.h([wires[1]])
+        # self.ry(np.pi / 2, wires[1])
+        self.h([wires[1]])
 
         return self.current_state

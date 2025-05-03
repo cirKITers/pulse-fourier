@@ -1,37 +1,39 @@
 import numpy as np
-import pennylane as qml
-
 from pulse.pulse_system import PulseSystem
-from utils.helpers import normalized_ground_state_prob
+from utils.definitions import GROUND_STATE
+from utils.helpers import normalized_ground_state_prob, prints
 
 
-class Circuit9:
+class Pulse15:
 
     def __init__(self, num_qubits):
         self.num_qubits = num_qubits
+        self.pls = PulseSystem(num_qubits, GROUND_STATE(num_qubits))
 
     def run(self, x, params, draw=False):
-
-        dev = qml.device("default.qubit", wires=self.num_qubits)
 
         def Ansatz(theta):
 
             for i in range(self.num_qubits):
-                qml.Hadamard(wires=i)
-
-            for i in range(self.num_qubits - 1):
-                control_qubit = i
-                target_qubit = i + 1
-                qml.CZ(wires=[control_qubit, target_qubit])
+                self.pls.ry(theta[i], i)
 
             for i in range(self.num_qubits):
-                qml.RX(theta[i], wires=i)
+                control_qubit = i
+                target_qubit = (i + 1) % self.num_qubits
+                self.pls.cnot(wires=[control_qubit, target_qubit])
+
+            for i in range(self.num_qubits):
+                self.pls.ry(theta[self.num_qubits + i], i)
+
+            for i in range(self.num_qubits):
+                control_qubit = i
+                target_qubit = (i + 1) % self.num_qubits
+                self.pls.cnot(wires=[control_qubit, target_qubit])
 
         def Encoding(feature):
             for i in range(self.num_qubits):
-                qml.RX(feature, wires=i)
+                self.pls.rx(feature, i)
 
-        @qml.qnode(dev)
         def circuit():
 
             Ansatz(theta=params[0])  # 2*num_qubits
@@ -40,10 +42,10 @@ class Circuit9:
 
             Ansatz(theta=params[1])  # 2*num_qubits
 
-            return qml.state()
+            return self.pls.current_state
 
         if draw:
-            print(qml.draw(circuit)())
+            print("no drawing on pulse level.")
         return circuit()
 
     def sample_fourier(self, x, parameter_set, num_samples):
@@ -52,11 +54,14 @@ class Circuit9:
             # Make fourier series for this sample
             fx = []
             for x_val in x:
-                feature = np.array([x_val] * self.num_qubits)
+                feature = x_val
                 param = parameter_set[sample]
-                final_state = self.run(feature, param, draw=True)
+                final_state = self.run(feature, param, draw=False)
+
                 fx_val = normalized_ground_state_prob(final_state)
                 fx.append(fx_val)
 
             fx_set.append(np.array(fx))
         return fx_set
+
+
