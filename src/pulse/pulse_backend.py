@@ -4,6 +4,7 @@ from scipy.integrate import quad
 from pulse.operator import *
 
 from utils.definitions import *
+from utils.helpers import binary_c_t
 
 jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
@@ -47,10 +48,6 @@ class PulseBackend:
         H_drive_single = drive_X_hamiltonian(drive_strength=k)
 
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
-
-        print(H_static_single)
-        print(H_static_multi)
-
         H_drive_multi = self.operator.parallel_hamiltonian("drive", target_qubits, H_drive_single)
 
         ham_solver = Solver(
