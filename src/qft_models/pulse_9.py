@@ -1,5 +1,5 @@
 import numpy as np
-from pulse.pulse_system import PulseSystem
+from pulse.pulse_backend import PulseBackend
 from utils.definitions import GROUND_STATE
 from utils.helpers import normalized_ground_state_prob
 
@@ -8,7 +8,7 @@ class Pulse9:
 
     def __init__(self, num_qubits):
         self.num_qubits = num_qubits
-        self.pls = PulseSystem(num_qubits, GROUND_STATE(num_qubits))
+        self.pls = PulseBackend(num_qubits, GROUND_STATE(num_qubits))
 
     def run(self, x, params, draw=False):
 

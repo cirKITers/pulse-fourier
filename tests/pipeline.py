@@ -2,7 +2,7 @@ import numpy as np
 import pennylane as qml
 import random
 
-from pulse.pulse_system import *
+from pulse.pulse_backend import *
 from utils.definitions import GROUND_STATE, EXCITED_STATE, SUPERPOSITION_STATE_H, RANDOM_STATE, PHASESHIFTED_STATE
 from utils.helpers import prints, overlap_components, statevector_fidelity
 from helpers import *

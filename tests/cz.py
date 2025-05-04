@@ -1,7 +1,7 @@
 import numpy as np
 import pennylane as qml
 
-from pulse.pulse_system import *
+from pulse.pulse_backend import *
 from tests.helpers import possible_init_states
 from tests.pipeline import *
 from utils.definitions import *
@@ -49,7 +49,7 @@ for i, (num_qubits, wire_pairs) in enumerate(test_cases):
         penny_state = c.run_quick_circuit(wire_pairs, init_state=init.data)
         prints(penny_state)
 
-        pls = PulseSystem(num_qubits, init)
+        pls = PulseBackend(num_qubits, init)
 
 
         for wire_pair in wire_pairs:

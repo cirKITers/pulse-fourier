@@ -1,16 +1,9 @@
 import jax
-import numpy as np
-from qiskit_dynamics import Solver, Signal
 from scipy.integrate import quad
 
-from visuals.probabilites import *
-from visuals.bloch_sphere import *
-from constants import *
-from pulse.envelope import gaussian_envelope
 from pulse.operator import *
 
-matplotlib.use('TkAgg')  # Force TkAgg backend
-import matplotlib.pyplot as plt  # import after setting backend
+from utils.definitions import *
 
 jax.config.update("jax_enable_x64", True)
 jax.config.update('jax_platform_name', 'cpu')
@@ -36,7 +29,7 @@ jax.config.update('jax_platform_name', 'cpu')
 # TODO pre calc common values like np.pi /2 for comp acceleration
 
 
-class PulseSystem:
+class PulseBackend:
 
     def __init__(self, num_qubits, initial_state):
         self.num_qubits = num_qubits
@@ -54,6 +47,10 @@ class PulseSystem:
         H_drive_single = drive_X_hamiltonian(drive_strength=k)
 
         H_static_multi = self.operator.parallel_hamiltonian("static", "all", H_static_single)
+
+        print(H_static_single)
+        print(H_static_multi)
+
         H_drive_multi = self.operator.parallel_hamiltonian("drive", target_qubits, H_drive_single)
 
         ham_solver = Solver(

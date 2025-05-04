@@ -1,5 +1,5 @@
 import numpy as np
-from pulse.pulse_system import PulseSystem
+from pulse.pulse_backend import PulseBackend
 from tests.helpers import possible_init_states
 from tests.pipeline import generate_tests
 import pennylane as qml
@@ -57,8 +57,8 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
         #
         # prints(penny_state)
 
-        pls = PulseSystem(num_qubits, init)
-        pls1 = PulseSystem(num_qubits, init)
+        pls = PulseBackend(num_qubits, init)
+        pls1 = PulseBackend(num_qubits, init)
 
         for _ in range(sequence_repetitions):
             pls.test(theta, target_qubits)

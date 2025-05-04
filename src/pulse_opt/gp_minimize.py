@@ -3,7 +3,7 @@ from skopt import gp_minimize
 from skopt.space import Real, Integer
 import joblib
 
-from pulse.pulse_system import *
+from pulse.pulse_backend import *
 
 expected_states = [
     PHI_PLUS,
