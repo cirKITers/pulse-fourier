@@ -17,7 +17,7 @@ Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the
 
 [1] https://arxiv.org/abs/2008.08605 (The effect of data encoding on the expressive power of variational quantum machine learning models, Schuld 2020)
 
-[2] https://joss.theoj.org/papers/10.21105/joss.05853
+[2] https://joss.theoj.org/papers/10.21105/joss.05853 (Qiskit Dynamics: A Python package for simulating the time dynamics of quantum systems)
 
 ## Setup
 
