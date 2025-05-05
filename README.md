@@ -4,7 +4,7 @@ Quantum Fourier Models (QFMs) are implemented at the pulse level using Qiskit Dy
 
 ## Context
 
-In the realm of quantum machine learning, quantum models can generally be described as a partial Fourier series, where the data encoding gates influence the accessible frequencies, while their parameters, often denoted as $\theta$, determine the amplitudes and phases of these frequencies [[1]](https://pennylane.ai/qml/demos/tutorial_expressivity_fourier_series). These quantum models will henceforth be referred to as quantum fourier models (QFMs).
+In the realm of quantum machine learning, quantum models can generally be described as a partial Fourier series, where the data encoding gates influence the accessible frequencies, while their parameters, often denoted as $\theta$, determine the amplitudes and phases of these frequencies [[1]](https://arxiv.org/abs/2008.08605). These quantum models will henceforth be referred to as quantum fourier models (QFMs).
  
 On hardware platforms such as superconducting circuits or trapped ions, the execution of quantum algorithms relies on precisely shaped and timed electromagnetic pulses. Finer control over the qubit's time evolution is achieved at the pulse level by varying pulse parameters, denoted as $\phi$.
 
@@ -15,7 +15,7 @@ First, to implement QFMs at the pulse level. This involves defining the underlyi
 Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the resulting partial Fourier series representation of the quantum model's output, while keeping the abstract gate-level parameters $\theta$ constant.
 
 
-[1] https://pennylane.ai/qml/demos/tutorial_expressivity_fourier_series
+[1] https://arxiv.org/abs/2008.08605 (The effect of data encoding on the expressive power of variational quantum machine learning models, Schuld 2020)
 
 [2] https://joss.theoj.org/papers/10.21105/joss.05853
 
