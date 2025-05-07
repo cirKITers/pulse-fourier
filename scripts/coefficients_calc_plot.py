@@ -9,12 +9,13 @@ from visuals.fx import plot_nfx
 import pandas as pd
 import numpy as np
 
+
 # const
 num_samples = 5000
 num_qubits = 4
 
-circuit_name = "Circuit 15"
-file_to_load = "../results/c15_exp/gate/Circuit15_Random_4qubits_1layers_5000samples_0start_20stop_1000points.json"
+circuit_name = "Circuit 9"
+file_to_load = "../results/c9_exp/gate/Circuit9_Random_4qubits_1layers_5000samples_0start_20stop_1000points.json"
 loaded_x, loaded_fx_set = load(file_to_load)
 
 
@@ -22,7 +23,6 @@ loaded_x, loaded_fx_set = load(file_to_load)
 
 
 # --- Data Preparation --- DEFINE NUMBER OF PARAMS AND SEED CORRECTLY DEPENDING ON CIRCUIT
-
 num_params = 8
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
 # parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
@@ -34,9 +34,25 @@ param_array = np.array([p.flatten() for p in parameter_set])
 
 # --- Data Preparation --- DECIDE NUMBER COEFFS
 
-num_coeffs = 10
+num_coeffs = 30
 a, b, c = coefficient_set(loaded_fx_set, num_coeff=num_coeffs)
 complex_coeffs = c
+
+
+
+X = np.fft.fft(loaded_fx_set[0]) / len(loaded_fx_set[0])
+X_shift = np.fft.fftshift(X)
+X_freq = np.fft.fftfreq(X.size, 1/6)
+X_freq_shift = np.fft.fftshift(X_freq)
+
+
+fig, ax = plt.subplots()
+ax.stem(X_freq_shift, np.abs(X_shift)/X_shift.size)
+plt.xlabel('Frequency')
+plt.ylabel('Amplitude')
+plt.show()
+
+
 
 
 order_coefficients_sets(complex_coeffs)

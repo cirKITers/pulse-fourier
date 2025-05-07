@@ -7,10 +7,17 @@ from utils.data_handler import save
 
 
 # Function parameter
+# start = 0
+# stop = 20
+# points = 1000  # 1000
+# x = np.linspace(start, stop, points)
+
+num_discrete_points = 20
+interval_length = 2 * np.pi
+x = np.arange(0, interval_length + interval_length / num_discrete_points, interval_length / num_discrete_points)
 start = 0
-stop = 20
-points = 1000  # 1000
-x = np.linspace(start, stop, points)
+stop = interval_length
+points = num_discrete_points + 1
 
 # Samples
 num_samples = 5000

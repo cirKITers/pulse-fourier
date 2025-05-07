@@ -13,41 +13,45 @@ def magnitude(z):
 
 
 def coefficients(f_x, num_coeff=num_coefficients_standard, complex_valued_fx=False):
+
     f_x = f_x - np.mean(f_x)    # convention
     N = len(f_x)
     if complex_valued_fx:
         fourier_transform = fft
     else:
-        fourier_transform = rfft
+        fourier_transform = rfft        # in this case returns only N/2+1 many coeffs because of symmetrie
     c_n = fourier_transform(f_x) / N  # complex coefficients, divided by N for scaling
 
+    # print(c_n)
     # exponential form
-    c_n = c_n[:num_coeff+1]  # complex coefficients truncated
+    # c_n = c_n[:num_coeff+1]  # complex coefficients truncated
 
     # trigonometric form
-    a_n = 2 * np.real(c_n)  # describes cosinus part
-    b_n = -2 * np.imag(c_n)  # describes sinus part
-    a_n[0] = a_n[0] / 2       # to get rid of the *2 from above, always practically 0
-    return a_n[1:], b_n[1:], c_n[1:]  # Return from the second element onwards
+    # a_n = 2 * np.real(c_n)  # describes cosinus part
+    # b_n = -2 * np.imag(c_n)  # describes sinus part
+    # a_n[0] = a_n[0] / 2       # to get rid of the *2 from above, always practically 0
+    return c_n  # Return from the second element onwards
 
 
 def coefficient_set(fx_set, num_coeff=num_coefficients_standard):
     num_samples = len(fx_set)
-    coeffs_cos = np.zeros((num_samples, num_coeff))
-    coeffs_sin = np.zeros((num_samples, num_coeff))
+    # coeffs_cos = np.zeros((num_samples, num_coeff))
+    # coeffs_sin = np.zeros((num_samples, num_coeff))
     coeffs_all = np.zeros((num_samples, num_coeff), dtype=np.complex128)
 
     # very fast for multiple 1000 samples
     for sample in range(num_samples):
 
-        a, b, c = coefficients(fx_set[sample], num_coeff=num_coeff)
+        c = coefficients(fx_set[sample], num_coeff=num_coeff)
+
         # f_series, mse = fourier_series_tri(x, f_x, a, b, plot=False)
         # print(f"Fourier Approximation MSE: {mse:.6f}")
-        coeffs_cos[sample, :] = a
-        coeffs_sin[sample, :] = b
+        # coeffs_cos[sample, :] = a
+        # coeffs_sin[sample, :] = b
+
         coeffs_all[sample, :] = c
 
-    return coeffs_cos, coeffs_sin, coeffs_all
+    return coeffs_all
 
 
 def order_coefficients_sets(complex_coeffs):
@@ -65,59 +69,103 @@ def order_coefficients_sets(complex_coeffs):
     # You can also get the sorted average magnitudes if you need them
     sorted_average_magnitudes = average_magnitudes[sorted_indices]
 
-    print("Original shape of complex coefficients:", complex_coeffs.shape)
-    print("Shape of ordered coefficients:", ordered_coefficients.shape)
+    # print("Original shape of complex coefficients:", complex_coeffs.shape)
+    # print("Shape of ordered coefficients:", ordered_coefficients.shape)
     print("Sorted indices (indicating the original column order):", sorted_indices)
-    print("Sorted average magnitudes:", sorted_average_magnitudes)
+    # print("Sorted average magnitudes:", sorted_average_magnitudes)
 
-    return sorted_indices, average_magnitudes
+    return ordered_coefficients
 
 
-def linearRegression(param_arrays, complex_coeffs, num_params, num_coeffs):
-    # 2. Calculate Magnitudes (as before, but now within the analysis)
-    magnitudes = np.abs(complex_coeffs)  # Shape: (5000, 3)
+# def linearRegression(param_arrays, complex_coeffs, num_params, num_coeffs):
+#     # 2. Calculate Magnitudes (as before, but now within the analysis)
+#     magnitudes = np.abs(complex_coeffs)  # Shape: (5000, 3)
+#
+#     # b) Linear Regression (for each coefficient magnitude as a function of parameters)
+#     from sklearn.linear_model import LinearRegression
+#     import statsmodels.api as sm  # For more detailed statistics
+#
+#     # --- Linear Regression and Coefficient Extraction ---
+#     regression_coefficients = np.zeros((num_params, num_coeffs))
+#
+#     for j in range(num_coeffs):
+#         X = param_arrays  # Shape: (5000, 3)
+#         y = magnitudes[:, j]  # Shape: (5000,)
+#
+#         # Using scikit-learn
+#         model = LinearRegression()
+#         model.fit(X, y)
+#         # print(f"\nLinear Regression for Coefficient Magnitude {j+1} (scikit-learn):")
+#         # print(f"  Coefficients: {model.coef_}")
+#         # print(f"  Intercept: {model.intercept_}")
+#         # print(f"  R-squared: {model.score(X, y)}")
+#
+#         # Using statsmodels for more detailed output
+#         X_with_intercept = sm.add_constant(X)  # Add a constant term for the intercept
+#         model_sm = sm.OLS(y, X_with_intercept).fit()
+#         # print(f"\nLinear Regression for Coefficient Magnitude {j+1} (statsmodels):")
+#         # print(model_sm.summary())
+#         regression_coefficients[:, j] = model.coef_
+#
+#     # --- Plotting the Heatmap of Regression Coefficients ---
+#     plt.figure(figsize=(10, 8))
+#     im = plt.imshow(regression_coefficients, cmap="coolwarm", aspect="auto")
+#
+#     # Add colorbar
+#     cbar = plt.colorbar(im)
+#     cbar.set_label("Regression Coefficient")
+#
+#     # Add labels
+#     plt.xticks(range(num_coeffs), [f"Coeff {i + 1}" for i in range(num_coeffs)])
+#     plt.yticks(range(num_params), [f"Param {i + 1}" for i in range(num_params)])
+#
+#     plt.title("Heatmap of Linear Regression Coefficients")
+#     plt.tight_layout()
+#     plt.show()
 
-    # b) Linear Regression (for each coefficient magnitude as a function of parameters)
-    from sklearn.linear_model import LinearRegression
-    import statsmodels.api as sm  # For more detailed statistics
 
-    # --- Linear Regression and Coefficient Extraction ---
-    regression_coefficients = np.zeros((num_params, num_coeffs))
 
-    for j in range(num_coeffs):
-        X = param_arrays  # Shape: (5000, 3)
-        y = magnitudes[:, j]  # Shape: (5000,)
+def check_2pi_periodicity(x, y, tolerance=1e-6):
+    """
+    Checks if a function, given by its values at discrete points,
+    exhibits a period of approximately 2*pi.
 
-        # Using scikit-learn
-        model = LinearRegression()
-        model.fit(X, y)
-        # print(f"\nLinear Regression for Coefficient Magnitude {j+1} (scikit-learn):")
-        # print(f"  Coefficients: {model.coef_}")
-        # print(f"  Intercept: {model.intercept_}")
-        # print(f"  R-squared: {model.score(X, y)}")
+    Args:
+        x (np.ndarray): Array of x-values.
+        y (np.ndarray): Array of corresponding y-values (function values).
+        tolerance (float, optional): Tolerance for comparing floating-point numbers.
+                                     Defaults to 1e-6.
 
-        # Using statsmodels for more detailed output
-        X_with_intercept = sm.add_constant(X)  # Add a constant term for the intercept
-        model_sm = sm.OLS(y, X_with_intercept).fit()
-        # print(f"\nLinear Regression for Coefficient Magnitude {j+1} (statsmodels):")
-        # print(model_sm.summary())
-        regression_coefficients[:, j] = model.coef_
+    Returns:
+        bool: True if the function appears to have a period of 2*pi, False otherwise.
+    """
+    period = 2 * np.pi
+    n_points = len(x)
 
-    # --- Plotting the Heatmap of Regression Coefficients ---
-    plt.figure(figsize=(10, 8))
-    im = plt.imshow(regression_coefficients, cmap="coolwarm", aspect="auto")
+    # We need to compare y(t) with y(t + 2pi) for various t.
+    # Since we have discrete points, we need to find indices that correspond
+    # to x_i and x_i + 2pi.
 
-    # Add colorbar
-    cbar = plt.colorbar(im)
-    cbar.set_label("Regression Coefficient")
+    for i in range(n_points):
+        x_val = x[i]
+        x_shifted = x_val + period
 
-    # Add labels
-    plt.xticks(range(num_coeffs), [f"Coeff {i + 1}" for i in range(num_coeffs)])
-    plt.yticks(range(num_params), [f"Param {i + 1}" for i in range(num_params)])
+        # Find the index of the point closest to x_shifted
+        idx_shifted = np.argmin(np.abs(x - x_shifted))
 
-    plt.title("Heatmap of Linear Regression Coefficients")
-    plt.tight_layout()
-    plt.show()
+        print(x_val)
+        print(x_shifted)
+        print(idx_shifted)
+
+        # Ensure the shifted point is within the bounds of our x array
+        if np.abs(x[idx_shifted] - x_shifted) < (x[1] - x[0]) / 2:  # Check if close enough
+
+
+            if not np.isclose(y[i], y[idx_shifted], atol=tolerance):
+                print(i)
+                return False  # Periodicity check failed for this point
+
+    return True
 
 
 
