@@ -12,20 +12,20 @@ authors = [{name = "Tilmann Rothe Santos"}]
 requires-python = ">=3.8"
 dependencies = [
     "numpy~=2.0.2",
-    "qutip~=5.0.4",         # "qutip~=5.1.1"
+    #"qutip~=5.0.4",         # "qutip~=5.1.1"
     "qiskit==1.4.2",
     "qiskit-dynamics~=0.5.1",
-    "qiskit-aer~=0.17.0",
-    "sympy~=1.13.3",
-    "matplotlib~=3.9.0",       #"matplotlib~=3.10.0"
+#    "qiskit-aer~=0.17.0",
+#    "sympy~=1.13.3",
+#    "matplotlib~=3.9.0",       #"matplotlib~=3.10.0"
     "scipy~=1.13.1",            # "scipy~=1.15.1
-    "scikit-learn~=1.6.1",
+#    "scikit-learn~=1.6.1",
     "jax~=0.4.3",               # "jax~=0.5.0"
-    "pandas~=2.2.3",
-    "seaborn~=0.13.2",
-    "plotly~=6.0.0",
-    "optax~=0.2.4",
-    "PennyLane~=0.40.0",
+#    "pandas~=2.2.3",
+#    "seaborn~=0.13.2",
+#    "plotly~=6.0.0",
+#    "optax~=0.2.4",
+#    "PennyLane~=0.40.0",
     "joblib~=1.4.2",
 ]
 

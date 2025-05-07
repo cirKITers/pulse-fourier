@@ -1,7 +1,4 @@
-import csv
 import json
-import os
-
 import numpy as np
 
 def load(file_path):
