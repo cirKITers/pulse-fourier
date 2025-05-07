@@ -1,6 +1,12 @@
 import jax
+import matplotlib
+from matplotlib import pyplot as plt
 from scipy.integrate import quad
 
+from visuals.bloch_sphere import bloch_sphere_trajectory, bloch_sphere_multiqubit_trajectory
+from visuals.probabilites import plot_populations
+
+matplotlib.use('TkAgg')
 from pulse.operator import *
 
 from utils.definitions import *
@@ -165,13 +171,21 @@ class PulseBackend:
             signals=[gaussian_signal]
         )
 
-        # Does not work for multi qubit
-        # plot probs
-        # pop = [np.abs(y.data[0]) ** 2 for y in result.y]
-        # start = 50
-        # stop = 58
-        # plt.plot(t_span[start:stop], pop[start:stop])
-        # plt.show()
+        # ROT FRAME
+        # bloch_sphere_trajectory(result.y)
+
+        # LAB FRAME
+        # trajectory_lab = []
+        # from scipy.linalg import expm
+        # t_max = t_span[-1]
+        # U_static = expm(-1j * H_static * t_max)
+        # for state in result.y:
+        #     # print(f"state.data shape: {state.data.shape}")
+        #     trajectory_lab.append(Statevector(U_static @ state.data))
+        # bloch_sphere_multiqubit_trajectory(trajectory_lab)
+
+        # POPULATIONS
+        plot_populations(result, T)
 
         self.current_state = result.y[-1]
 

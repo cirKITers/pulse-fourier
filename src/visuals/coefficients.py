@@ -54,10 +54,8 @@ def visualize_complex_colors(fx_set, complex_colors):
     plt.xticks([])  # Remove x-axis ticks
     plt.yticks([])  # Remove y-axis ticks
     plt.axis('off')  # Turn off axes
-    plt.tight_layout() #tight layout
+    plt.tight_layout() # tight layout
     plt.show()
-
-
 
 
 def subplot(coeffs_cos, coeffs_sin, coloring="gradual"):
@@ -72,7 +70,12 @@ def subplot(coeffs_cos, coeffs_sin, coloring="gradual"):
 
     fig, ax = plt.subplots(1, num_coeff, figsize=(20, 10))
 
+    print(f"starting subplots... (0-{num_coeff-1})")
+
     for idx, ax_ in enumerate(ax):
+
+        print(f"subplot number: {idx}")
+
         ax_.set_title(r"$c_{:02d}$".format(idx))
         for i in range(num_samples):
             if coloring == "gradual":
@@ -84,7 +87,9 @@ def subplot(coeffs_cos, coeffs_sin, coloring="gradual"):
             else:
                 color = complex_coloring(coeffs_cos[i, idx] + 1j * coeffs_sin[i, idx])
 
-            size = 15 + (25 - 15) * (i / (num_samples - 1)) if num_samples > 1 else 20
+            # size = 15 + (25 - 15) * (i / (num_samples - 1)) if num_samples > 1 else 20
+            size = 20
+
             ax_.scatter(
                 coeffs_cos[i, idx],
                 coeffs_sin[i, idx],

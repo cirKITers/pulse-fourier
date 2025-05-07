@@ -1,5 +1,8 @@
 from matplotlib import pyplot as plt
 
+from constants import dt
+
+
 # https://qiskit-community.github.io/qiskit-dynamics/tutorials/qiskit_pulse.html
 def plot_populations(sol, T):
     pop0 = [psi.probabilities()[0] for psi in sol.y]
@@ -12,8 +15,8 @@ def plot_populations(sol, T):
     plt.ylabel("Population")
     plt.legend(frameon=False)
     plt.ylim([0, 1.05])
-    plt.xlim([0, 2*T])
-    plt.vlines(T, 0, 1.05, "k", linestyle="dashed")
+    plt.xlim([0, T*dt+8])      # plt.xlim([0, 2*T])
+    plt.vlines(T*dt, 0, 1.05, "k", linestyle="dashed")
     plt.show()
 
 

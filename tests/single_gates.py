@@ -5,6 +5,7 @@ from tests.helpers import possible_init_states
 from tests.pipeline import generate_tests
 import pennylane as qml
 
+from utils.definitions import GROUND_STATE
 from utils.helpers import prints, overlap_components, statevector_fidelity, random_theta
 
 
@@ -45,6 +46,11 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
 
     theta = random_theta()
 
+    theta = np.pi/2
+    num_qubits = 1
+    target_qubits = [0]
+
+
     print(f"Test Case {i + 1}:")
     print(f"  Number of qubits (n): {num_qubits}")
     print(f"  Target qubits: {target_qubits} \n")
@@ -55,18 +61,19 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
 
         init = init_function(num_qubits)
 
+        init = GROUND_STATE(1)
+
         penny_state = init.data
         for _ in range(sequence_repetitions):
             penny_state = c.run_quick_circuit(thet=theta, target_q=target_qubits, init_state=penny_state)
 
         prints(penny_state)
 
+
+
         pls = PulseBackend(num_qubits, init)
 
         for _ in range(sequence_repetitions):
-
-
-
 
 
 

@@ -5,7 +5,6 @@ from qft_models.circuit_9 import Circuit9
 from utils.helpers import random_parameter_set2
 from utils.data_handler import save
 
-
 # Function parameter
 start = 0
 stop = 20
@@ -33,10 +32,7 @@ fx_set = model.sample_fourier(x, parameter_set, num_samples)
 save("Circuit9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c9_exp/gate/")
 
 
-# file_to_load = "../results/c9_exp/Circuit9_Random_4qubits_1layers_2samples_0start_20stop_2points.json"
-# loaded_x, loaded_fx_set = load(file_to_load)
 
-# plot_nfx(x, fx_set, random_color=True)
 
 
 

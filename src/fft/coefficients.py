@@ -6,14 +6,13 @@ from sklearn.metrics import mean_squared_error
 
 from utils.data_handler import *
 
-num_coefficients = 30
-
+num_coefficients_standard = 8
 
 def magnitude(z):
     return np.abs(z)
 
 
-def coefficients(f_x, num_coeff=num_coefficients, complex_valued_fx=False):
+def coefficients(f_x, num_coeff=num_coefficients_standard, complex_valued_fx=False):
     f_x = f_x - np.mean(f_x)    # convention
     N = len(f_x)
     if complex_valued_fx:
@@ -32,23 +31,98 @@ def coefficients(f_x, num_coeff=num_coefficients, complex_valued_fx=False):
     return a_n[1:], b_n[1:], c_n[1:]  # Return from the second element onwards
 
 
-def coefficient_set(fx_set):
+def coefficient_set(fx_set, num_coeff=num_coefficients_standard):
     num_samples = len(fx_set)
-    coeffs_cos = np.zeros((num_samples, num_coefficients))
-    coeffs_sin = np.zeros((num_samples, num_coefficients))
-    coeffs_all = np.zeros((num_samples, num_coefficients), dtype=np.complex128)
+    coeffs_cos = np.zeros((num_samples, num_coeff))
+    coeffs_sin = np.zeros((num_samples, num_coeff))
+    coeffs_all = np.zeros((num_samples, num_coeff), dtype=np.complex128)
 
-    for _ in range(num_samples):
-        a, b, c = coefficients(fx_set[_], num_coeff=num_coefficients)
+    # very fast for multiple 1000 samples
+    for sample in range(num_samples):
+
+        a, b, c = coefficients(fx_set[sample], num_coeff=num_coeff)
         # f_series, mse = fourier_series_tri(x, f_x, a, b, plot=False)
         # print(f"Fourier Approximation MSE: {mse:.6f}")
-        coeffs_cos[_, :] = a
-        coeffs_sin[_, :] = b
-        coeffs_all[_, :] = c
+        coeffs_cos[sample, :] = a
+        coeffs_sin[sample, :] = b
+        coeffs_all[sample, :] = c
 
     return coeffs_cos, coeffs_sin, coeffs_all
 
 
+def order_coefficients_sets(complex_coeffs):
+    magnitudes = np.abs(complex_coeffs)
+
+    # Calculate the average magnitude for each of the 30 coefficients across all samples
+    average_magnitudes = np.mean(magnitudes, axis=0)
+
+    # Get the indices that would sort the average magnitudes in ascending order
+    sorted_indices = np.argsort(average_magnitudes)
+
+    # Order the coefficients based on their average magnitude
+    ordered_coefficients = complex_coeffs[:, sorted_indices]
+
+    # You can also get the sorted average magnitudes if you need them
+    sorted_average_magnitudes = average_magnitudes[sorted_indices]
+
+    print("Original shape of complex coefficients:", complex_coeffs.shape)
+    print("Shape of ordered coefficients:", ordered_coefficients.shape)
+    print("Sorted indices (indicating the original column order):", sorted_indices)
+    print("Sorted average magnitudes:", sorted_average_magnitudes)
+
+    return sorted_indices, average_magnitudes
+
+
+def linearRegression(param_arrays, complex_coeffs, num_params, num_coeffs):
+    # 2. Calculate Magnitudes (as before, but now within the analysis)
+    magnitudes = np.abs(complex_coeffs)  # Shape: (5000, 3)
+
+    # b) Linear Regression (for each coefficient magnitude as a function of parameters)
+    from sklearn.linear_model import LinearRegression
+    import statsmodels.api as sm  # For more detailed statistics
+
+    # --- Linear Regression and Coefficient Extraction ---
+    regression_coefficients = np.zeros((num_params, num_coeffs))
+
+    for j in range(num_coeffs):
+        X = param_arrays  # Shape: (5000, 3)
+        y = magnitudes[:, j]  # Shape: (5000,)
+
+        # Using scikit-learn
+        model = LinearRegression()
+        model.fit(X, y)
+        # print(f"\nLinear Regression for Coefficient Magnitude {j+1} (scikit-learn):")
+        # print(f"  Coefficients: {model.coef_}")
+        # print(f"  Intercept: {model.intercept_}")
+        # print(f"  R-squared: {model.score(X, y)}")
+
+        # Using statsmodels for more detailed output
+        X_with_intercept = sm.add_constant(X)  # Add a constant term for the intercept
+        model_sm = sm.OLS(y, X_with_intercept).fit()
+        # print(f"\nLinear Regression for Coefficient Magnitude {j+1} (statsmodels):")
+        # print(model_sm.summary())
+        regression_coefficients[:, j] = model.coef_
+
+    # --- Plotting the Heatmap of Regression Coefficients ---
+    plt.figure(figsize=(10, 8))
+    im = plt.imshow(regression_coefficients, cmap="coolwarm", aspect="auto")
+
+    # Add colorbar
+    cbar = plt.colorbar(im)
+    cbar.set_label("Regression Coefficient")
+
+    # Add labels
+    plt.xticks(range(num_coeffs), [f"Coeff {i + 1}" for i in range(num_coeffs)])
+    plt.yticks(range(num_params), [f"Param {i + 1}" for i in range(num_params)])
+
+    plt.title("Heatmap of Linear Regression Coefficients")
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+#----------------------
 # OLD: Computes for multiple fourier series (a set) samples the coefficients with FFT and returns a visual distribution
 def coefficient_distribution_fft(num_samples, num_coeff, x, fx_set, plot=True):
     coeffs_cos = np.zeros((num_samples, num_coeff))

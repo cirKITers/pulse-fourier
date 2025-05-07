@@ -9,11 +9,11 @@ from utils.data_handler import save
 # Function parameter
 start = 0
 stop = 20
-points = 1000
+points = 1000  # 1000
 x = np.linspace(start, stop, points)
 
 # Samples
-num_samples = 5000
+num_samples = 5000  # 5000
 
 # Hyper parameter
 num_qubits = 4  # scale
