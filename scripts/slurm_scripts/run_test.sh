@@ -8,6 +8,6 @@
 
 module load devel/python/3.11.7
 
-source ~/pulse-fourier/.venv/bin/activate
+source /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/.venv/bin/activate
 
-python ~/pulse-fourier/scripts/pulse_9_run.py
+python /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/scripts/pulse_9_run.py

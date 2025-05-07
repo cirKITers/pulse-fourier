@@ -1,21 +1,46 @@
+import numpy as np
 from matplotlib import pyplot as plt
 
-from fft.coefficients import coefficient_set, order_coefficients_sets
-from utils.data_handler import load
+from fft.coefficients import order_coefficients_sets, coefficient_set
+from qft_models.circuit_9 import Circuit9
+
 from utils.helpers import random_parameter_set2
-from visuals.coefficients import subplot
+from utils.data_handler import save, load
 from visuals.fx import plot_nfx
 
-import pandas as pd
-import numpy as np
+# Function parameter
+start = 0
+stop = 20
+points = 1000  # 1000
+x = np.linspace(start, stop, points)
 
-# const
-num_samples = 5000
+# Samples
+num_samples = 10
+
+# Hyper parameter
+num_qubits = 4  # scale
+num_ansatz = 2  # const, 1 layer
+
+
+# Model
+model = Circuit9(num_qubits)
+
+# Parameter
+parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
+
+# MODEL RUN
+fx_set = model.sample_fourier(x, parameter_set, num_samples)
+
+# Save function
+# save("Test_circuit9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "test/")
+
+plot_nfx(x, fx_set, random_color=True)
+
+
+
 num_qubits = 4
 
-circuit_name = "Circuit 15"
-file_to_load = "../results/c15_exp/gate/Circuit15_Random_4qubits_1layers_5000samples_0start_20stop_1000points.json"
-loaded_x, loaded_fx_set = load(file_to_load)
+
 
 
 # plot_nfx(loaded_x, loaded_fx_set, random_color=True)
@@ -26,7 +51,7 @@ loaded_x, loaded_fx_set = load(file_to_load)
 num_params = 8
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
 # parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
-# parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=42)
+
 
 # Flatten out ansatz
 param_array = np.array([p.flatten() for p in parameter_set])
@@ -34,8 +59,8 @@ param_array = np.array([p.flatten() for p in parameter_set])
 
 # --- Data Preparation --- DECIDE NUMBER COEFFS
 
-num_coeffs = 10
-a, b, c = coefficient_set(loaded_fx_set, num_coeff=num_coeffs)
+num_coeffs = 30
+a, b, c = coefficient_set(fx_set, num_coeff=num_coeffs)
 complex_coeffs = c
 
 
@@ -74,8 +99,9 @@ plt.imshow(correlations, cmap="coolwarm", aspect="auto")
 plt.colorbar(label="Correlation")
 plt.xticks(range(num_coeffs), [f"Coeff {i+1}" for i in range(num_coeffs)])
 plt.yticks(range(num_params), [f"Param {i+1}" for i in range(num_params)])
-plt.title(circuit_name+" Correlation Heatmap")
+plt.title("Test C9"+" Correlation Heatmap")
 plt.tight_layout()
 plt.show()
+
 
 

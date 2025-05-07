@@ -10,6 +10,8 @@ ENV/
 env/
 myenv/
 
+# result files
+results/
 
 # legacy files
 legacy/
