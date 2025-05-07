@@ -51,6 +51,12 @@ class Pulse15:
     def sample_fourier(self, x, parameter_set, num_samples):
         fx_set = []
         for sample in range(num_samples):
+            print("Starting Pulse 15 eval...")
+
+            # Print progress every 500 samples
+            if (sample + 1) % 500 == 0:
+                print(f"Processed sample: {sample + 1} / {num_samples}")
+
             # Make fourier series for this sample
             fx = []
             for x_val in x:

@@ -1,1 +1,11 @@
-{"title": "Pulse9_Random - 4 qubits - 1 layers - 1 samples - 0 start - 20 stop - 1 points ", "x": [0.0], "fx_set": [[-0.8084888587166831]]}
+{
+ "title": "Pulse9_Random - 4 qubits - 1 layers - 1 samples - 0 start - 20 stop - 1 points ",
+ "x": [
+  0.0
+ ],
+ "fx_set": [
+  [
+   -0.8084888587166885
+  ]
+ ]
+}

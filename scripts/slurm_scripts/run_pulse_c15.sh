@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=pulse_hea
+#SBATCH --job-name=pulse_c15
 #SBATCH --partition=cpu
 #SBATCH --time=24:00:00
 #SBATCH --ntasks=4
@@ -10,4 +10,4 @@ module load devel/python/3.11.7
 
 source ~/pulse-fourier/.venv/bin/activate
 
-python ~/pulse-fourier/scripts/pulse_hea_run.py
+python ~/pulse-fourier/scripts/pulse_15_run.py

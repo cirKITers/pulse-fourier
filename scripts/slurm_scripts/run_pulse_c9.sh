@@ -1,21 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=pulse_c9
-#SBATCH --partition=htc
+#SBATCH --partition=cpu
 #SBATCH --time=24:00:00
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=32GB
+#SBATCH --ntasks=4
+#SBATCH --mem=32000MB
+#SBATCH --output="logs/slurm-%j-%x.out"
 
+module load devel/python/3.11.7
 
-python3 -m venv .venv
+source ~/pulse-fourier/.venv/bin/activate
 
-source .venv/bin/activate
-
-pip install -e .
-
-python scripts/test_run.py
-
-
-# Execute the Python script
-python ../pulse_9_run.py
+python ~/pulse-fourier/scripts/pulse_9_run.py
 

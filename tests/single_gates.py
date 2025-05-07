@@ -46,9 +46,9 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
 
     theta = random_theta()
 
-    theta = np.pi/2
-    num_qubits = 1
-    target_qubits = [0]
+    # theta = np.pi/2
+    # num_qubits = 1
+    # target_qubits = [0]
 
 
     print(f"Test Case {i + 1}:")
@@ -61,7 +61,7 @@ for i, (num_qubits, target_qubits) in enumerate(test_cases):
 
         init = init_function(num_qubits)
 
-        init = GROUND_STATE(1)
+        # init = GROUND_STATE(1)
 
         penny_state = init.data
         for _ in range(sequence_repetitions):

@@ -128,6 +128,7 @@ class PulseBackend:
         """
         target_qubits = self.operator.verify_wires(target_qubits, "RX")
 
+
         # RX:
         integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])  # this equals out exactly the gauss deviations
 
@@ -164,6 +165,7 @@ class PulseBackend:
         # plt.axvline(x=12, color='red', linestyle='--')
         # plt.show()
 
+
         result = ham_solver.solve(
             t_span=t_span,
             y0=self.current_state,
@@ -185,7 +187,7 @@ class PulseBackend:
         # bloch_sphere_multiqubit_trajectory(trajectory_lab)
 
         # POPULATIONS
-        plot_populations(result, T)
+        # plot_populations(result, T)
 
         self.current_state = result.y[-1]
 
