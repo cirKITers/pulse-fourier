@@ -27,7 +27,7 @@ x = np.arange(0, interval_length + delta, delta)
 # print(len(x))
 # print(x)
 # Samples
-num_samples = 2
+num_samples = 10
 
 # Hyper parameter
 num_qubits = 4  # scale
