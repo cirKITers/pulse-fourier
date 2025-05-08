@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=test_pulse_c9_parallel
 #SBATCH --partition=cpu
-#SBATCH --time=10:30:00
+#SBATCH --time=00:30:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=96
 #SBATCH --mem=350000MB
