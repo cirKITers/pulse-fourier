@@ -30,7 +30,7 @@ def save(model_name, num_qubits, num_layers, num_samples, start, stop, points, x
     }
 
     filename = f"{model_name}_{num_qubits}qubits_{num_layers}layers_{num_samples}samples_{start}start_{stop}stop_{points}points.json"
-    file_path = "/pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/results/" + direc + filename       # ../results/ locally
+    file_path = "/pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/results/" + direc + filename       #   "../results/"
 
     with open(file_path, 'w') as f:
         json.dump(data_to_save, f, indent=1)  # indent is for better readability

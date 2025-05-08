@@ -6,6 +6,8 @@
 #SBATCH --mem=32000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
+module load compiler/llvm
+
 module load devel/python/3.11.7
 
 source /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/.venv/bin/activate

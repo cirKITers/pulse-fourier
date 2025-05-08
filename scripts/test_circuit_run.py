@@ -20,13 +20,14 @@ points = 1000  # 1000
 
 # four relevant coeffs
 # x = np.linspace(start, stop, points)
-num_discrete_points = 20
+excluding_discrete_points = 8  # len(x) is plus one (including interval length value)!
 interval_length = 2 * np.pi
-x = np.arange(0, interval_length + interval_length / num_discrete_points, interval_length / num_discrete_points)     #
+delta = interval_length / excluding_discrete_points
+x = np.arange(0, interval_length + delta, delta)
 print(len(x))
 # print(x)
 # Samples
-num_samples = 200
+num_samples = 100
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -36,14 +37,15 @@ num_ansatz = 2  # const, 1 layer
 # --- Data Preparation --- DEFINE NUMBER OF PARAMS AND SEED CORRECTLY DEPENDING ON CIRCUIT
 
 # Model
-model = CircuitHE(num_qubits)
+model_name = "Test HEA"
+model = Circuit15(num_qubits)
 
 # Parameter
 # parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
-# parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
-parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=42)
+parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
+# parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=42)
 
-num_params = 24
+num_params = 16
 # p
 # Flatten out ansatz
 param_array = np.array([p.flatten() for p in parameter_set])
@@ -66,7 +68,7 @@ num_qubits = 4
 
 # --- Data Preparation --- DECIDE NUMBER COEFFS
 
-num_coeffs = math.floor(num_discrete_points/2) + 1
+num_coeffs = math.floor(len(x)/2) + 1
 
 c = coefficient_set(fx_set, num_coeff=num_coeffs)
 complex_coeffs = c
@@ -77,10 +79,10 @@ coeff_magnitudes = np.abs(complex_coeffs)  # Calculate magnitudes
 
 
 # SUBPLOT MAGNITUDES
-# a = 2 * np.real(c)  # describes cosinus part
-# b = -2 * np.imag(c)  # describes sinus part
-# a[0] = a[0] / 2       # to get rid of the *2 from above, always practically 0
-# subplot(a, b)
+a = 2 * np.real(c)  # describes cosinus part
+b = -2 * np.imag(c)  # describes sinus part
+a[0] = a[0] / 2       # to get rid of the *2 from above, always practically 0
+subplot(a, b)
 
 # print(len(coeff_magnitudes))
 
@@ -108,14 +110,14 @@ correlations = np.corrcoef(param_array.T, coeff_magnitudes.T)[
 
 
 #   - Heatmap of Correlations
-# plt.figure(figsize=(8, 6))
-# plt.imshow(correlations, cmap="coolwarm", aspect="auto")
-# plt.colorbar(label="Correlation")
-# plt.xticks(range(num_coeffs), [f"Coeff {i}" for i in range(num_coeffs)])
-# plt.yticks(range(num_params), [f"Param {i+1}" for i in range(num_params)])
-# plt.title("Test C9"+" Correlation Heatmap")
-# plt.tight_layout()
-# plt.show()
+plt.figure(figsize=(8, 6))
+plt.imshow(correlations, cmap="coolwarm", aspect="auto")
+plt.colorbar(label="Correlation")
+plt.xticks(range(num_coeffs), [f"Coeff {i}" for i in range(num_coeffs)])
+plt.yticks(range(num_params), [f"Param {i+1}" for i in range(num_params)])
+plt.title(model_name+" Correlation Heatmap")
+plt.tight_layout()
+plt.show()
 
 
 

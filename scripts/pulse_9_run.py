@@ -12,15 +12,16 @@ from utils.data_handler import save
 # points = 1000  # 1000
 # x = np.linspace(start, stop, points)
 
-num_discrete_points = 20
+excluding_discrete_points = 8  # len(x) is plus one (including interval length value)!
 interval_length = 2 * np.pi
-x = np.arange(0, interval_length + interval_length / num_discrete_points, interval_length / num_discrete_points)
+delta = interval_length / excluding_discrete_points
+x = np.arange(0, interval_length + delta, delta)
 start = 0
 stop = interval_length
-points = num_discrete_points + 1
+points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 5000
+num_samples = 2
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -44,6 +45,7 @@ save("Pulse9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set
 # loaded_x, loaded_fx_set = load(file_to_load)
 
 # plot_nfx(x, fx_set, random_color=True)
+
 
 
 

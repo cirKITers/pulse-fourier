@@ -21,7 +21,7 @@ class Pulse9:
                 control_qubit = i
                 target_qubit = i + 1
                 self.pls.cz(wires=[control_qubit, target_qubit])
-            #
+
             for i in range(self.num_qubits):
                 self.pls.rx(theta[i], i)
 
@@ -46,11 +46,11 @@ class Pulse9:
     def sample_fourier(self, x, parameter_set, num_samples):
         fx_set = []
         for sample in range(num_samples):
-            print("Starting Pulse 9 eval...")
+            print("Starting Pulse 9 eval...", flush=True)
 
             # Print progress every 500 samples
             if (sample + 1) % 500 == 0:
-                print(f"Processed sample: {sample + 1} / {num_samples}")
+                print(f"Processed sample: {sample + 1} / {num_samples}", flush=True)
 
             # Make fourier series for this sample
             fx = []
