@@ -1,8 +1,8 @@
 import numpy as np
 from joblib import Parallel, delayed
 
-from qft_models.circuit_9 import Circuit9
-from qft_models.pulse_15 import Pulse15
+# from qft_models.circuit_9 import Circuit9
+# from qft_models.pulse_15 import Pulse15
 from qft_models.pulse_9 import Pulse9
 
 from utils.helpers import random_parameter_set2
