@@ -66,7 +66,7 @@ class CircuitHE:
 
                 final_state = self.run(feature, param, draw=False)
 
-                fx_val = ground_state_prob(final_state)
+                fx_val = normalized_ground_state_prob(final_state)
 
                 fx.append(fx_val)
 

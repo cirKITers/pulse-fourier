@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=pulse_c9
+#SBATCH --job-name=test_pulse_c9
 #SBATCH --partition=cpu
 #SBATCH --time=00:30:00
 #SBATCH --ntasks=12
