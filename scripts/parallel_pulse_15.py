@@ -3,6 +3,7 @@ from joblib import Parallel, delayed
 
 from qft_models.pulse_15 import Pulse15
 
+
 from utils.helpers import random_parameter_set2
 from utils.data_handler import save
 
@@ -16,25 +17,27 @@ stop = interval_length
 points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 1000
+num_samples = 200
 
 # Hyper parameter
 num_qubits = 4  # scale
 num_ansatz = 2  # const, 1 layer
 
 
-def process_sample(params):
+def process_sample(index, params):
+    # print(f"Processing sample at index {index} with parameters: {params}")
     return model.sample_fourier(x, np.expand_dims(params, axis=0), 1)[0]
 
 
+n_jobs = -1
 
-n_jobs = 4  # Adjust based on your CPU core count
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
 model = Pulse15(num_qubits)
 
-results = Parallel(n_jobs=n_jobs)(delayed(process_sample)(params) for params in parameter_set)
+
+delayed_funcs = [delayed(process_sample)(i, params) for i, params in enumerate(parameter_set)]
+results = Parallel(n_jobs=n_jobs)(delayed_funcs)
 fx_set = np.array(results)
 
-    # Save the complete result
-    # save("Pulse15_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c15_exp/pulse/", cluster=True)
+save("Pulse15_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c15_exp/pulse/", cluster=True)
 

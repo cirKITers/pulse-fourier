@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=test_pulse_c9_parallel
 #SBATCH --partition=cpu
-#SBATCH --time=00:30:00
+#SBATCH --time=09:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=150000MB
+#SBATCH --mem=200000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
 module load compiler/llvm
