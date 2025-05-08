@@ -56,7 +56,7 @@ class Pulse9:
             fx = []
             for x_val in x:
 
-                print("discrete point:", x_val, flush=True)
+                # print("discrete point:", x_val, flush=True)
 
                 feature = x_val
                 param = parameter_set[sample]

@@ -2,7 +2,7 @@
 #SBATCH --job-name=pulse_c9
 #SBATCH --partition=cpu
 #SBATCH --time=24:00:00
-#SBATCH --ntasks=4
+#SBATCH --ntasks=12
 #SBATCH --mem=32000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
