@@ -15,13 +15,13 @@ class Pulse9:
 
         def Ansatz(theta):
 
-            # for i in range(self.num_qubits):
-            #     pls.h(i)
-            #
-            # for i in range(self.num_qubits - 1):
-            #     control_qubit = i
-            #     target_qubit = i + 1
-            #     pls.cz(wires=[control_qubit, target_qubit])
+            for i in range(self.num_qubits):
+                pls.h(i)
+
+            for i in range(self.num_qubits - 1):
+                control_qubit = i
+                target_qubit = i + 1
+                pls.cz(wires=[control_qubit, target_qubit])
 
             for i in range(self.num_qubits):
                 pls.rx(theta[i], i)
