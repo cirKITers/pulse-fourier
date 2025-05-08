@@ -27,7 +27,7 @@ x = np.arange(0, interval_length + delta, delta)
 # print(len(x))
 # print(x)
 # Samples
-num_samples = 30
+num_samples = 2
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -46,7 +46,7 @@ parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), s
 # parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=42)
 
 num_params = 8
-# p
+
 # Flatten out ansatz
 param_array = np.array([p.flatten() for p in parameter_set])
 

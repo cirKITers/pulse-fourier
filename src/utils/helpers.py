@@ -255,10 +255,6 @@ def ground_state_prob(statevector):
 def normalized_ground_state_prob(statevector):
     if isinstance(statevector, Statevector):
         statevector = statevector.data
-    # print(statevector)
-    # print(prob(statevector))
-    # print(statevector[0])
-    # print(prob(statevector[0]))
     return 2*prob(statevector[0])-1
 
 
