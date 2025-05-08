@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.fft import fft, rfft
+from scipy.fft import fft, rfft, fftshift
 from scipy.integrate import quad
 from sklearn.metrics import mean_squared_error
 
@@ -14,7 +14,7 @@ def magnitude(z):
 
 def coefficients(f_x, num_coeff=num_coefficients_standard, complex_valued_fx=False):
 
-    f_x = f_x - np.mean(f_x)    # convention
+    # f_x = f_x - np.mean(f_x)    # convention
     N = len(f_x)
     if complex_valued_fx:
         fourier_transform = fft

@@ -14,9 +14,9 @@ from visuals.coefficients import subplot
 from visuals.fx import plot_nfx
 
 # Function parameter
-start = 0
-stop = 20
-points = 1000  # 1000
+# start = 0
+# stop = 20
+# points = 1000  # 1000
 
 # four relevant coeffs
 # x = np.linspace(start, stop, points)
@@ -24,10 +24,10 @@ excluding_discrete_points = 8  # len(x) is plus one (including interval length v
 interval_length = 2 * np.pi
 delta = interval_length / excluding_discrete_points
 x = np.arange(0, interval_length + delta, delta)
-print(len(x))
+# print(len(x))
 # print(x)
 # Samples
-num_samples = 100
+num_samples = 30
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -37,15 +37,15 @@ num_ansatz = 2  # const, 1 layer
 # --- Data Preparation --- DEFINE NUMBER OF PARAMS AND SEED CORRECTLY DEPENDING ON CIRCUIT
 
 # Model
-model_name = "Test HEA"
-model = Circuit15(num_qubits)
+model_name = "Test C9"
+model = Circuit9(num_qubits)
 
 # Parameter
-# parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
-parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
+parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
+# parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
 # parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=42)
 
-num_params = 16
+num_params = 8
 # p
 # Flatten out ansatz
 param_array = np.array([p.flatten() for p in parameter_set])

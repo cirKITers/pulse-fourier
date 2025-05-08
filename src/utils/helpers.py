@@ -245,6 +245,12 @@ def fourier_series(x, coeffs):
 def prob(statevector):
     return np.abs(statevector) ** 2
 
+
+def ground_state_prob(statevector):
+    if isinstance(statevector, Statevector):
+        statevector = statevector.data
+    return prob(statevector[0])
+
 # normalized [0, 1]
 def normalized_ground_state_prob(statevector):
     if isinstance(statevector, Statevector):

@@ -98,8 +98,8 @@ def subplot(coeffs_cos, coeffs_sin, coloring="gradual"):
                 edgecolor=color,
             )
         ax_.set_aspect("equal")
-        ax_.set_ylim(-1, 1)
-        ax_.set_xlim(-1, 1)
+        ax_.set_ylim(-0.5, 0.5)
+        ax_.set_xlim(-0.5, 0.5)
 
     # Add a legend to the first subplot
     # ax[0].legend(fontsize='small')

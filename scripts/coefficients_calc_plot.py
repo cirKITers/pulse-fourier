@@ -40,17 +40,17 @@ complex_coeffs = c
 
 
 
-X = np.fft.fft(loaded_fx_set[0]) / len(loaded_fx_set[0])
-X_shift = np.fft.fftshift(X)
-X_freq = np.fft.fftfreq(X.size, 1/6)
-X_freq_shift = np.fft.fftshift(X_freq)
+# X = np.fft.fft(loaded_fx_set[0]) / len(loaded_fx_set[0])
+# X_shift = np.fft.fftshift(X)
+# X_freq = np.fft.fftfreq(X.size, 1/6)
+# X_freq_shift = np.fft.fftshift(X_freq)
 
 
-fig, ax = plt.subplots()
-ax.stem(X_freq_shift, np.abs(X_shift)/X_shift.size)
-plt.xlabel('Frequency')
-plt.ylabel('Amplitude')
-plt.show()
+# fig, ax = plt.subplots()
+# ax.stem(X_freq_shift, np.abs(X_shift)/X_shift.size)
+# plt.xlabel('Frequency')
+# plt.ylabel('Amplitude')
+# plt.show()
 
 
 

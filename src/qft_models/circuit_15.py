@@ -1,7 +1,7 @@
 import numpy as np
 import pennylane as qml
 
-from utils.helpers import normalized_ground_state_prob, prints
+from utils.helpers import normalized_ground_state_prob, ground_state_prob
 
 
 class Circuit15:
@@ -61,11 +61,15 @@ class Circuit15:
             # Make fourier series for this sample
             fx = []
             for x_val in x:
+
                 feature = x_val
+
                 param = parameter_set[sample]
+
                 final_state = self.run(feature, param, draw=False)
 
-                fx_val = normalized_ground_state_prob(final_state)
+                fx_val = ground_state_prob(final_state)
+
                 fx.append(fx_val)
 
             fx_set.append(np.array(fx))

@@ -1,7 +1,7 @@
 import numpy as np
 from pulse.pulse_backend import PulseBackend
 from utils.definitions import GROUND_STATE
-from utils.helpers import normalized_ground_state_prob
+from utils.helpers import normalized_ground_state_prob, ground_state_prob
 
 
 class Pulse9:
@@ -59,11 +59,12 @@ class Pulse9:
                 # print("discrete point:", x_val, flush=True)
 
                 feature = x_val
+
                 param = parameter_set[sample]
 
                 final_state = self.run(feature, param, draw=False)
 
-                fx_val = normalized_ground_state_prob(final_state)
+                fx_val = ground_state_prob(final_state)
 
                 fx.append(fx_val)
 
