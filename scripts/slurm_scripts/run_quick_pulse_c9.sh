@@ -2,7 +2,8 @@
 #SBATCH --job-name=test_pulse_c9
 #SBATCH --partition=cpu
 #SBATCH --time=00:30:00
-#SBATCH --ntasks=12
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=10
 #SBATCH --mem=32000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
