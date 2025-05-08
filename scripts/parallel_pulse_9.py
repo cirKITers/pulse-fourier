@@ -18,7 +18,7 @@ stop = interval_length
 points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 10
+num_samples = 100
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -26,7 +26,7 @@ num_ansatz = 2  # const, 1 layer
 
 
 def process_sample(index, params):
-    print(f"Processing sample at index {index} with parameters: {params}")
+    # print(f"Processing sample at index {index} with parameters: {params}")
     return model.sample_fourier(x, np.expand_dims(params, axis=0), 1)[0]
 
 
