@@ -12,5 +12,5 @@ pls.h(0)
 prints(pls.current_state)
 
 
-save("test", 1, 1, 1, 1, 1, 1, [1], [1], "test/")
+save("test", 1, 1, 1, 1, 1, 1, [1], [1], "test/", cluster=True)
 

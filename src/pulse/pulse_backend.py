@@ -110,6 +110,7 @@ class PulseBackend:
 
                 self.current_state = result.y[-1]
 
+
     # works duration independent!
     def rx(self, theta, target_qubits='all', plot_prob=False, plot_blochsphere=False):
         """
@@ -127,7 +128,6 @@ class PulseBackend:
         - result: Simulation result from Solver.solve(), later maybe also testing logic
         """
         target_qubits = self.operator.verify_wires(target_qubits, "RX")
-
 
         # RX:
         integral, _ = quad(gaussian_envelope, t_span[0], t_span[-1])  # this equals out exactly the gauss deviations

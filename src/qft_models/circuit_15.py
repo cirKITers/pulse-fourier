@@ -51,11 +51,12 @@ class Circuit15:
         return circuit()
 
     def sample_fourier(self, x, parameter_set, num_samples):
+        print("Starting Gate 15 eval...")
         fx_set = []
         for sample in range(num_samples):
 
-            # Print progress every 500 samples
-            if (sample + 1) % 500 == 0:
+            # Print progress every 100 samples
+            if (sample + 1) % 100 == 0:
                 print(f"Processed sample: {sample + 1} / {num_samples}")
 
             # Make fourier series for this sample

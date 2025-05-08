@@ -38,7 +38,7 @@ parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), s
 fx_set = model.sample_fourier(x, parameter_set, num_samples)
 
 # Save function
-save("Circuit9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c9_exp/gate/")
+save("Circuit9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c9_exp/gate/", cluster=True)
 
 
 

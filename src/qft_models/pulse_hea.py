@@ -9,51 +9,53 @@ class PulseHE:
 
     def __init__(self, num_qubits):
         self.num_qubits = num_qubits
-        self.pls = PulseBackend(num_qubits, GROUND_STATE(num_qubits))
 
     def run(self, x, params, draw=False):
+
+        pls = PulseBackend(self.num_qubits, GROUND_STATE(self.num_qubits))
 
         def Ansatz(theta):
 
             for i in range(self.num_qubits):
-                self.pls.ry(theta[i], i)
+                pls.ry(theta[i], i)
 
             for i in range(self.num_qubits):
-                self.pls.rz(theta[self.num_qubits + i], i)
+                pls.rz(theta[self.num_qubits + i], i)
 
             for i in range(self.num_qubits):
-                self.pls.ry(theta[self.num_qubits*2 + i], i)
+                pls.ry(theta[self.num_qubits*2 + i], i)
 
             for i in range(self.num_qubits):
                 control_qubit = i
                 target_qubit = (i + 1) % self.num_qubits
-                self.pls.cnot(wires=[control_qubit, target_qubit])
+                pls.cnot(wires=[control_qubit, target_qubit])
 
         def Encoding(feature):
             for i in range(self.num_qubits):
-                self.pls.rx(feature, i)
+                pls.rx(feature, i)
 
         def circuit():
 
-            Ansatz(theta=params[0])     # 2*num_qubits
+            Ansatz(theta=params[0])  # 2*num_qubits
 
             Encoding(x)
 
-            Ansatz(theta=params[1])     # 2*num_qubits
+            Ansatz(theta=params[1])  # 2*num_qubits
 
-            return self.pls.current_state
+            return pls.current_state
 
         if draw:
             print("no drawing on pulse level.")
         return circuit()
 
     def sample_fourier(self, x, parameter_set, num_samples):
+        print("Starting Pulse HEA eval...")
+
         fx_set = []
         for sample in range(num_samples):
-            print("Starting Pulse HEA eval...")
 
-            # Print progress every 500 samples
-            if (sample + 1) % 500 == 0:
+            # Print progress every 100 samples
+            if (sample + 1) % 100 == 0:
                 print(f"Processed sample: {sample + 1} / {num_samples}")
 
             # Make fourier series for this sample

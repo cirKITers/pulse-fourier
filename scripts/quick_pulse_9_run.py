@@ -39,7 +39,7 @@ parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), s
 fx_set = model.sample_fourier(x, parameter_set, num_samples)
 
 # Save function
-save("Pulse9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c9_exp/pulse/")
+save("Pulse9_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c9_exp/pulse/", cluster=True)
 
 
 # file_to_load = "../results/c9_exp/Circuit9_Random_4qubits_1layers_2samples_0start_20stop_2points.json"
