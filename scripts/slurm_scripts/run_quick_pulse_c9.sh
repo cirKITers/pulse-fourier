@@ -12,5 +12,5 @@ module load devel/python/3.11.7
 
 source /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/.venv/bin/activate
 
-python /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/scripts/quick_pulse_9_run.py
+python /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/scripts/parallel_pulse_9_run.py
 

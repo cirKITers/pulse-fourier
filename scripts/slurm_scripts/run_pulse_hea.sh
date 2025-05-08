@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=pulse_hea
+#SBATCH --job-name=pulse_hea_parallel
 #SBATCH --partition=cpu
 #SBATCH --time=24:00:00
 #SBATCH --ntasks=12

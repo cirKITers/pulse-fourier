@@ -15,13 +15,13 @@ class Circuit9:
 
         def Ansatz(theta):
 
-            for i in range(self.num_qubits):
-                qml.Hadamard(wires=i)
+            # for i in range(self.num_qubits):
+            #     qml.Hadamard(wires=i)
 
-            for i in range(self.num_qubits - 1):
-                control_qubit = i
-                target_qubit = i + 1
-                qml.CZ(wires=[control_qubit, target_qubit])
+            # for i in range(self.num_qubits - 1):
+            #     control_qubit = i
+            #     target_qubit = i + 1
+            #     qml.CZ(wires=[control_qubit, target_qubit])
             #
             for i in range(self.num_qubits):
                 qml.RX(theta[i], wires=i)
