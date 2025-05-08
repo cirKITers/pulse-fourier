@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=test_pulse_c9_parallel
 #SBATCH --partition=cpu
-#SBATCH --time=01:30:00
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
+#SBATCH --time=10:30:00
+#SBATCH --nodes=2
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=96
 #SBATCH --mem=350000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
