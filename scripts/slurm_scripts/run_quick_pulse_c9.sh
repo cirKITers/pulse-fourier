@@ -3,7 +3,7 @@
 #SBATCH --partition=cpu
 #SBATCH --time=00:30:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=96
+#SBATCH --cpus-per-task=64
 #SBATCH --mem=350000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
