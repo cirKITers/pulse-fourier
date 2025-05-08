@@ -49,7 +49,7 @@ class PulseHE:
         return circuit()
 
     def sample_fourier(self, x, parameter_set, num_samples):
-        print("Starting Pulse HEA eval...")
+        # print("Starting Pulse HEA eval...")
 
         fx_set = []
         for sample in range(num_samples):

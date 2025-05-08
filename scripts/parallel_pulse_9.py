@@ -9,7 +9,7 @@ from utils.helpers import random_parameter_set2
 from utils.data_handler import save
 
 
-excluding_discrete_points = 1  # len(x) is plus one (including interval length value)!
+excluding_discrete_points = 8  # len(x) is plus one (including interval length value)!
 interval_length = 2 * np.pi
 delta = interval_length / excluding_discrete_points
 x = np.arange(0, interval_length + delta, delta)
