@@ -33,7 +33,7 @@ def process_sample(index, params):
 n_jobs = -1
 
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
-print(parameter_set)
+# print(parameter_set)
 model = Pulse9(num_qubits)
 
 delayed_funcs = [delayed(process_sample)(i, params) for i, params in enumerate(parameter_set)]

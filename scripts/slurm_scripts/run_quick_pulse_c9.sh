@@ -4,7 +4,7 @@
 #SBATCH --time=01:30:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=32000MB
+#SBATCH --mem=128000MB
 #SBATCH --output="logs/slurm-%j-%x.out"
 
 module load compiler/llvm
