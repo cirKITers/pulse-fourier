@@ -17,7 +17,7 @@ stop = interval_length
 points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 200
+num_samples = 80
 
 # Hyper parameter
 num_qubits = 4  # scale

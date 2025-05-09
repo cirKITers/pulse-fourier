@@ -12,8 +12,8 @@ from pulse.operator import *
 from utils.definitions import *
 from utils.helpers import binary_c_t
 
-jax.config.update("jax_enable_x64", True)
-jax.config.update('jax_platform_name', 'cpu')
+# jax.config.update("jax_enable_x64", True)
+# jax.config.update('jax_platform_name', 'cpu')
 
 
 # TODO test: Effect of Pulse-Level parameter on Fourier series (and like that on its coefficients)
