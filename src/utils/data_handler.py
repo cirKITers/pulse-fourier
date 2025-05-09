@@ -22,7 +22,7 @@ def load(file_path):
         print(f"Error: Could not decode JSON from {file_path}")
         return None, None
 
-def save(model_name, num_qubits, num_layers, num_samples, start, stop, points, x, fx_set, seed, direc, cluster):
+def save(model_name, num_qubits, num_layers, num_samples, start, stop, points, seed, x, fx_set, direc, cluster):
     data_to_save = {
         "title": f"{model_name} - {num_qubits} qubits - {num_layers} layers - {num_samples} samples - {start} start - {stop} stop - {points} points - {seed} seed",
         "x": x.tolist() if isinstance(x, np.ndarray) else x,
