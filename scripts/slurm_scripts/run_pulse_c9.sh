@@ -13,5 +13,12 @@ module load devel/python/3.11.7
 
 source /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/.venv/bin/activate
 
-python /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/scripts/parallel_pulse_9.py
+
+seeds=("10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29")
+
+for seed in "${seeds[@]}"; do
+  echo "Running with seed: $seed"
+  python /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/scripts/parallel_pulse_9.py "$seed"
+done
+
 

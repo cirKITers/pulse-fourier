@@ -1,3 +1,4 @@
+import sys  # to take seed arg
 import numpy as np
 from joblib import Parallel, delayed
 
@@ -32,7 +33,14 @@ def process_sample(index, params):
 
 n_jobs = -1
 
-seed = 9
+# SEED AS ARG
+if len(sys.argv) > 1:
+    seed = int(sys.argv[1])
+    print(f"Evaluating seed number {seed} on script...")
+else:
+    print("Error: The provided seed must be an integer.")
+    sys.exit(1)
+
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=seed)
 # print(parameter_set)
 model = Pulse9(num_qubits)
