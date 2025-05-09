@@ -38,13 +38,13 @@ Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the
     ```
 
     - On Windows:
-    ```bash
-     .\.venv\Scripts\activate
-    ```
+       ```bash
+        .\.venv\Scripts\activate
+       ```
     - On macOS/Linux:
-    ```bash
-     source .venv/bin/activate
-    ```
+       ```bash
+        source .venv/bin/activate
+       ```
 
 3. Install the project in editable mode:
 
