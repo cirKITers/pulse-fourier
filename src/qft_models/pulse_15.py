@@ -51,7 +51,7 @@ class Pulse15:
         return circuit()
 
     def sample_fourier(self, x, parameter_set, num_samples):
-        # print("Starting Pulse 15 eval...")
+        print("Starting Pulse 15 eval...")
 
         fx_set = []
         for sample in range(num_samples):
@@ -64,7 +64,7 @@ class Pulse15:
             fx = []
             for x_val in x:
 
-                # print("discrete point:", x_val, flush=True)
+                print("discrete point:", x_val, flush=True)
 
                 feature = x_val
 
