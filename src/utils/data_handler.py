@@ -22,14 +22,14 @@ def load(file_path):
         print(f"Error: Could not decode JSON from {file_path}")
         return None, None
 
-def save(model_name, num_qubits, num_layers, num_samples, start, stop, points, x, fx_set, direc, cluster):
+def save(model_name, num_qubits, num_layers, num_samples, start, stop, points, x, fx_set, seed, direc, cluster):
     data_to_save = {
-        "title": f"{model_name} - {num_qubits} qubits - {num_layers} layers - {num_samples} samples - {start} start - {stop} stop - {points} points ",
+        "title": f"{model_name} - {num_qubits} qubits - {num_layers} layers - {num_samples} samples - {start} start - {stop} stop - {points} points - {seed} seed",
         "x": x.tolist() if isinstance(x, np.ndarray) else x,
         "fx_set": [fx_values.tolist() if isinstance(fx_values, np.ndarray) else fx_values for fx_values in fx_set]
     }
 
-    filename = f"{model_name}_{num_qubits}qubits_{num_layers}layers_{num_samples}samples_{start}start_{stop}stop_{points}points.json"
+    filename = f"{model_name}_{num_qubits}qubits_{num_layers}layers_{num_samples}samples_{start}start_{stop}stop_{points}points_{seed}seed.json"
 
     if cluster:
         highdir = "/pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/results/"

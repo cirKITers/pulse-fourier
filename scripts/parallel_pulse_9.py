@@ -18,7 +18,7 @@ stop = interval_length
 points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 80
+num_samples = 50
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -32,7 +32,8 @@ def process_sample(index, params):
 
 n_jobs = -1
 
-parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=9)
+seed = 9
+parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=seed)
 # print(parameter_set)
 model = Pulse9(num_qubits)
 
@@ -40,7 +41,7 @@ delayed_funcs = [delayed(process_sample)(i, params) for i, params in enumerate(p
 results = Parallel(n_jobs=n_jobs)(delayed_funcs)
 fx_set = np.array(results)
 
-save("Pulse9_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c9_exp/pulse/", cluster=True)
+save("Pulse9_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, seed, x, fx_set, "c9_exp/pulse/", cluster=True)
 
 
 # model_gate = Circuit9(num_qubits)

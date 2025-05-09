@@ -17,7 +17,7 @@ stop = interval_length
 points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 80
+num_samples = 50
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -31,12 +31,13 @@ def process_sample(index, params):
 
 n_jobs = -1
 
-parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=42)
+seed = 42
+parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=seed)
 model = PulseHE(num_qubits)
 
 delayed_funcs = [delayed(process_sample)(i, params) for i, params in enumerate(parameter_set)]
 results = Parallel(n_jobs=n_jobs)(delayed_funcs)
 fx_set = np.array(results)
 
-save("PulseHEA_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "hea_exp/pulse/", cluster=True)
+save("PulseHEA_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, seed, x, fx_set, "hea_exp/pulse/", cluster=True)
 
