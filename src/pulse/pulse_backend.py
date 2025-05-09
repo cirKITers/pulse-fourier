@@ -44,6 +44,7 @@ class PulseBackend:
         self.operator = PulseOperator(num_qubits)
 
     # fod 0.9998
+    @jax.jit
     def h(self, target_qubits, correction=True, plot=False, bool_blochsphere=False):
 
         target_qubits = self.operator.verify_wires(target_qubits, "H")
@@ -112,6 +113,7 @@ class PulseBackend:
 
 
     # works duration independent!
+    @jax.jit
     def rx(self, theta, target_qubits='all', plot_prob=False, plot_blochsphere=False):
         """
         Implements an RX gate (rotation around X-axis) by angle theta on specified qubits in current_state.
@@ -193,6 +195,7 @@ class PulseBackend:
 
         # worst similarity at around 0.99
 
+    @jax.jit
     def ry(self, theta, target_qubits='all', plot_prob=False, plot_blochsphere=False):
         target_qubits = self.operator.verify_wires(target_qubits, "RY")
 
@@ -228,6 +231,7 @@ class PulseBackend:
         self.current_state = result.y[-1]
 
     # similarity of 1.0
+    @jax.jit
     def rz(self, theta, target_qubits, plot_prob=False, plot_blochsphere=False):
         """
         Implements an RZ gate (rotation around Z-axis) by angle theta on all qubits in current_state.
@@ -270,6 +274,7 @@ class PulseBackend:
 
         self.current_state = result.y[-1]
 
+    @jax.jit
     def cz(
             self,
             wires
@@ -317,6 +322,7 @@ class PulseBackend:
 
         self.current_state = result.y[-1]
 
+    @jax.jit
     def cnot(
             self,
             wires
