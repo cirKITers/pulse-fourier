@@ -24,18 +24,24 @@ Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the
 1. Clone the repository:
     ```bash
     git clone https://github.com/cirKITers/pulse-fourier.git
+    ```
+   ```bash
     cd pulse-fourier
     ```
+    
 
 2. Create a virtual environment and activate it:
+   
+   ```bash
+      python -m venv .venv
+   ```
+   
     - On Windows:
       ```bash
-      python -m venv .venv
       .\.venv\Scripts\activate
       ```
     - On macOS/Linux:
       ```bash
-      python3 -m venv .venv
       source .venv/bin/activate
       ```
 
