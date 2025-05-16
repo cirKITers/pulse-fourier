@@ -33,6 +33,7 @@ def process_sample(index, params):
 
 n_jobs = -1
 
+
 # SEED AS ARG
 if len(sys.argv) > 1:
     seed = int(sys.argv[1])
@@ -40,6 +41,7 @@ if len(sys.argv) > 1:
 else:
     print("Error: The provided seed must be an integer.")
     sys.exit(1)
+
 
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RX"]), seed=seed)
 # print(parameter_set)
@@ -52,6 +54,9 @@ fx_set = np.array(results)
 save("Pulse9_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, seed, x, fx_set, "c9_exp/pulse/", cluster=True)
 
 
+
+
+# CHECK DIFFERENCE
 # model_gate = Circuit9(num_qubits)
 # fx_set_gate = model_gate.sample_fourier(x, parameter_set, num_samples)
 #
