@@ -38,8 +38,6 @@ import numpy as np
 # plot_2fx(loaded_x_copy, loaded_fx_set_hea[0], fx_set[0])
 
 
-
-
 # COMPOSING OF MULTIPLE FILES
 num_qubits = 4
 num_layers = 1
@@ -47,18 +45,20 @@ num_samples = 50
 start = 0
 stop = 6.283185307179586
 points = 9
+seed_start = 10
+seed_stop = 110
 
 
 directory_path_gate = "../results/c9_exp/gate/"
 model_name_gate = "Circuit9_Random"
-fx_set_gate = load_and_combine_fx_sets(directory_path_gate, model_name_gate, num_qubits, num_layers, num_samples, start, stop, points)
+fx_set_gate = load_and_combine_fx_sets(directory_path_gate, model_name_gate, num_qubits, num_layers, num_samples, start, stop, points, seed_start, seed_stop)
 # if combined_fx_set_gate is not None:
 #     print("Combined fx_set shape:", combined_fx_set_gate.shape)
 
 
 directory_path_pulse = "../results/c9_exp/pulse/"
 model_name_pulse = "Pulse9_Random_Parallel_Joblib"
-fx_set_pulse = load_and_combine_fx_sets(directory_path_pulse, model_name_pulse, num_qubits, num_layers, num_samples, start, stop, points)
+fx_set_pulse = load_and_combine_fx_sets(directory_path_pulse, model_name_pulse, num_qubits, num_layers, num_samples, start, stop, points, seed_start, seed_stop)
 # if combined_fx_set_pulse is not None:
 #     print("Combined fx_set shape:", combined_fx_set_pulse.shape)
 

@@ -40,6 +40,7 @@ else:
     print("Error: The provided seed must be an integer.")
     sys.exit(1)
 
+
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=seed)
 model = Pulse15(num_qubits)
 
@@ -49,4 +50,41 @@ results = Parallel(n_jobs=n_jobs)(delayed_funcs)
 fx_set = np.array(results)
 
 save("Pulse15_Random_Parallel_Joblib", num_qubits, 1, num_samples, start, stop, points, seed, x, fx_set, "c15_exp/pulse/", cluster=True)
+
+
+# CHECK DIFFERENCE
+# from qft_models.circuit_15 import Circuit15
+# model_gate = Circuit15(num_qubits)
+# fx_set_gate = model_gate.sample_fourier(x, parameter_set, num_samples)
+#
+#
+# fx_set_pulse = fx_set
+# tolerance = 1e-3
+#
+# difference_matrices = []
+# for i in range(len(fx_set_pulse)):
+#     pulse_sequence = fx_set_pulse[i]
+#     gate_sequence = fx_set_gate[i]
+#
+#     if pulse_sequence.shape != gate_sequence.shape:
+#         print(f"Warning: Shapes of sequences at index {i} do not match.")
+#         difference_matrices.append(None)  # Or handle differently
+#         continue
+#
+#     absolute_differences = np.abs(pulse_sequence - gate_sequence)
+#     difference_matrices.append(absolute_differences)
+#
+#
+# for i, diff_matrix in enumerate(difference_matrices):
+#     if diff_matrix is not None:
+#         print(f"Absolute differences for sequence pair {i}:")
+#         print(diff_matrix)
+#
+#         max_diff = np.max(diff_matrix)
+#         print(f"Maximum absolute difference for sequence pair {i}: {max_diff}")
+#         within_tolerance = np.all(diff_matrix <= tolerance)
+#         print(f"All differences within tolerance ({tolerance}): {within_tolerance}")
+#     else:
+#         print(f"Comparison skipped for sequence pair {i} due to shape mismatch.")
+
 

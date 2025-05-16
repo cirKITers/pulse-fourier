@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from joblib import Parallel, delayed
 
@@ -8,7 +10,7 @@ from utils.helpers import random_parameter_set2
 from utils.data_handler import save
 
 
-excluding_discrete_points = 100  # len(x) is plus one (including interval length value)!
+excluding_discrete_points = 8  # len(x) is plus one (including interval length value)!
 interval_length = 2 * np.pi
 delta = interval_length / excluding_discrete_points
 x = np.arange(0, interval_length + delta, delta)
@@ -17,7 +19,7 @@ stop = interval_length
 points = excluding_discrete_points + 1
 
 # Samples
-num_samples = 1
+num_samples = 10
 
 # Hyper parameter
 num_qubits = 4  # scale
@@ -31,7 +33,15 @@ def process_sample(index, params):
 
 n_jobs = -1
 
-seed = 42
+# SEED AS ARG
+if len(sys.argv) > 1:
+    seed = int(sys.argv[1])
+    print(f"Evaluating seed number {seed} on script...")
+else:
+    print("Error: The provided seed must be an integer.")
+    sys.exit(1)
+
+
 parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RZ", "RY"]), seed=seed)
 model = PulseHE(num_qubits)
 

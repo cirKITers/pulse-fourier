@@ -1,7 +1,7 @@
 import numpy as np
 from pulse.pulse_backend import PulseBackend
 from utils.definitions import GROUND_STATE
-from utils.helpers import normalized_ground_state_prob, prints, ground_state_prob
+from utils.helpers import normalized_ground_state_prob
 
 
 class Pulse15:

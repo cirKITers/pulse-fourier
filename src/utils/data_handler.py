@@ -22,7 +22,7 @@ def load(file_path):
         print(f"Error: Could not decode JSON from {file_path}")
         return None, None
 
-def load_and_combine_fx_sets(directory, model_name, num_qubits, num_layers, num_samples, start, stop, points):
+def load_and_combine_fx_sets(directory, model_name, num_qubits, num_layers, num_samples, start, stop, points, seed_start, seed_stop):
     """
     Loads fx_set data from multiple JSON files and combines them into a single NumPy array.
 
@@ -35,13 +35,15 @@ def load_and_combine_fx_sets(directory, model_name, num_qubits, num_layers, num_
         start (float): The start value of the parameter range.
         stop (float): The stop value of the parameter range.
         points (int): The number of points in the parameter range.
+        seed_start
+        seed_stop
 
     Returns:
         numpy.ndarray: A single NumPy array containing all the combined fx_set data,
                        or None if no files are found or an error occurs.
     """
     all_fx_sets = []
-    for seed in range(10, 110):
+    for seed in range(seed_start, seed_stop):
         file_name = f"{model_name}_{num_qubits}qubits_{num_layers}layers_{num_samples}samples_{start}start_{stop}stop_{points}points_{seed}seed.json"
         file_path = directory + file_name
         # print(file_path)
