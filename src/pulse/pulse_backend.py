@@ -8,7 +8,7 @@ from visuals.bloch_sphere import bloch_sphere_trajectory
 # from visuals.bloch_sphere import bloch_sphere_trajectory, bloch_sphere_multiqubit_trajectory
 from visuals.probabilites import plot_populations
 
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 from pulse.operator import *
 
 from utils.definitions import *
