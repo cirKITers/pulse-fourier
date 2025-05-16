@@ -54,7 +54,7 @@ def visualize_complex_colors(fx_set, complex_colors):
     plt.xticks([])  # Remove x-axis ticks
     plt.yticks([])  # Remove y-axis ticks
     plt.axis('off')  # Turn off axes
-    plt.tight_layout() # tight layout
+    plt.tight_layout()  # tight layout
     plt.show()
 
 
@@ -98,8 +98,8 @@ def subplot(coeffs_cos, coeffs_sin, coloring="gradual"):
                 edgecolor=color,
             )
         ax_.set_aspect("equal")
-        ax_.set_ylim(-0.5, 0.5)
-        ax_.set_xlim(-0.5, 0.5)
+        ax_.set_ylim(-1.0, 1.0)
+        ax_.set_xlim(-1.0, 1.0)
 
     # Add a legend to the first subplot
     # ax[0].legend(fontsize='small')

@@ -351,7 +351,7 @@ def is_two_qubit_entangled(state_vector):
     return not np.isclose(a * d, b * c)
 
 
-# PARAMETER GENERATION CIRCUIT 15
+# PARAMETER GENERATION NEW - USE THIS HERE:
 def random_parameter_set2(num_samples, ansatze, num_qubits, num_gates, seed=None):
     if seed is not None:
         np.random.seed(seed)
@@ -359,6 +359,28 @@ def random_parameter_set2(num_samples, ansatze, num_qubits, num_gates, seed=None
     for times in range(num_samples):
         parameter_set.append(np.random.uniform(low=-np.pi, high=np.pi, size=(ansatze, num_qubits * num_gates)))
     return parameter_set
+
+def combine_parameter_sets(num_samples, ansatze, num_qubits, num_gates, seeds):
+    """
+    Generates and combines parameter sets from multiple seeds into a single list.
+
+    Args:
+        num_samples (int): The number of parameter sets to generate for each seed.
+        ansatze (int): The number of layers (ansatz repetitions).
+        num_qubits (int): The number of qubits in the circuit.
+        num_gates (int): The number of gates per qubit per layer.
+        seeds (list): A list of seed values.
+
+    Returns:
+        list: A single list containing all parameter sets generated from the given seeds.
+              The length of the list will be num_samples * len(seeds).
+    """
+    combined_parameter_set = []
+    for seed in seeds:
+        parameter_set = random_parameter_set2(num_samples, ansatze, num_qubits, num_gates, seed=seed)
+        combined_parameter_set.extend(parameter_set)  # Use extend to add the *elements* of the list
+    return combined_parameter_set
+
 
 
 # PARAMETER GENERATION

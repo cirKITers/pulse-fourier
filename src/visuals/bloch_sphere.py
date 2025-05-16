@@ -8,6 +8,7 @@ from utils.definitions import *
 from utils.helpers import *
 # matplotlib.use('TkAgg')             # 'TkAgg' for plotting locally, 'Agg' for cluster (no plotting) TODO handle in .idea
 
+
 def bloch_sphere_multiqubit_trajectory(states, qubits_to_plot=None, laboratory_frame=False):
     """
     Plots the Bloch sphere trajectories for specified qubits in a multi-qubit system.
@@ -32,7 +33,7 @@ def bloch_sphere_multiqubit_trajectory(states, qubits_to_plot=None, laboratory_f
     num_plots = len(qubits_to_plot)
 
     fig = plt.figure(figsize=(8 * num_plots, 6))
-    fig.suptitle("Bloch Sphere Trajectories for Selected Qubits", fontsize=16)
+    # fig.suptitle("Bloch Sphere Trajectories for Selected Qubits", fontsize=16)
 
     for i, qubit_index in enumerate(qubits_to_plot):
         bloch_x = []
@@ -63,13 +64,25 @@ def bloch_sphere_multiqubit_trajectory(states, qubits_to_plot=None, laboratory_f
         ax.scatter([bloch_x[0]], [bloch_y[0]], [bloch_z[0]], color='g', label='Initial')
         ax.scatter([bloch_x[-1]], [bloch_y[-1]], [bloch_z[-1]], color='r', label='Final')
 
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_title(f'Qubit {qubit_index}')
-        ax.legend()
+        ax.set_xlabel('X', fontsize=16)
+        ax.set_ylabel('Y', fontsize=16)
+        ax.set_zlabel('Z', fontsize=16)
+        # ax.set_title(f'Qubit {qubit_index}')
+        ax.legend(fontsize=16)
         ax.set_box_aspect([1, 1, 1])
         ax.view_init(elev=20, azim=45)
+
+        # Set ticks for grid lines
+        ticks_minor = np.linspace(-1, 1, 11)
+        ax.set_xticks(ticks_minor, minor=True)
+        ax.set_yticks(ticks_minor, minor=True)
+        ax.set_zticks(ticks_minor, minor=True)
+
+        # Set major ticks (the labels) with fontsize 16
+        ax.set_xticks([-1, 1])
+        ax.set_yticks([-1, 1])
+        ax.set_zticks([-1, 1])
+        ax.tick_params(axis='both', which='major', labelsize=16)
 
     plt.tight_layout()
     plt.show()

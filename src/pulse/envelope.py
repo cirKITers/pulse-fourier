@@ -7,7 +7,7 @@ from constants import *
 
 def gaussian_envelope(t):
     center = T * dt / 2
-    return 1.0 * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
+    return amp * jnp.exp(-((t - center) ** 2) / (2 * sigma ** 2))
 
 
 def DRAG_gaussian_envelope(t):

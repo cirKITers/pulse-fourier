@@ -27,31 +27,31 @@ def coefficients(f_x, num_coeff=num_coefficients_standard, complex_valued_fx=Fal
     # c_n = c_n[:num_coeff+1]  # complex coefficients truncated
 
     # trigonometric form
-    # a_n = 2 * np.real(c_n)  # describes cosinus part
-    # b_n = -2 * np.imag(c_n)  # describes sinus part
-    # a_n[0] = a_n[0] / 2       # to get rid of the *2 from above, always practically 0
-    return c_n  # Return from the second element onwards
+    a_n = 2 * np.real(c_n)  # describes cosinus part
+    b_n = -2 * np.imag(c_n)  # describes sinus part
+    a_n[0] = a_n[0] / 2       # to get rid of the *2 from above
+    return a_n, b_n, c_n
 
 
 def coefficient_set(fx_set, num_coeff=num_coefficients_standard):
     num_samples = len(fx_set)
-    # coeffs_cos = np.zeros((num_samples, num_coeff))
-    # coeffs_sin = np.zeros((num_samples, num_coeff))
+    coeffs_cos = np.zeros((num_samples, num_coeff))
+    coeffs_sin = np.zeros((num_samples, num_coeff))
     coeffs_all = np.zeros((num_samples, num_coeff), dtype=np.complex128)
 
     # very fast for multiple 1000 samples
     for sample in range(num_samples):
 
-        c = coefficients(fx_set[sample], num_coeff=num_coeff)
+        a, b, c = coefficients(fx_set[sample], num_coeff=num_coeff)
 
         # f_series, mse = fourier_series_tri(x, f_x, a, b, plot=False)
         # print(f"Fourier Approximation MSE: {mse:.6f}")
-        # coeffs_cos[sample, :] = a
-        # coeffs_sin[sample, :] = b
+        coeffs_cos[sample, :] = a
+        coeffs_sin[sample, :] = b
 
         coeffs_all[sample, :] = c
 
-    return coeffs_all
+    return coeffs_cos, coeffs_sin, coeffs_all
 
 
 def order_coefficients_sets(complex_coeffs):

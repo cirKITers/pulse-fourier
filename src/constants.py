@@ -2,8 +2,9 @@ import numpy as np
 
 # pulse: tunable
 sigma = 15  # standard deviation of gaussian function
-dt = 0.1   # Time steps. The smaller the time step, the more accurate the simulation, but also the more computationally expensive
 amp = 1.0  # Amplitude, height gaussian bell at peak, default Max
+
+dt = 0.1   # Time steps. The smaller the time step, the more accurate the simulation, but also the more computationally expensive
 T = 120  # T = 12ns
 t_span = np.linspace(0, T * dt, T + 1)  # from 0 to 12 with 120 intervals of 0.1
 

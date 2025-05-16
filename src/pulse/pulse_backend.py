@@ -1,12 +1,14 @@
 import jax
 import matplotlib
 from matplotlib import pyplot as plt
+
 from scipy.integrate import quad
 
+from visuals.bloch_sphere import bloch_sphere_trajectory
 # from visuals.bloch_sphere import bloch_sphere_trajectory, bloch_sphere_multiqubit_trajectory
 from visuals.probabilites import plot_populations
 
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 from pulse.operator import *
 
 from utils.definitions import *
@@ -160,8 +162,17 @@ class PulseBackend:
             phase=0.0,
         )
 
+        # ticks, label of axises, legends
         # print("drawing...")
-        # gaussian_signal.draw(t0=0, tf=60, n=1000000, function="signal")
+        # gaussian_signal.draw(t0=10, tf=20, n=1000000, function="signal")
+        # plt.xlabel("Time (ns)", fontsize=16)
+        # # plt.ylabel("Scaling Factor", fontsize=16)
+        # plt.title("Control Signal", fontsize=16)
+        # plt.xticks(fontsize=16)
+        # plt.yticks(fontsize=16)
+        # # plt.legend(fontsize=12)
+        # plt.grid(True, linestyle='--', alpha=0.6)
+        # plt.tight_layout()
         # plt.axvline(x=12, color='red', linestyle='--')
         # plt.show()
 
@@ -173,18 +184,22 @@ class PulseBackend:
             signals=[gaussian_signal]
         )
 
-        # ROT FRAME
-        # bloch_sphere_trajectory(result.y)
+        from visuals.bloch_sphere import bloch_sphere_multiqubit_trajectory, bloch_sphere_trajectory
+        #
+        # from mpmath import expm
 
         # LAB FRAME
+        # bloch_sphere_trajectory(lab_frame_trajectory)
+
         # trajectory_lab = []
         # from scipy.linalg import expm
-        # t_max = t_span[-1]
-        # U_static = expm(-1j * H_static * t_max)
-        # for state in result.y:
-        #     # print(f"state.data shape: {state.data.shape}")
-        #     trajectory_lab.append(Statevector(U_static @ state.data))
-        # bloch_sphere_multiqubit_trajectory(trajectory_lab)
+        # for t, state in zip(t_span, result.y):
+        #     U_static_t = expm(-1j * H_static * t)
+        #     transformed_state_data = U_static_t @ state.data
+        #     trajectory_lab.append(Statevector(transformed_state_data))
+        # bloch_sphere_multiqubit_trajectory(trajectory_lab)  # No need for a special flag in this function as it just plots the states it receives
+
+        bloch_sphere_multiqubit_trajectory(result.y)
 
         # POPULATIONS
         # plot_populations(result, T)
@@ -267,6 +282,15 @@ class PulseBackend:
             method='jax_odeint',
             signals=[signal]
         )
+
+        # trajectory_lab = []
+        # from scipy.linalg import expm
+        # t_max = t_span[-1]
+        # U_static = expm(-1j * H_static * t_max)
+        # for state in result.y:
+        #     # print(f"state.data shape: {state.data.shape}")
+        #     trajectory_lab.append(Statevector(U_static @ state.data))
+        # bloch_sphere_multiqubit_trajectory(trajectory_lab)
 
         self.current_state = result.y[-1]
 

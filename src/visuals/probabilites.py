@@ -9,13 +9,15 @@ def plot_populations(sol, T):
     pop1 = [psi.probabilities()[1] for psi in sol.y]
 
     fig = plt.figure(figsize=(8, 5))
-    plt.plot(sol.t, pop0, lw=3, label="Population in |0>")
-    plt.plot(sol.t, pop1, lw=3, label="Population in |1>")
-    plt.xlabel("Time (ns)")
-    plt.ylabel("Population")
-    plt.legend(frameon=False)
+    plt.plot(sol.t, pop0, lw=5, label="Population in |0>")
+    plt.plot(sol.t, pop1, lw=5, label="Population in |1>")
+    plt.xlabel("Time (ns)", fontsize=16)
+    plt.ylabel("Population", fontsize=16)
+    plt.legend(frameon=False, fontsize=16)
     plt.ylim([0, 1.05])
     plt.xlim([0, T*dt+8])      # plt.xlim([0, 2*T])
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
     plt.vlines(T*dt, 0, 1.05, "k", linestyle="dashed")
     plt.show()
 
