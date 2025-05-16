@@ -15,7 +15,7 @@ source /pfs/data6/home/ka/ka_scc/ka_tc6850/pulse-fourier/.venv/bin/activate
 
 
 start=51
-end=2525
+end=275
 
 for ((seed=start; seed<=end; seed++)); do
   echo "Running with seed: $seed"
