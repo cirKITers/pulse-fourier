@@ -1,16 +1,13 @@
 import jax
-import matplotlib
-from matplotlib import pyplot as plt
-
 from scipy.integrate import quad
 
-from visuals.bloch_sphere import bloch_sphere_trajectory
-# from visuals.bloch_sphere import bloch_sphere_trajectory, bloch_sphere_multiqubit_trajectory
-from visuals.probabilites import plot_populations
+# import matplotlib
+# from matplotlib import pyplot as plt
+# from visuals.bloch_sphere import bloch_sphere_trajectory
+# from visuals.probabilites import plot_populations
 
 # matplotlib.use('TkAgg')
 from pulse.operator import *
-
 from utils.definitions import *
 from utils.helpers import binary_c_t
 
@@ -184,7 +181,6 @@ class PulseBackend:
             signals=[gaussian_signal]
         )
 
-        from visuals.bloch_sphere import bloch_sphere_multiqubit_trajectory, bloch_sphere_trajectory
         #
         # from mpmath import expm
 
@@ -198,8 +194,6 @@ class PulseBackend:
         #     transformed_state_data = U_static_t @ state.data
         #     trajectory_lab.append(Statevector(transformed_state_data))
         # bloch_sphere_multiqubit_trajectory(trajectory_lab)  # No need for a special flag in this function as it just plots the states it receives
-
-        bloch_sphere_multiqubit_trajectory(result.y)
 
         # POPULATIONS
         # plot_populations(result, T)
