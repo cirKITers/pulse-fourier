@@ -438,3 +438,38 @@ def random_parameter_set(num_layer, num_qubits, num_gates, num_samples):
 
 def random_parameter(num_layer, num_qubits, num_gates):
     return np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(num_layer, num_qubits, num_gates))
+
+
+
+# Custom Color Map
+from matplotlib.colors import LinearSegmentedColormap
+def custom_grey_colormap(levels=256):
+    """
+    Creates a custom colormap with white in the middle and light grey
+    moving towards positive and negative extremes.
+
+    Args:
+        levels (int): Number of color levels in the colormap.
+
+    Returns:
+        matplotlib.colors.LinearSegmentedColormap: The custom colormap.
+    """
+    midpoint = 0.5
+    dark_grey = 0.5
+
+    cdict = {
+        'red':   [(0.0, dark_grey, dark_grey),  # Start near white (adjust as needed)
+                  (midpoint, 1.0, 1.0),  # White at the midpoint
+                  (1.0, dark_grey, dark_grey)],  # End near white
+        'green': [(0.0,dark_grey, dark_grey),
+                  (midpoint, 1.0, 1.0),
+                  (1.0, dark_grey, dark_grey)],
+        'blue':  [(0.0, dark_grey, dark_grey),
+                  (midpoint, 1.0, 1.0),
+                  (1.0, dark_grey, dark_grey)],
+        'alpha': [(0.0, 1.0, 1.0),
+                  (midpoint, 1.0, 1.0),
+                  (1.0, 1.0, 1.0)]
+    }
+    cmap = LinearSegmentedColormap('custom_grey', cdict, N=levels)
+    return cmap

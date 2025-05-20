@@ -21,24 +21,29 @@ points = excluding_discrete_points + 1
 
 
 # Samples
-num_samples = 5000
+num_samples = 10  # 5000
 
 # Hyper parameter
 num_qubits = 4  # scale
 num_ansatz = 2  # const, 1 layer
 
+seeds = list(range(500, 501))
 
-# Model
-model = Circuit15(num_qubits)
+for seed in seeds:
+    print(f"Starting seed number {seed}...")
 
-# Parameter
-parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=15)
 
-# MODEL RUN
-fx_set = model.sample_fourier(x, parameter_set, num_samples)
+    # Model
+    model = Circuit15(num_qubits)
 
-# Save function
-save("Circuit15_Random", num_qubits, 1, num_samples, start, stop, points, x, fx_set, "c15_exp/gate/", cluster=True)
+    # Parameter
+    parameter_set = random_parameter_set2(num_samples, 2, num_qubits, len(["RY", "RY"]), seed=seed)
+
+    # MODEL RUN
+    fx_set = model.sample_fourier(x, parameter_set, num_samples)
+
+    # Save function
+    save("Circuit15_Random", num_qubits, 1, num_samples, start, stop, points, seed, x, fx_set, "c15_exp/gate/", cluster=False)
 
 
 
