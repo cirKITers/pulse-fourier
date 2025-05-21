@@ -110,7 +110,7 @@ class PulseBackend:
                 self.current_state = result.y[-1]
 
 
-    # works duration independent!
+    # works duration independent
     def rx(self, theta, target_qubits='all', plot_prob=False, plot_blochsphere=False):
         """
         Implements an RX gate (rotation around X-axis) by angle theta on specified qubits in current_state.
@@ -154,17 +154,21 @@ class PulseBackend:
         # print(const)
 
         gaussian_signal = Signal(
-            envelope=gaussian_envelope,
+            envelope=1.0,
             carrier_freq=nu,
             phase=0.0,
         )
 
-        # ticks, label of axises, legends
+        # # ticks, label of axises, legends
+        # from matplotlib import pyplot as plt
+        # import matplotlib
+        # matplotlib.use('TkAgg')
+        #
         # print("drawing...")
-        # gaussian_signal.draw(t0=10, tf=20, n=1000000, function="signal")
+        # gaussian_signal.draw(t0=11.5, tf=12.5, n=1000000, function="signal")
         # plt.xlabel("Time (ns)", fontsize=16)
         # # plt.ylabel("Scaling Factor", fontsize=16)
-        # plt.title("Control Signal", fontsize=16)
+        # plt.title("Oscillating Term", fontsize=16)
         # plt.xticks(fontsize=16)
         # plt.yticks(fontsize=16)
         # # plt.legend(fontsize=12)

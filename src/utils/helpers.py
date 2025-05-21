@@ -445,8 +445,8 @@ def random_parameter(num_layer, num_qubits, num_gates):
 from matplotlib.colors import LinearSegmentedColormap
 def custom_grey_colormap(levels=256):
     """
-    Creates a custom colormap with white in the middle and light grey
-    moving towards positive and negative extremes.
+    Creates a custom colormap with white at the minimum and gradually
+    transitions to grey.
 
     Args:
         levels (int): Number of color levels in the colormap.
@@ -454,22 +454,29 @@ def custom_grey_colormap(levels=256):
     Returns:
         matplotlib.colors.LinearSegmentedColormap: The custom colormap.
     """
-    midpoint = 0.5
-    dark_grey = 0.5
+    dark_grey = 0.3 # You can adjust this value to control how dark the grey gets
 
     cdict = {
-        'red':   [(0.0, dark_grey, dark_grey),  # Start near white (adjust as needed)
-                  (midpoint, 1.0, 1.0),  # White at the midpoint
-                  (1.0, dark_grey, dark_grey)],  # End near white
-        'green': [(0.0,dark_grey, dark_grey),
-                  (midpoint, 1.0, 1.0),
+        'red':   [(0.0, 1.0, 1.0),  # Start at white (1.0)
+                  (1.0, dark_grey, dark_grey)], # End at dark_grey
+        'green': [(0.0, 1.0, 1.0),
                   (1.0, dark_grey, dark_grey)],
-        'blue':  [(0.0, dark_grey, dark_grey),
-                  (midpoint, 1.0, 1.0),
+        'blue':  [(0.0, 1.0, 1.0),
                   (1.0, dark_grey, dark_grey)],
         'alpha': [(0.0, 1.0, 1.0),
-                  (midpoint, 1.0, 1.0),
                   (1.0, 1.0, 1.0)]
     }
-    cmap = LinearSegmentedColormap('custom_grey', cdict, N=levels)
+    cmap = LinearSegmentedColormap('custom_white_to_grey', cdict, N=levels)
     return cmap
+
+
+def custom_scientific_formatter(x, pos):
+    if x == 0:
+        return "$0$"
+    else:
+        # Get the exponent
+        exponent = int(np.floor(np.log10(abs(x))))
+        # Get the mantissa, rounded to a few decimal places
+        mantissa = x / (10**exponent)
+        # Format the mantissa (e.g., to 1 or 2 decimal places)
+        return f"${mantissa:.1f} \\times 10^{{{exponent}}}$"

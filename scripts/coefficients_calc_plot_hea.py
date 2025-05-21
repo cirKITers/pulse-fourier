@@ -4,8 +4,9 @@ from fft.coefficients import coefficient_set, order_coefficients_sets
 from qft_models.circuit_15 import Circuit15
 from qft_models.circuit_hea import CircuitHE
 from utils.data_handler import load, load_and_combine_fx_sets
-from utils.helpers import random_parameter_set2, combine_parameter_sets, custom_grey_colormap
+from utils.helpers import random_parameter_set2, combine_parameter_sets, custom_grey_colormap, custom_scientific_formatter
 from visuals.coefficients import subplot
+from visuals.correlation_matrices import diff_corr, corr_matr
 from visuals.fx import plot_2fx
 
 import pandas as pd
@@ -140,23 +141,13 @@ correlations_gate = np.corrcoef(param_array.T, magnitude_gate.T)[
 correlations_pulse = np.abs(correlations_pulse)
 correlations_gate = np.abs(correlations_gate)
 
+# Mean Absolute Error of Correlations
+mae_correlation = np.mean(np.abs(correlations_pulse - correlations_gate))
+print(f"Mean Absolute Error (MAE) of Correlations: {mae_correlation}")
+
 # DIFFERENCE
 correlation_differences = correlations_pulse - correlations_gate
-# print("Element-wise difference in correlations:\n", correlation_differences)
-vmax_abs = np.max(np.abs(correlation_differences))
-plt.figure(figsize=(8, 6))
-plt.imshow(correlation_differences, cmap=custom_grey_colormap(), aspect='auto', vmin=-vmax_abs, vmax=vmax_abs)
-plt.title('Difference in Correlations (Pulse - Gate)', fontsize=22)
-plt.xticks(np.arange(num_coeffs), [f"Coeff {i}" for i in range(num_coeffs)], fontsize=22)
-y_ticks_indices = np.arange(0, num_params, 2)
-y_tick_labels = [f"Param {i+1}" for i in range(0, num_params, 2)]
-plt.yticks(ticks=y_ticks_indices, labels=y_tick_labels, fontsize=22)
-cbar = plt.colorbar(label='Correlation Difference')
-cbar.ax.tick_params(labelsize=22)
-cbar.set_label('Correlation Difference', fontsize=22)
-plt.tight_layout()
-plt.show()
-
+# diff_corr(correlation_differences, num_coeffs, num_params, 2)
 
 # 2. Visualization
 #   - Scatter Plots
@@ -170,32 +161,7 @@ plt.show()
 #     plt.tight_layout()
 #     plt.show()
 
+corr_matr(correlations_pulse, num_coeffs, num_params, 2)
 
-#   - Heatmap of Correlations
-# plt.figure(figsize=(8, 6))
-# plt.imshow(correlations_pulse, cmap="viridis", aspect="auto")
-# cbar = plt.colorbar(label="Correlation")
-# cbar.ax.tick_params(labelsize=22)
-# cbar.set_label("Correlation", fontsize=22)
-# plt.xticks(range(num_coeffs), [f"Coeff {i}" for i in range(num_coeffs)], fontsize=22)
-# y_ticks_indices = np.arange(0, num_params, 2)
-# y_tick_labels = [f"Param {i+1}" for i in range(0, num_params, 2)]
-# plt.yticks(ticks=y_ticks_indices, labels=y_tick_labels, fontsize=22)
-# plt.title("HEA Gate-Based Correlation Heatmap", fontsize=22)
-# plt.tight_layout()
-# plt.show()
-#
-# # Second
-# plt.figure(figsize=(8, 6))
-# plt.imshow(correlations_gate, cmap="viridis", aspect="auto")
-# cbar = plt.colorbar(label="Correlation")
-# cbar.ax.tick_params(labelsize=22)
-# cbar.set_label("Correlation", fontsize=22)
-# plt.xticks(range(num_coeffs), [f"Coeff {i}" for i in range(num_coeffs)], fontsize=22)
-# y_ticks_indices = np.arange(0, num_params, 2)
-# y_tick_labels = [f"Param {i+1}" for i in range(0, num_params, 2)]
-# plt.yticks(ticks=y_ticks_indices, labels=y_tick_labels, fontsize=22)
-# plt.title("HEA Pulse-Based Correlation Heatmap", fontsize=22)
-# plt.tight_layout()
-# plt.show()
+
 
