@@ -1,7 +1,7 @@
 # Evaluation of Pulse Level Quantum Fourier Models
 
 Quantum Fourier Models (QFMs) are implemented at the pulse level using Qiskit Dynamics to explore how variations in pulse parameters ϕ affect their partial Fourier series representation.
-Publication: https://publikationen.bibliothek.kit.edu/1000184129
+Thesis: https://publikationen.bibliothek.kit.edu/1000184129
 
 ## Context
 
