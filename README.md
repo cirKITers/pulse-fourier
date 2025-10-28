@@ -54,5 +54,5 @@ Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the
      ```
 
 ## Acknowledgments
-The research concept and subsequent supervision for this thesis were provided by Melvin Strobl.
+The research idea and subsequent supervision for this thesis were provided by Melvin Strobl.
 
