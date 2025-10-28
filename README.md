@@ -53,4 +53,6 @@ Secondly, to evaluate the impact of varying pulse-level parameters $\phi$ on the
       pip install -e .
      ```
 
+## Acknowledgments
+The research concept and subsequent supervision for this thesis were provided by Melvin Strobl.
 
